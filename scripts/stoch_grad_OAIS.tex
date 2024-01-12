@@ -1,0 +1,55 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm} 
+
+\title{Notes for Standard Normal Example}
+
+
+\begin{document}
+
+\maketitle
+
+\section{Intro}
+This document shows the theoretical steps that we took to implement stochastic gradiant optimized adaptive importance sampling (OAIS) to generate sample from standard normal distribution. The calculation is baes on section 3.2 of the paper "Convergence rates for optimised adaptive importance samplers by Akyildiz and Miguez, 2021". The contents of this document are acting as supporting docuemnt for the Julia script stochgradOAIS.jl which implements the algorithm.
+
+\section{Main}
+In this example, we work on implementing OAIS to simulate random samples from a standard normal
+distribution. Our target distribution (to sample from) is standard normal distribution $X \sim N(0,1)$ where density is:
+
+\begin{align*}
+f(x) = \frac{1}{\sqrt{2\pi}} e^{\frac{-1}{2} x^2}    
+\end{align*}
+
+Our proposal distribution to aid in sampling is $N(\mu,1)$ where $\mu$ is the unknown mean with density:
+$$
+g(x,\mu) = \frac{1}{\sqrt{2\pi}} e^{\frac{-1}{2} (x-\mu)^2}
+$$
+
+We start by trying to write the $g(x,\mu)$ density in the form of exponential family distributions:
+
+$$h(x) e^{(\theta T(x) - A(\theta))}$$
+
+where $\theta$ is the unknown parameter (in our example $\mu$). The calculation follows:
+
+\begin{align*}
+    g(x,\mu) &= \frac{1}{\sqrt{2\pi}} e^{ \frac{-1}{2} (x^2 + \mu^2 - 2 \mu x) } \\
+             &= \frac{1}{\sqrt{2\pi}} e^{ \frac{-1}{2} x^2 - \frac{1}{2} \mu^2 + \mu x } \\
+             &= \frac{1}{\sqrt{2\pi}} e^{\frac{-1}{2}x^2} e^{\mu x - \frac{1}{2} \mu^2}
+\end{align*}
+
+Therefore we can say that in our example $\theta T(X) = \mu x$, $A(\theta) = \frac{1}{2} \mu^2$, and $h(x) = e^{\frac{-1}{2}x^2}$. Now we compute formula 2.8 from the paper as follows:
+
+\begin{align*}
+\nabla \rho(\theta) &= E_{q_{\theta}} \left[ (\nabla A(\theta) - T(X)) \frac{f^{2}(x)}{g^{2}(x)} \right] \\
+                    &= E_{q_{\theta}} \left[ (\mu - x) \frac{f^{2}(x)}{g^{2}(x)} \right] 
+\end{align*}
+
+An unbiased estimator for $\nabla \rho(\theta)$ based on a sample of size $N$ is:
+
+\begin{align*}
+\sim \frac{1}{N} \sum_{i=1}^{N} (\mu-x_i) \frac{f^{2}(x_i)}{g^{2}(x_i)}
+\end{align*}
+
+\end{document}
