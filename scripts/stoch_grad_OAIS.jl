@@ -34,7 +34,7 @@ end
 # For any values of x and \mu, returns the p.d.f of N(\mu,1)
 #
 function g(x, mu)
-    (1/sqrt(2*pi)) .* exp.(-0.5 * (x.-mu) )
+    (1/sqrt(2*pi)) .* exp.(-0.5 * (x.-mu).^2 )
  end
 
 
@@ -51,10 +51,10 @@ function g(x, mu)
 function update_proposal(x, mu, stepsize)
 
    num = f.(x).^2
-   den = g.(x,mu)
+   den = g.(x,mu).^2
    temp = (mu .- x) .* (num ./ den)
    gt = mean(temp)
-   new_mu = mu - gt
+   new_mu = mu - gt*stepsize
    return new_mu
 
 end
@@ -87,7 +87,7 @@ end
 let mu = 1
 
 # Number of Monte Carlo samples
-T = 10000
+T = 100
 
 # Number of random sample at each iteration
 N = 1000
@@ -96,11 +96,11 @@ xx = sample_from_proposal(N,mu)
 for t in 1:T
    # You can change stepsize if you run into problem 
    # but it should be ok with this one (William: I think so).
-    mu = update_proposal(xx,mu,1/t) 
+    mu = update_proposal(xx,mu,(1/t)^(0.7) ) 
     xx = sample_from_proposal(N,mu)
     ww = compute_weights(xx,mu)
-    println(sum(ww .* xx))
+    println(mu)
+    #println(sum(ww .* xx))
 end
 end
-
 
