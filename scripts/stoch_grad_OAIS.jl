@@ -38,6 +38,13 @@ function g(x, mu)
  end
 
 
+ #
+ # Analytical gradient of the effective sample size.
+ #
+ function G(mu)
+    2*mu*exp(mu^2)
+ end
+
 #
 # Define a function to update the proposal at each iteration, let's call this function update_proposal.
 # This function takes the sample (x) and parameter (mu) at each iteration and returns
@@ -60,16 +67,23 @@ function update_proposal(x, mu, stepsize)
 end
 
 
+# Update the proposal using our analytical expression for the gradient of the effective sample size. Note that this analytical update does not require any Monte Carlo samples.
+function update_proposal_analytical(mu, stepsize)
+    new_mu = mu - G(mu)*stepsize
+    return new_mu
+end
+
 #
 # Define a function to compute weights at each iteration.
 # The inputs are sample (x) and parameter (mu) at each iteration.
 # The ouput is a vector of weights for each observation in x.
 #
-function compute_weights(x, mu)
+function compute_weights(x, mu, normalize=true)
     weights = f.(x) ./ g.(x,mu)
-    sumweights = sum(weights)
-    w = weights ./ sumweights
-    return w
+    if normalize
+        weights = weights ./ mean(weights)
+    end
+    return weights
 end
 
 
@@ -84,7 +98,8 @@ end
 #
 
 # Initial value for mu in proposal
-let mu = 1
+mu = 1
+# let mu = 1
 
 # Number of Monte Carlo samples
 T = 100
@@ -96,11 +111,31 @@ xx = sample_from_proposal(N,mu)
 for t in 1:T
    # You can change stepsize if you run into problem 
    # but it should be ok with this one (William: I think so).
-    mu = update_proposal(xx,mu,(1/t)^(0.7) ) 
+    mu = update_proposal(xx,mu, 0.2*(1/t)^(0.55) ) 
     xx = sample_from_proposal(N,mu)
     ww = compute_weights(xx,mu)
     println(mu)
     #println(sum(ww .* xx))
 end
-end
+# end
 
+
+
+ww = compute_weights(xx,mu, false)
+var(ww)
+
+ww_norm = compute_weights(xx,mu)
+var(ww_norm)
+
+
+
+
+
+mu = 1
+for t in 1:T
+    # You can change stepsize if you run into problem 
+    # but it should be ok with this one (William: I think so).
+     mu = update_proposal_analytical(mu,0.3*(1/t)^(0.7) )
+     println(mu)
+     #println(sum(ww .* xx))
+ end
