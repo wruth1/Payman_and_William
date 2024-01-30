@@ -129,8 +129,6 @@ var(ww_norm)
 
 
 
-
-
 mu = 1
 for t in 1:T
     # You can change stepsize if you run into problem 
@@ -139,3 +137,10 @@ for t in 1:T
      println(mu)
      #println(sum(ww .* xx))
  end
+
+
+
+ #
+ # Example 2: Target distribution is Gamma(\alpha,\lambda) and proposal is Exp(\lambda)
+ #
+ 
