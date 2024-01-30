@@ -138,9 +138,3 @@ for t in 1:T
      #println(sum(ww .* xx))
  end
 
-
-
- #
- # Example 2: Target distribution is Gamma(\alpha,\lambda) and proposal is Exp(\lambda)
- #
- 
