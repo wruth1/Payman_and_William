@@ -101,8 +101,8 @@ end
 
 # Initial value for lambda in proposal distribution
 lambda = 1
-shape = 5
-scale = 5
+shape = 1
+scale = 2
 
 # Number of Monte Carlo samples
 T = 100
