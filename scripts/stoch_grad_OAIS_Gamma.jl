@@ -9,7 +9,7 @@
 # Details: Algorithm 2, Stochastic gradient OAIS on page 7 of 17 of the paper. 
 #
 # For this example, we work on the following example in this script: 
-# target:    f(x) X ~ Gamma(\alpha,\lambda)
+# target:    f(x) X ~ Gamma(\alpha,\beta)
 # proposal:  g(x) X ~ Exponential(\lambda)
 #
 
@@ -22,10 +22,10 @@ using Plots
 
 #
 # Define the target distribution, f(x) Gamma distribution.
-# The function Takes x and returns p.d.f of Gamma(\alpha,\lambda)
+# The function Takes x, alpha, and beta and returns p.d.f of Gamma(\alpha,\beta)
 # 
-function f(x, alpha, lambda)
-    (lambda^(alpha))/(gamma(alpha)) * x.^(alpha-1) .* exp.(-lambda * x)
+function f(x, alpha, beta)
+    (beta^(alpha))/(gamma(alpha)) * x.^(alpha-1) .* exp.(-beta * x)
 end
 
 
@@ -42,40 +42,36 @@ function g(x, lambda)
  #
  # Analytical gradient of the effective sample size.
  #
- function compute_exact_gradient(alpha, lambda)
-    (1+ (2*alpha - 1)/(lambda) ) * (-gamma(2*alpha-1)/lambda*gamma(alpha)*gamma(alpha))
+ function compute_exact_gradient()
+    # Still working on it
  end
+
+
+ #
+ # Unbiased estimator for the gradient of effective sample size.
+ #
+ # Not complete, check for alpha here.
+ function estimate_gradient(x, lambda)
+    ( (-1/lambda) + x ) .* f(x, alpha, beta).^2 .* g(x, lambda).^2
+ end
+
+
 
 #
 # Define a function to update the proposal at each iteration, let's call this function update_proposal.
-# This function takes the sample (x) and parameters (\alpha and \lambda) at each iteration and returns
+# This function takes the sample (x) and parameters (\alpha and \beta) at each iteration and returns
 # a new value for the parameters. 
-#
-# (Some notes on stepsize: 
-# the best practical suggestion is to set stepsize as \frac{1}{t} where t is the iteration number.
-# Usually the range for stepsize is between \frac{1}{sqrt(t)} and \frac{1}{t}
-# Anything in this ranges should work it is a matter of time for convergence.)
 # 
-function update_proposal(x, alpha, lambda, stepsize)
+function update_proposal(x, alpha, beta, lambda, stepsize)
 
-   num = f.(x,alpha,lambda).^2
+   num = f.(x,alpha,beta).^2
    den = g.(x,lambda).^2
    temp = -( (1/lambda) .+ x) .* (num ./ den)
    gt = mean(temp)
-   theta = [alpha,lambda]
+   theta = [alpha,beta]
    new_theta = theta .- gt*stepsize
    return new_theta
 
-end
-
-
-#
-# Update the proposal using our analytical expression for the gradient of the effective sample size. 
-# Note that this analytical update does not require any Monte Carlo samples.
-# 
-function update_proposal_analytical(theta, stepsize)
-    new_theta = theta .- compute_exact_gradient(theta[1],theta[2])*stepsize
-    return new_theta
 end
 
 #
@@ -92,19 +88,21 @@ function compute_weights(x, alpha, lambda, normalize = true)
 end
 
 
+#
+# A function to sample from the proposal distribution, takes sample size (n) and 
+# scale in exponential distribution (lambda). Returns a vector of length n.
+#
 function sample_from_proposal(n,lambda)
     u = rand(Exponential(lambda),n)
     return u
 end
 
 
-#
-# Initialize values
-#
 
-# Initial value for alpha and lambda in proposal distribution
-alpha = 1
+# Initial value for lambda in proposal distribution
 lambda = 1
+shape = 5
+scale = 5
 
 # Number of Monte Carlo samples
 T = 100
@@ -114,11 +112,10 @@ N = 1000
 
 xx = sample_from_proposal(N,lambda)
 for t in 1:T
-    theta = update_proposal_analytical( [alpha,lambda], 0.2*(1/t)^(0.55) ) 
+    theta = update_proposal(xx, shape, scale, lambda, 0.2*(1/t)^(0.55))
     xx    = sample_from_proposal(N,theta[2])
     ww    = compute_weights(xx,theta[1],theta[2])
     println(theta)
-    println(mean(ww .* xx))
 end
 
 histogram(xx)
