@@ -42,8 +42,10 @@ function g(x, lambda)
  #
  # Analytical gradient of the effective sample size.
  #
- function compute_exact_gradient()
+ function compute_exact_gradient(lambda, alpha, beta)
     # Still working on it
+    num = 2 * beta^(2*alpha) * gamma(2*alpha - 1) * (lambda - beta)
+    den = lambda^2 * gamma(alpha)^2 * (2*alpha)
  end
 
 
@@ -51,11 +53,12 @@ function g(x, lambda)
  # Unbiased estimator for the gradient of effective sample size.
  #
  # Not complete, check for alpha here.
- function estimate_gradient(x, lambda)
-    ( (-1/lambda) + x ) .* f(x, alpha, beta).^2 .* g(x, lambda).^2
+ function estimate_gradient(x, lambda, alpha, beta)
+    ( (-1/lambda) + x ) .* f(x, alpha, beta).^2 ./ g(x, lambda).^2
  end
 
 
+ # Ref(parameter) tells Julia to replace the vector to scaler point to it. broadcast of a vector in a function
 
 #
 # Define a function to update the proposal at each iteration, let's call this function update_proposal.
@@ -64,13 +67,10 @@ function g(x, lambda)
 # 
 function update_proposal(x, alpha, beta, lambda, stepsize)
 
-   num = f.(x,alpha,beta).^2
-   den = g.(x,lambda).^2
-   temp = -( (1/lambda) .+ x) .* (num ./ den)
+   temp = estimate_gradient.(x, lambda, alpha, beta)
    gt = mean(temp)
-   theta = [alpha,beta]
-   new_theta = theta .- gt*stepsize
-   return new_theta
+   new_lambda = lambda .- gt*stepsize
+   return new_lambda
 
 end
 
@@ -79,8 +79,8 @@ end
 # The inputs are sample (x) and parameter (mu) at each iteration.
 # The ouput is a vector of weights for each observation in x.
 #
-function compute_weights(x, alpha, lambda, normalize = true)
-    weights = f.(x,alpha,lambda) ./ g.(x,lambda)
+function compute_weights(x, lambda, alpha, beta, normalize = true)
+    weights = f.(x,alpha,beta) ./ g.(x,lambda)
     if normalize
         weights = weights ./ mean(weights)
     end
@@ -97,25 +97,36 @@ function sample_from_proposal(n,lambda)
     return u
 end
 
+# Fix the value of shape and scale in Gamma dist
+shape = 1
+scale = 5
 
 
 # Initial value for lambda in proposal distribution
-lambda = 1
-shape = 1
-scale = 2
+lambda_0 = 4.0
+lambda = lambda_0
+theta = lambda_0
 
 # Number of Monte Carlo samples
-T = 100
+T = 5000
 
 # Number of random sample at each iteration
-N = 1000
+N = 2000
+
+all_thetas = zeros(T)
+all_ess = zeros(T)
 
 xx = sample_from_proposal(N,lambda)
 for t in 1:T
-    theta = update_proposal(xx, shape, scale, lambda, 0.2*(1/t)^(0.55))
-    xx    = sample_from_proposal(N,theta[2])
-    ww    = compute_weights(xx,theta[1],theta[2])
+    theta = update_proposal(xx, shape, scale, theta, 0.5*(1/t)^(0.9))
+    xx    = sample_from_proposal(N,theta)
+    ww    = compute_weights(xx,theta,shape,scale)
+    all_thetas[t] = theta
+    all_ess[t] = mean( f.(xx,shape,scale).^2 / g.(xx,scale) )
     println(theta)
 end
 
-histogram(xx)
+scatter(all_thetas)
+scatter(all_ess)
+#ylims!(lambda_0*0.95, maximum(all_thetas))
+#hline!([lambda_0])
