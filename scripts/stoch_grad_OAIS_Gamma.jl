@@ -9,7 +9,7 @@
 # Details: Algorithm 2, Stochastic gradient OAIS on page 7 of 17 of the paper. 
 #
 # For this example, we work on the following target and proposal distribution in this script: 
-# target:    f(x) X ~ Gamma(\alpha,\beta)
+# target:    f(x) X ~ Gamma(\a,\beta)
 # proposal:  g(x) X ~ Exponential(\lambda)
 #
 
