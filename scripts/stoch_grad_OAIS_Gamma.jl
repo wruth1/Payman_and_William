@@ -95,7 +95,7 @@ function update_proposal(x, alpha, beta, lambda, stepsize, exact=true)
     end
 
    gt = mean(temp)
-   println(gt)
+   #println(gt)
    new_lambda = lambda .- (stepsize * gt)
    return new_lambda
 
@@ -181,4 +181,4 @@ scatter(all_thetas)
 
 
 
-savefig("d:/estimate_grad.png")
+#savefig("d:/estimate_grad.png")
