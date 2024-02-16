@@ -59,5 +59,64 @@ An unbiased estimator for $\nabla \rho(\theta)$ based on a sample of size $N$ is
 What about the family $\mathcal{G} := \{ \phi(0, \sigma^2) : \sigma \in \mathbb{R} \}$? I.e.\ A Normal scale family with known mean (for convenience, set $\mu = 0$).
 
 
+\section{Gamma Distribution}
+Target distribution is Gamma$(\alpha,\beta)$ with density:
+$$f(x) = \frac{\beta^\alpha}{\Gamma(\alpha)} x^{\alpha-1} e^{-\beta x} \quad \quad x>0$$
+and proposal distribution is Exp($\lambda$) with density:
+$$g(x)=\lambda e^{-\lambda x} \quad \quad x>0$$
+We start by writing the proposal distribution in the form of exponential family distirbutions, i.e: 
+$$g(x) = h(x) e^{\theta T(X) - A(\theta)}$$
+We can write the proposal distribution as follows:
+$$g(x)=1 \times e^{ln(\lambda)-\lambda x}$$
+This concludes that:
+$$h(x)=1 \quad T(X) = -X \quad A(\lambda)=-ln(\lambda)$$
+
+The gradient of effective sample size is:
+\begin{align*}
+\nabla \rho(\lambda) &= E_{g} \left[ (\nabla A(\lambda) - T(X) ) \frac{f^{2}(x)}{g^{2}(x)} \right] \\
+&= E_{g} \left[ (X - \frac{1}{\lambda})  \frac{f^{2}(x)}{g^{2}(x)} \right] \\
+&= \int_{0}^{\infty} (X - \frac{1}{\lambda}) \frac{f^{2}(x)}{g^{2}(x)} g(x) dx \\
+&= \int_{0}^{\infty} (X - \frac{1}{\lambda}) \frac{f^{2}(x)}{g(x)} dx 
+\end{align*}
+
+
+\begin{align*}
+\frac{f^{2}(x)}{g(x)} &= \frac{ \left( \frac{\beta^\alpha}{\Gamma(\alpha)} x^{\alpha - 1} e^{-\beta x} \right)^2 }{\lambda e^{-\lambda x}} = \frac{ \frac{ \beta^{2 \alpha} }{ \Gamma^{2}(\alpha) }x^{2\alpha-2} e^{-2 \beta x} }{\lambda e^{-\lambda x}} \\
+&= \frac{\beta^{2 \alpha}}{\Gamma^{2}(\alpha)} x^{(2 \alpha - 1)-1} e^{-2 \beta x} \lambda^{-1} e^{\lambda x} \\
+&= \frac{\beta^{2 \alpha}}{\Gamma^{2}(\alpha)} \frac{1}{\lambda} x^{(2 \alpha - 1)-1} e^{-(2 \beta - \lambda) x} \\
+&= A(\alpha,\beta,\lambda) x^{(2 \alpha - 1) - 1} e^{-(2 \beta - \lambda)x}
+\end{align*}
+
+where $A(\alpha,\beta,\lambda) = \frac{\beta^{2 \alpha}}{\lambda \Gamma^{2}(\alpha)}$. Continue the calculation of $\nabla \rho(\lambda)$ as follows:
+
+\begin{align*}
+\nabla \rho(\lambda) &= \int_{0}^{\infty} (X - \frac{1}{\lambda}) A(\alpha,\beta,\lambda) x^{(2 \alpha - 1) - 1} e^{-(2 \beta - \lambda)x} dx \\
+&= A(\alpha,\beta,\lambda) \Bigg[ \int_{0}^{\infty} x^{(2 \alpha - 1)} e^{-(2 \beta - \lambda)x} dx - \frac{1}{\lambda} \int_{0}^{\infty} x^{(2 \alpha - 1)} e^{-(2 \beta - \lambda) x} dx \Bigg] \\
+&= A(\alpha,\beta,\lambda) \Bigg[ \frac{\Gamma(2 \alpha)}{ (2 \beta - \lambda)^{2 \alpha} } - \frac{1}{\lambda} \frac{\Gamma(2 \alpha - 1)}{(2 \beta - \lambda)^{2 \alpha - 1}} \Bigg] \\
+&= \frac{\beta^{2 \alpha}}{\lambda \Gamma^{2}(\alpha)} \Bigg[ \frac{\lambda \Gamma(2 \alpha) - (2 \beta - \lambda) \Gamma(2 \alpha - 1)}{ \lambda (2 \beta - \lambda)^{2 \alpha} } \Bigg] \\
+&= \Bigg( \frac{\beta}{ 2 \beta - \lambda} \Bigg)^{2 \alpha} \Bigg[ \frac{\Gamma(2 \alpha)}{\lambda \Gamma^{2}(\alpha)} - \frac{(2 \beta - \lambda)}{\lambda^2} \frac{\Gamma(2 \alpha - 1)}{\Gamma^{2}(\alpha)} \Bigg] \\
+&= \Bigg( \frac{\beta}{ 2 \beta - \lambda} \Bigg)^{2 \alpha} \frac{1}{\lambda \Gamma^{2}(\alpha)} \Bigg[ \Gamma(2 \alpha) - \frac{(2\beta-\lambda)\Gamma(2\alpha-1)}{\lambda} \Bigg]
+\end{align*}
+
+Provided $2 \beta - \lambda \neq 0$, we can solve $\nabla \rho(\lambda) = 0$ to find $\lambda_{opt}$ as:
+
+\begin{align*}
+&\Bigg( \frac{\beta}{ 2 \beta - \lambda} \Bigg)^{2 \alpha} \frac{1}{\lambda \Gamma^{2}(\alpha)} \Bigg[ \Gamma(2 \alpha) - \frac{(2\beta-\lambda)\Gamma(2\alpha-1)}{\lambda} \Bigg] = 0 \\
+&\Gamma(2 \alpha) - \frac{(2\beta - \lambda) \Gamma(2 \alpha - 1)}{\lambda} = 0 \\
+&\Gamma(2 \alpha) = \frac{(2\beta - \lambda) \Gamma(2 \alpha - 1)}{\lambda} \\
+&\frac{\Gamma(2 \alpha)}{\Gamma(2 \alpha - 1)} = \frac{2 \beta}{\lambda} - 1 \\
+&\frac{\Gamma(2 \alpha)}{\Gamma(2 \alpha - 1)} + 1 = \frac{2 \beta}{\lambda} \\
+&\frac{ \Gamma(2 \alpha - 1) + \Gamma(2 \alpha) }{\Gamma(2 \alpha - 1)} = \frac{2\beta}{\lambda} \\
+&\Rightarrow \lambda_{opt} = (2 \beta) \frac{\Gamma(2 \alpha - 1)}{ \Gamma(2 \alpha - 1) + \Gamma(2 \alpha) }
+\end{align*}
+
+and since $\Gamma(2 \alpha) = (2 \alpha - 1) \Gamma(2 \alpha - 1)$ we can write:
+
+\begin{align*}
+\lambda_{opt} &=  (2 \beta) \frac{\Gamma(2 \alpha - 1)}{ \Gamma(2 \alpha - 1) +  (2 \alpha - 1) \Gamma(2 \alpha - 1) } \\
+&= (2 \beta) \frac{1}{1 + 2 \alpha - 1} = \frac{2 \beta}{2 \alpha} = \frac{\beta}{\alpha}
+\end{align*}
+
+Therefore $\lambda_{opt} = \frac{\beta}{\alpha}$
 
 \end{document}
