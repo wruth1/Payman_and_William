@@ -23,6 +23,7 @@ using SpecialFunctions
 using Plots
 using Random
 using StatsPlots # to save plots
+using ProgressMeter
 
 
 
@@ -86,20 +87,37 @@ function g(x, lambda)
 # 
 # new_lambda: a scalar value. The updated value for parameter in proposal distribution
 # 
-function update_proposal(x, alpha, beta, lambda, stepsize, exact=true)
+function update_proposal(lambda, stepsize, gt)
 
-    if exact
-        temp = compute_exact_gradient(lambda, alpha, beta)
-    else
-        temp = estimate_gradient.(x, lambda, alpha, beta)
-    end
-
-   gt = mean(temp)
-   #println(gt)
    new_lambda = lambda .- (stepsize * gt)
    return new_lambda
 
 end
+
+
+#
+# Define a function to compute gradient either exactly or empirically
+#
+#  x: sample 
+# \alpha: shape in target distribution (constant) 
+# \beta: scale in target distribution (constant)
+# exact: a boolean value, true (default value) computes the exact gradient. 
+#
+function compute_gradient(x, alpha, beta, lambda, exact=true)
+
+    if exact
+        # Compute the exact gradient analytically 
+        gt = compute_exact_gradient(lambda, alpha, beta)
+    else
+        # Estimate the gradient empirically 
+        temp = estimate_gradient.(x, lambda, alpha, beta)
+        gt = mean(temp)
+    end
+
+    return gt
+
+end
+
 
 #
 # Define a function to compute weights at each iteration.
@@ -144,41 +162,112 @@ theta = 1
 T = 1000
 
 # Number of random sample at each iteration
-N = 1000
+N = 10000
 
 
 #
 # Define two numeric vector to record: 1) value for lambda, and 2) effective sample size (ess) 
 # at each iteration (1:T)
 #
-all_thetas = zeros(T)
-all_ess = zeros(T)
-
+all_thetas_true = zeros(T)
+all_thetas_approx = zeros(T)
+all_ess_true = zeros(T)
+all_ess_approx = zeros(T)
+all_true_gradient = zeros(T)
+all_approx_gradient = zeros(T)
 
 # Set seed
 Random.seed!(123)
 
 # Sample from proposal
-xx = sample_from_proposal(N,theta)
+#xx = sample_from_proposal(N,theta)
 
 # Iterate over 1:T, at each iteration: 
 # (i) update proposal parameter, (ii) sample from proposal with the new theta value, and 
 # (iii) compute weights
 # Along the loop, record each generated value for theta and effective sample size.
-for t in 1:T
-    theta = update_proposal(xx, shape, scale, theta, 0.5*(1/t)^(0.9), false)
+
+exact=true
+
+@showprogress for t in 1:T
+
     xx    = sample_from_proposal(N,theta)
-    ww    = compute_weights(xx,theta,shape,scale)
-    all_thetas[t] = theta
-    all_ess[t] = mean( f.(xx,shape,scale).^2 / g.(xx,scale) )
+
+    gradient = compute_gradient(xx, shape, scale, theta, exact)
+    theta = update_proposal(theta, 0.5*(1/t)^(0.9), gradient)
+    ess = mean( f.(xx,shape,scale).^2 / g.(xx,scale) )
+
+    if exact
+        all_true_gradient[t] = gradient
+        all_thetas_true[t] = theta
+        all_ess_true[t] = ess
+    else
+        all_approx_gradient[t] = gradient
+        all_thetas_approx[t] = theta
+        all_ess_approx[t] = ess
+    end
+
+    #ww    = compute_weights(xx,theta,shape,scale)
+
     #println(theta)
 end
 
-scatter(all_thetas)
+
+
+
+exact = false
+
+@showprogress for t in 1:T
+
+    xx    = sample_from_proposal(N,theta)
+
+    gradient = compute_gradient(xx, shape, scale, theta, exact)
+    theta = update_proposal(theta, 0.5*(1/t)^(0.9), gradient)
+    ess = mean( f.(xx,shape,scale).^2 / g.(xx,scale) )
+
+    if exact
+        all_true_gradient[t] = gradient
+        all_thetas_true[t] = theta
+        all_ess_true[t] = ess
+    else
+        all_approx_gradient[t] = gradient
+        all_thetas_approx[t] = theta
+        all_ess_approx[t] = ess
+    end
+
+    #ww    = compute_weights(xx,theta,shape,scale)
+
+    #println(theta)
+end
+
+
+
+#scatter(all_thetas)
 #scatter(all_ess)
 #ylims!(lambda_0*0.95, maximum(all_thetas))
 #hline!([lambda_0])
 
 
+scatter(all_thetas_true)
+hline!([2.0])
+scatter(all_thetas_approx)
+hline!([2.0])
 
-#savefig("d:/estimate_grad.png")
+scatter(all_true_gradient)
+scatter(all_approx_gradient)
+scatter(all_true_gradient, all_approx_gradient)
+
+
+true_thetas_plot = scatter(all_thetas_true);
+approx_thetas_plot = scatter(all_thetas_approx);
+plot(true_thetas_plot, approx_thetas_plot, layout = (1, 2), size = (1200, 600))
+savefig("trueThetas_vs_approxThetas.png")
+
+true_grad_plot = scatter(all_true_gradient);
+ylims!((-0.1, 0.05))
+approx_grad_plot = scatter(all_approx_gradient, markersize=0.5);
+ylims!((-0.1, 0.05))
+plot(true_grad_plot, approx_grad_plot, layout = (1, 2), size = (1200, 600))
+savefig("trueGradients_vs_approxGradients.png")
+
+
