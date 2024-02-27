@@ -3,6 +3,7 @@ name = "Payman_and_William"
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 DrWatson = "634d3b9d-ee7a-5ddf-bec9-22491ea816e1"
+LogExpFunctions = "2ab3a3ac-af41-5b50-aa03-7779005ae688"
 
 [compat]
 DrWatson = "2.13.0"

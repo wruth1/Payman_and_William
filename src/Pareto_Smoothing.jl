@@ -223,4 +223,85 @@ function pareto_smooth(X, M_keep, return_k=false, regularize=true)
 end
 
 
+"""
+Fit GPD to largest M_keep elements of X. Return a copy of X with largest elements replaced by their smoothed values.
+"""
+function pareto_smooth!(X, M_keep, return_k=false, regularize=true)
+    # Extract largest elements of X for smoothing
+    X_decr = sortperm(X, rev=true)
+    ind_keep = X_decr[1:M_keep]
+    X_keep = X[ind_keep]
+
+    # Apply smoothing
+    X_keep_smooth, k_hat = pareto_smooth_all(X_keep, true, regularize)
+
+    # Create smoothed copy of X
+    X[ind_keep] = X_keep_smooth
+
+
+    if return_k
+        return X, k_hat
+    else
+        return X
+    end
+end
+
+
+
+"""
+Fit GPD to largest M_keep elements of X. Return a copy of X with largest elements replaced by their smoothed values.
+"""
+function pareto_smooth(X, M_keep, return_k=false, regularize=true)
+    # Extract largest elements of X for smoothing
+    X_decr = sortperm(X, rev=true)
+    ind_keep = X_decr[1:M_keep]
+    X_keep = X[ind_keep]
+
+    # Apply smoothing
+    X_keep_smooth, k_hat = pareto_smooth_all(X_keep, true, regularize)
+
+    # Create smoothed copy of X
+    X_smooth = deepcopy(X)
+    X_smooth[ind_keep] = X_keep_smooth
+
+
+    if return_k
+        return X_smooth, k_hat
+    else
+        return X_smooth
+    end
+end
+
+"""
+Get the default number of weights to retain for pareto smoothing.
+"""
+function get_M_keep(X)
+    M_sqrt = ceil(Int, 3*sqrt(length(X)))
+    M_prop = Int(0.2 * length(X))
+    
+    M_keep = min(M_sqrt, M_prop)
+    return M_keep
+end
+
+
+"""
+Fit GPD to largest elements of X. Keep the recommended number of weights (see Vehtari et al.) Return a copy of X with largest elements replaced by their smoothed values.
+"""
+function pareto_smooth(X, return_k=false, regularize=true)
+
+    M_keep = get_M_keep(X)
+
+    return(pareto_smooth(X, M_keep, return_k, regularize))
+end
+
+"""
+Fit GPD to largest elements of X. Keep the recommended number of weights (see Vehtari et al.) Return a copy of X with largest elements replaced by their smoothed values.
+"""
+function pareto_smooth!(X, return_k=false, regularize=true)
+
+    M_keep = get_M_keep(X)
+
+    return(pareto_smooth!(X, M_keep, return_k, regularize))
+end
+
 
