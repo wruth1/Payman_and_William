@@ -1,0 +1,18 @@
+- Here are some thoughts on what to do next for Pareto Smoothing (PS):
+    - I've implemented the method on our normal example, and plotted k-hat as mu moves away from zero
+        - First thing after finishing here, I'm going to add confidence bands to this plot 
+    - I'm going to repeat this plot for the Gamma example
+        - To start, fix the target distribution with some values of alpha and beta, then plot how k-hat changes with lambda (the proposal parameter)
+        - I would also like to see how things change with alpha and beta from the target. One way to do this is to construct a grid of alpha and beta, then find the largest/smallest values of lambda which make k-hat greater than 0.7 (the bound at which Vehtari et al. say importance sampling breaks down).
+            - The problem I'm trying to address here is that there are four dimensions of information: alpha, beta, lambda and k-hat. I need to reduce this to at most three.
+            - I said largest and smallest values of lambda because I think that for any combination of alpha and beta, sufficiently large values of lambda will be bad. However, for certain configurations, I expect that sufficiently small values of lambda will also be bad. Heuristically, I would expect this to happen when the optimal choice of lambda for maximizing ESS is large.
+
+- We're also going to want to start exploring stochastic approximation with PS
+    - I remember doing this at some point but I'm not sure where the code is. I think it should be easy enough to replicate
+    - Start with the normal example and see how we do. The answer is obvious here, so it's not such a problem that we don't have an analytical solution like we did with ESS
+    - Then move on to the Gamma setting. Things are more murky here, but I think we can expect the optimal value of lambda for ESS to at least be a good value for PS. If stochastic approximation goes off to infinity or picks an answer far from beta/alpha, then something is probably wrong.
+        -We also need to deal with the absence of any analytical derivatives here. Fortunately, that's actually fine. See the Kiefer-Wolfowitz algorithm. The basic idea is to do stochastic approximation on a numerical approximation to the derivative of our objective function (i.e. k-hat as a function of lambda)
+            - Actually, our real target is some expected value of k-hat. I think it makes sense to just imagine repeating PS on a sequence of problems with increasing Monte Carlo sizes and asking what we converge to. The Vehtari et al. paper probably has something to say about this, but I haven't dug into it thoroughly yet. We may end up having to use some extreme value theory ourselves to say what k-hat is estimating. I'm interested in thinking more about this, but I think it's best to make sure there's an algorithm here worth caring about before we invest a bunch of time to understand the surrounding theory.
+
+Anyway, those are some of my thoughts on where we're at and where we're heading. Feel free to add/change as you see fit. We should probably discuss this when we meet on Thursday.
+    
