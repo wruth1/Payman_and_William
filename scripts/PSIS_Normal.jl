@@ -16,9 +16,12 @@
 
 using Distributions
 using Statistics
+using Plots
+using LaTeXStrings  # For strings of the form L"...", which are interpreted using Latex syntax. Math mode is used for the whole string unless you include $'s.
 
 
-
+# Load the functions from Pareto_Smoothing.jl
+include("./src/Pareto_Smoothing.jl")
 
 
 
@@ -40,46 +43,6 @@ end
 function g(x, mu)
     (1/sqrt(2*pi)) .* exp.(-0.5 * (x.-mu).^2 )
  end
-
-
- #
- # Analytical gradient of the effective sample size.
- #
- function G(mu)
-    2*mu*exp(mu^2)
- end
-
-function get_weight(x, mu)
-    return f(x) / g(x, mu)
-end
-
-#
-# Define a function to update the proposal at each iteration, let's call this function update_proposal.
-# This function takes the sample (x) and parameter (mu) at each iteration and returns
-# a new value for the parameter (mu). 
-#
-# (Some notes on stepsize: 
-# the best practical suggestion is to set stepsize as \frac{1}{t} where t is the iteration number.
-# Usually the range for stepsize is between \frac{1}{sqrt(t)} and \frac{1}{t}
-# Anything in this ranges should work it is a matter of time for convergence.)
-# 
-function update_proposal(x, mu, stepsize)
-
-   num = f.(x).^2
-   den = g.(x,mu).^2
-   temp = (mu .- x) .* (num ./ den)
-   gt = mean(temp)
-   new_mu = mu - gt*stepsize
-   return new_mu
-
-end
-
-
-# Update the proposal using our analytical expression for the gradient of the effective sample size. Note that this analytical update does not require any Monte Carlo samples.
-function update_proposal_analytical(mu, stepsize)
-    new_mu = mu - G(mu)*stepsize
-    return new_mu
-end
 
 #
 # Define a function to compute weights at each iteration.
@@ -105,44 +68,41 @@ end
 # Initialize values
 #
 
-# Initial value for mu in proposal
-mu = 1
-# let mu = 1
+# List of mu values to try
+mu_vec = collect(0.1:0.1:5)
 
-# Number of Monte Carlo samples
-T = 100
 
-# Number of random sample at each iteration
+# Size of each sample
 N = 1000
 
-xx = sample_from_proposal(N,mu)
-for t in 1:T
-   # You can change stepsize if you run into problem 
-   # but it should be ok with this one (William: I think so).
-    mu = update_proposal(xx,mu, 0.2*(1/t)^(0.55) ) 
-    xx = sample_from_proposal(N,mu)
-    ww = compute_weights(xx,mu)
-    println(mu)
-    #println(sum(ww .* xx))
+# Number of samples to generate at each value of mu
+M = 500
+
+all_k_hats = zeros(length(mu_vec), M)
+
+
+using Suppressor
+
+@suppress_err for (i, mu) in enumerate(mu_vec)
+    for m in 1:M
+        xx = sample_from_proposal(N,mu)
+        ww = compute_weights(xx,mu, false)
+        _, k_hat = pareto_smooth(ww, M_keep="default", return_k=true)
+        all_k_hats[i,m] = k_hat
+    end
 end
-# end
 
 
 
-ww = compute_weights(xx,mu, false)
-var(ww)
+# Plot the mean k_hat for each value of mu
+plot(mu_vec, mean(all_k_hats, dims=2), xlabel=L"\mu", ylabel=L"\hat{k}", label=L"mean $\hat{k}$", title=L"Mean $\hat{k}$ for each value of $\mu$")
+# Add a horizontal line at 0.7
+hline!([0.7], label=nothing, color=:red, linestyle=:dash)
 
-ww_norm = compute_weights(xx,mu)
-var(ww_norm)
+# Add confidence bands
+ucls = mean(all_k_hats, dims=2) .+ 1.96*std(all_k_hats, dims=2) / sqrt(M);
+lcls = mean(all_k_hats, dims=2) .- 1.96*std(all_k_hats, dims=2) / sqrt(M);
 
-
-
-mu = 1
-for t in 1:T
-    # You can change stepsize if you run into problem 
-    # but it should be ok with this one (William: I think so).
-     mu = update_proposal_analytical(mu,0.3*(1/t)^(0.7) )
-     println(mu)
-     #println(sum(ww .* xx))
- end
+plot!(mu_vec, ucls, label="95% CI", color=:black, linestyle=:dash)
+plot!(mu_vec, lcls, label=nothing, color=:black, linestyle=:dash)
 

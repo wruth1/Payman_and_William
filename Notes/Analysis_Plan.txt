@@ -1,6 +1,7 @@
 - Here are some thoughts on what to do next for Pareto Smoothing (PS):
     - I've implemented the method on our normal example, and plotted k-hat as mu moves away from zero
         - First thing after finishing here, I'm going to add confidence bands to this plot 
+        - I should also add another curve showing the objective function used by Akyildiz and Miguez, for reference. I've done multiple Y-axis scales on the same plot before. It's a bit confusing to set-up, but if we recycle my old code it should be easy enough. I'll look into this.
     - I'm going to repeat this plot for the Gamma example
         - To start, fix the target distribution with some values of alpha and beta, then plot how k-hat changes with lambda (the proposal parameter)
         - I would also like to see how things change with alpha and beta from the target. One way to do this is to construct a grid of alpha and beta, then find the largest/smallest values of lambda which make k-hat greater than 0.7 (the bound at which Vehtari et al. say importance sampling breaks down).
