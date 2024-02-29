@@ -69,7 +69,7 @@ end
 #
 
 # List of mu values to try
-mu_vec = collect(0.1:0.1:5)
+mu_vec = collect(-5:0.1:5)
 
 
 # Size of each sample

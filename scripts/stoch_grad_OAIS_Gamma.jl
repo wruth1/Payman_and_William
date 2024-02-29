@@ -260,14 +260,16 @@ scatter(all_true_gradient, all_approx_gradient)
 
 true_thetas_plot = scatter(all_thetas_true);
 approx_thetas_plot = scatter(all_thetas_approx);
-plot(true_thetas_plot, approx_thetas_plot, layout = (1, 2), size = (1200, 600))
+plot(true_thetas_plot, approx_thetas_plot, layout = (1, 2), size = (1200, 600), 
+title = "Left panel true theta values and right panel is the approximate theta values")
 savefig("trueThetas_vs_approxThetas.png")
 
 true_grad_plot = scatter(all_true_gradient);
 ylims!((-0.1, 0.05))
 approx_grad_plot = scatter(all_approx_gradient, markersize=0.5);
 ylims!((-0.1, 0.05))
-plot(true_grad_plot, approx_grad_plot, layout = (1, 2), size = (1200, 600))
+plot(true_grad_plot, approx_grad_plot, layout = (1, 2), size = (1200, 600),
+title = "Left panel true gradient values and right panel is the approximate gradient values")
 savefig("trueGradients_vs_approxGradients.png")
 
 
