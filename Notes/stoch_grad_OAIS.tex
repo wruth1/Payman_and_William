@@ -4,6 +4,14 @@
 \usepackage{amssymb}
 \usepackage{amsthm} 
 
+\usepackage{natbib} % For citation functions like \citet and \citep
+
+
+\newcommand{\bG}{\mathbb{G}}
+\newcommand{\bF}{\mathbb{F}}
+
+
+
 \title{Notes for Standard Normal Example}
 
 
@@ -14,7 +22,7 @@
 \section{Intro}
 This document shows the theoretical steps that we took to implement stochastic gradiant optimized adaptive importance sampling (OAIS) to generate sample from standard normal distribution. The calculation is baes on section 3.2 of the paper "Convergence rates for optimised adaptive importance samplers by Akyildiz and Miguez, 2021". The contents of this document are acting as supporting docuemnt for the Julia script stochgradOAIS.jl which implements the algorithm.
 
-\section{Main}
+\section{Normal Location Model}
 In this example, we work on implementing OAIS to simulate random samples from a standard normal
 distribution. Our target distribution (to sample from) is standard normal distribution $X \sim N(0,1)$ where density is:
 
@@ -52,7 +60,18 @@ An unbiased estimator for $\nabla \rho(\theta)$ based on a sample of size $N$ is
 \sim \frac{1}{N} \sum_{i=1}^{N} (\mu-x_i) \frac{f^{2}(x_i)}{g^{2}(x_i)}
 \end{align*}
 
+\subsection{Objective Function}
 
+I would like to compare the objective function used by \citet{Aky21}, $\rho$, with the $\hat{k}$ diagnostic we are working with. To this end, it will be helpful to have an analytic expression for $\rho = \bG w^2$, and $w = f/g$ is the importance weight.
+
+First, note that
+%
+\begin{align}
+    w &:= \frac{f}{g_\mu}\\
+    &= \exp(\mu^2 - 2 x \mu)
+\end{align}
+%
+Next, since $\rho=\bG w^2$, we need only integrate $g \cdot w^2$. The result ends up being $\exp(\mu^2)$. As a brief sanity check, we observe that this expression for $\rho$ is minimized at $\mu=0$, corresponding to $\bG = \bF$, with a value of 1. This value of $\rho$ implies that the $\bG$-variance of $w$ is 0, which is exactly what we would expect when the proposal equals the target (specifically, these weights equal 1). This all sounds plausible to me. Furthermore, differentiating our expression for $\rho$ matches the gradient computed elsewhere using identities for exponential family distributions. I'm happy with this expression now.
 
 \section{Normal Dispersion Model}
 
@@ -118,5 +137,9 @@ and since $\Gamma(2 \alpha) = (2 \alpha - 1) \Gamma(2 \alpha - 1)$ we can write:
 \end{align*}
 
 Therefore $\lambda_{opt} = \frac{\beta}{\alpha}$
+
+
+\bibliographystyle{apalike}
+\bibliography{MyBib}
 
 \end{document}
