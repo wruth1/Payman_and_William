@@ -17,3 +17,5 @@
 
 Anyway, those are some of my thoughts on where we're at and where we're heading. Feel free to add/change as you see fit. We should probably discuss this when we meet on Thursday.
     
+
+I'm currently reading the paper by Pickands (1975) which goes into the Pareto limit theory for tails of ``nice'' distributions. See \textit{Notes/MyBib.bib} for the reference.
