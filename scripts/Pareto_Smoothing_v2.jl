@@ -7,7 +7,7 @@ using Statistics
 # Jin Zhang and Michael A. Stephens (2009), section 4: new estimators
 #
 
-function fit_gdp(x)
+function fit_gpd(x)
     
     # Get the sample size
     n = length(x)
@@ -48,13 +48,14 @@ function compute_profile_likelihood(x, theta)
    k = (-1/n) * ( log(1- theta'x) )
 
    # Compute profile log-likelihood
-   l_theta = n * (log.(theta/k) +. k -. 1)
+   l_theta = n .* ( log.(theta/k) .+ k .- 1 )
 
    # Compute profile likelihood and return
-   L_theta = exp(l_theta)
+   L_theta = exp.(l_theta)
 
    return L_theta
 end
 
 
-x = rand(Exponential(10), 30)
+x = rand(Exponential(3), 30)
+fit_gpd(x)
