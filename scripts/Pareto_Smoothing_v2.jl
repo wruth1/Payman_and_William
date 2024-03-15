@@ -80,7 +80,7 @@ function compute_theta_weights(ll_theta)
 
 end 
 
-x = rand(Exponential(3), 30)
+x = rand(Exponential(3), 50)
 
 fit_generalized_pareto_dist(x)
 
