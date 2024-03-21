@@ -1,6 +1,7 @@
 using Distributions
 using Statistics
 using SpecialFunctions
+using LogExpFunctions
 
 #
 # Note to Payman: For every value of theta_j, you need to loop over your sample size 
@@ -49,7 +50,7 @@ function estimate_theta(x, m)
     # Compute weights for each theta
     theta_weights = compute_theta_weights(ll_theta)
 
-    # Compute estimat eof theta for GPD
+    # Compute estimate of theta for GPD
     theta_hat = sum( ll_theta .* theta_weights)
  
     return theta_hat
@@ -74,8 +75,10 @@ end
 
 function compute_theta_weights(ll_theta)
        
-    sm = sum( exp.(ll_theta) )
-    theta_weights = (1/sm) .* ( 1 ./ exp.(-ll_theta) )
+    #sm = sum( exp.(ll_theta) )
+    #theta_weights = (1/sm) .* ( 1 ./ exp.(-ll_theta) )
+    sm = logsumexp( exp.(ll_theta) )
+    theta_weights = exp.(ll_theta .- sm)
     return theta_weights
 
 end 
@@ -83,5 +86,5 @@ end
 x = rand(Exponential(3), 50)
 
 fit_generalized_pareto_dist(x)
-
+include("..//src/Pareto_Smoothing.jl")
 fit_GPD(x)
