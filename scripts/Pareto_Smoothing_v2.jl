@@ -51,7 +51,7 @@ function estimate_theta(x, m)
     theta_weights = compute_theta_weights(ll_theta)
 
     # Compute estimate of theta for GPD
-    theta_hat = sum( ll_theta .* theta_weights)
+    theta_hat = sum( all_thetas .* theta_weights)
  
     return theta_hat
 end
@@ -77,14 +77,15 @@ function compute_theta_weights(ll_theta)
        
     #sm = sum( exp.(ll_theta) )
     #theta_weights = (1/sm) .* ( 1 ./ exp.(-ll_theta) )
-    sm = logsumexp( exp.(ll_theta) )
+    sm = logsumexp( ll_theta )
     theta_weights = exp.(ll_theta .- sm)
     return theta_weights
 
 end 
 
+Random.seed!(1)
 x = rand(Exponential(3), 50)
 
-fit_generalized_pareto_dist(x)
+fit_generalized_pareto_dist(x.-minimum(x))
 include("..//src/Pareto_Smoothing.jl")
 fit_GPD(x)
