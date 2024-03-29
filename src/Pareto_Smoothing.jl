@@ -11,7 +11,9 @@ using LogExpFunctions
 
 
 
-# Random.seed!(1)
+Random.seed!(1)
+
+X = rand(Exponential(3), 50)
 
 # M = 100
 # X_raw = rand(Uniform(0, 1), M)
