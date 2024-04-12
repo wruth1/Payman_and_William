@@ -1,0 +1,52 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm} 
+\usepackage{xcolor}     % For the \textcolor{}{} command
+
+\usepackage{natbib} % For citation functions like \citet and \citep
+
+
+\newcommand{\bG}{\mathbb{G}}
+\newcommand{\bF}{\mathbb{F}}
+\newcommand{\dfdg}{d \bF / d \bG}
+\newcommand{\dfdgfrac}{\frac{d \bF}{d \bG}}
+
+
+\title{Gamma LRT}
+\date{}
+
+
+\begin{document}
+
+\maketitle
+
+This document describes the steps to obtain the tail function for the importance sampling weights in Gamma distribution example. 
+We use an Exponential distribution as the proposal dist with pdf $g(x)$, and our target distribution is Gamma with pdf $f(x)$.
+
+Steps are as follows (I think!)
+
+Step 1. Set the target distribution, $f(x)$ as a Gamma distribution with $\alpha$ as shape and $\beta$ as scale:
+
+\begin{align}
+    f(x;\alpha,\beta) = \frac{\beta^{\alpha}}{\Gamma(\alpha)} x^{\alpha-1} e^{\beta x}
+\end{align}
+
+Step 2. Set the proposal distribution, $g(x)$, as an Exponential dist with scale parameter of one:
+\begin{align}
+    g(x) = e^{-x}
+\end{align}
+
+Step 3. The pdf of weights is $w(x;\alpha,\beta) = \frac{f(x;\alpha,\beta)}{g(x)}$
+
+Step 4. Use the pdf in step 3 and compute its tail function as described in Pickands paper:
+
+\begin{align}
+    P(x) = \frac{F(X \geq u+x)}{F(X \geq u)}
+\end{align}
+
+where $F(.)$ is the CDF of weights as defined in step 3.
+
+Step 5. Find $Q_3$, and median as described in the paper. Compute the $c$ and $a$. 
+\end{document}
