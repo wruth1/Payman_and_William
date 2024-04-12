@@ -167,6 +167,100 @@ Putting this all together now, we get
     c_u & \approx \sqrt{\frac{\pi}{8}} \cdot  \frac{u  \exp(u^2 / 2)}{\log(2)} - 1 \label{eq:approx_tail_index}
 \end{align}
 
+
+
+The tail function for the case of standard Normal dist is as follows. We have tail function:
+
+\begin{align}
+    P(x) = \frac{F(X \ge u + x)}{F(X \ge u)} = \frac{\Bar \Phi(u+x)}{\Bar \Phi(u)}
+\end{align}
+
+We use the identity ? $\Bar \Phi(t) = \frac{\phi(t)}{t}$. So we can rewrite the tail function as:
+
+\begin{align}
+    P(x) = \frac{ \frac{\phi(u+x)}{u+x} }{ \frac{\phi(u)}{u} } = \frac{u}{u+x} e^{-ux - \frac{1}{2} x^2 }
+\end{align}
+
+Now obtain median and $Q_3$ by solving $P(x)=\frac{1}{2}$ and $P(x) = \frac{1}{4}$. First median:
+
+\begin{align}
+\frac{u}{u+x} e^{-ux - \frac{1}{2} x^2 } = 0.5 \\
+e^{-ux - \frac{1}{2} x^2 } = \frac{u+x}{u} . \frac{1}{2} \\
+e^{-ux - \frac{1}{2} x^2 } = (1 + \frac{x}{u}) . \frac{1}{2} \\
+-ux - \frac{1}{2} x^2 = \log((1 + \frac{x}{u}) . \frac{1}{2}) \\
+-ux - \frac{1}{2} x^2 = log(1 + \frac{x}{u}) = log(1 + \frac{x}{u}) + log(\frac{1}{2}) \\
+\frac{1}{2} x^{2} + ux + log(\frac{1}{2}) + log(1 + \frac{x}{u}) = 0
+\end{align}
+
+We now replace $log(1 + \frac{x}{u})$ by the Taylor expansion as $log(1 + \frac{x}{u}) \sim \frac{x}{u} - \frac{ (\frac{x}{u})^2 }{2} + \cdot$ to get:
+
+\begin{align}
+\frac{1}{2} x^{2} + ux + \frac{x}{u} - \frac{x^2}{2u^2} + \log(\frac{1}{2}) = 0 \\
+\left( \frac{1}{2} - \frac{1}{2u^2} \right) x^2 + \left( u + \frac{1}{u} \right) x + log(\frac{1}{2}) = 0
+\end{align}
+
+Set $a = \left( \frac{1}{2} - \frac{1}{2u^2} \right)$, $b = \left( u + \frac{1}{u} \right)$, and $c = log(\frac{1}{2})$ and compute $\Delta_1 = b^2  - 4ac$ to find the roots:
+
+\begin{align}
+    \Delta_{1} = \left( u + \frac{1}{u} \right)^{2} + 2 \left( 1 - \frac{1}{u^2} \right) \log{2}
+\end{align}
+
+Therefore the median is:
+
+\begin{align}
+    M = \frac{-(u+\frac{1}{u}) + \sqrt{\Delta_1}}{1 - \frac{1}{u^2}}
+\end{align}
+
+With a similar calculation we can compute $Q_3$ as:
+
+\begin{align}
+    Q_3 = \frac{-(u+\frac{1}{u}) + \sqrt{\Delta_2}}{1 - \frac{1}{u^2}}
+\end{align}
+
+where $\Delta_{2} = \left( u + \frac{1}{u} \right)^{2} + 2 \left( 1 - \frac{1}{u^2} \right) \log{4}$. According to Pickands papers we ned to compute:
+\begin{align}
+c(u) = (log(2))^{-1} log(\frac{Q_3 - M}{M})
+\end{align}
+
+So we can write: 
+
+\begin{align}
+Q_3 - M = \frac{ \sqrt{\Delta_2} - \sqrt{\Delta_1} }{1-\frac{1}{u^2}}
+\end{align}
+
+Note that we can write:
+
+\begin{align}
+\sqrt{\Delta_2} - \sqrt{\Delta_1} = \frac{\Delta_2 - \Delta_1}{\sqrt{\Delta_2} + \sqrt{\Delta_1}} = \frac{2(1-\frac{1}{u^2})}{u+o(u)}
+\end{align}
+
+and:
+
+\begin{align}
+\frac{Q_3 - M}{M} = \frac{ \frac{ \sqrt{\Delta_2} - \sqrt{\Delta_1} }{1-\frac{1}{u^2}} }{ \frac{ -(u+\frac{1}{u}) + \sqrt{\Delta_1} }{1-\frac{1}{u^2}} } = \frac{ \sqrt{\Delta_2} - \sqrt{\Delta_1} }{ -(u+\frac{1}{u}) + \sqrt{\Delta_1}}
+\end{align}
+    
+Define $\Delta_0 = (u + \frac{1}{u})^2$ to write:
+
+\begin{align}
+\sqrt{\Delta_1} - (u+\frac{1}{u}) = \sqrt{\Delta_1} - \sqrt{\Delta_0} = \frac{\Delta_1 - \Delta_0}{\sqrt{\Delta_1} + \sqrt{\Delta_0}} = \frac{2(1-\frac{1}{u^2}\log(2))}{u + o(u)}
+\end{align}
+    
+Finally we can write: 
+
+\begin{align}
+\frac{Q_3 - M}{M} = \frac{ \frac{2(1-\frac{1}{u^2})}{u+o(u)} }{ \frac{2(1-\frac{1}{u^2})}{u+o(u)} } \\
+\lim_{u\to\infty} \frac{Q_3 - M}{M} = 1
+\end{align}
+
+and concludes:
+
+\begin{align}
+\lim_{u\to\infty} c(u) = \lim_{u\to\infty} (\log(2))^{-1} \log(\frac{Q_3 - M}{M}) = 0
+\end{align}
+    
+Therefore $c=0$.
+
 \subsection{Discussion}
 
 I did most of the above derivation by hand, so there's a pretty good chance that I messed something up somewhere. Having the tail index go to $\infty$ as $u \rightarrow \infty$ doesn't really align with my expectations; I would have preferred that the first term go to zero, so the asymptotic tail index is just $-1$. It's entirely possible that I just missed a minus sign somewhere along the way. Going back over this with Maple would help, I just don't have time for that today.
