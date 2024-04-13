@@ -26,6 +26,7 @@ This document describes the steps to obtain the tail function for the importance
 We use an Exponential distribution as the proposal dist with pdf $g(x)$, and our target distribution is Gamma with pdf $f(x)$.
 
 Steps are as follows (I think!)
+\textcolor{blue}{This looks really good Payman. I just added a couple notes in blue.}
 
 Step 1. Set the target distribution, $f(x)$ as a Gamma distribution with $\alpha$ as shape and $\beta$ as scale:
 
@@ -37,8 +38,9 @@ Step 2. Set the proposal distribution, $g(x)$, as an Exponential dist with scale
 \begin{align}
     g(x) = e^{-x}
 \end{align}
+\textcolor{blue}{More generally, we can use any scale parameter for the exponential. For the purposes of this discussion, we just need the scale parameter to be fixed. I think it's pretty reasonable to keep $\lambda=1$ for now to avoid cluttering our formulas, although eventually we'll need to do the general case.}\\
 
-Step 3. The pdf of weights is $w(x;\alpha,\beta) = \frac{f(x;\alpha,\beta)}{g(x)}$
+Step 3. The pdf of weights is $w(x;\alpha,\beta) = \frac{f(x;\alpha,\beta)}{g(x)}$. \textcolor{blue}{This actually isn't quite the pdf of the weights. Instead, the $X$s are iid from $g$, and the weights are obtained by evaluating $w$ at the simulated $X$s. The distribution on the weights is then induced by the distribution on $X$ and the functional relationship between $X$ and $W$. If the words ``pushforward measure'' help clarify things, that's exactly what's happening here. If not, $W$ is a transformation of $X$. In principle, we can get the pdf of $W$ by computing the Jacobian of the (inverse) transformation (i.e. the derivative of the inverse of the likelihood ratio function). Personally, I prefer to work directly with the CDF or survival function; for one, I think it's easier, and for two, we need the survival function for step 4 anyway.}\\
 
 Step 4. Use the pdf in step 3 and compute its tail function as described in Pickands paper:
 
