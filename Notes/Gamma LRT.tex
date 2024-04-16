@@ -4,12 +4,17 @@
 \usepackage{amssymb}
 \usepackage{amsthm} 
 \usepackage{xcolor}     % For the \textcolor{}{} command
+\usepackage{mathrsfs}   % For the \mathscr{} font
 
 \usepackage{natbib} % For citation functions like \citet and \citep
 
 
 \newcommand{\bG}{\mathbb{G}}
 \newcommand{\bF}{\mathbb{F}}
+\newcommand{\bP}{\mathbb{P}}
+
+\newcommand{\sW}{\mathscr{W}}
+
 \newcommand{\dfdg}{d \bF / d \bG}
 \newcommand{\dfdgfrac}{\frac{d \bF}{d \bG}}
 
@@ -51,4 +56,51 @@ Step 4. Use the pdf in step 3 and compute its tail function as described in Pick
 where $F(.)$ is the CDF of weights as defined in step 3.
 
 Step 5. Find $Q_3$, and median as described in the paper. Compute the $c$ and $a$. 
+
+
+\section{William's Derivation}
+
+I'm going to mostly stick to the above notation, but I would like to use the general exponential distribution until I find myself needing to set $\lambda=1$. I will also suppress dependence on parameters in the various densities to avoid extra typing. Thus, $g(x) = \exp(-x/\lambda)/\lambda$.
+
+At a high-level, my plan is to compute the survival function of the weights, as well as their density and the derivative of their density. I can then use Equation (1.1.30) on page 15 of \citet{deH06} to (hopefully) compute the tail index. There are enough steps here that it's going to take a few days' work. One step at a time.
+
+To start, we note that the weight, $W$, can be written as a random variable in the following way.
+%
+\begin{align}
+    W(X) &= \frac{f(X)}{g(X)}\\
+    &= \frac{\lambda}{\beta^\alpha \Gamma(\alpha)} X^{\alpha - 1} \exp\left[ -X \left( \frac{1}{\beta} + \frac{1}{\lambda} \right) \right]\\
+    &=: c X^{\alpha - 1} \exp(-X / \gamma)
+\end{align}
+%
+where $c = \lambda / \beta^\alpha \Gamma(\alpha)$, and $\gamma = (1/\beta + 1/\lambda)^{-1}$. I doubt that it will every be relevant, but I think it's cute that $\gamma$ is a harmonic mean. 
+
+We can now work out the survival function of $W$. We write $\sW$ for the inconveniently named Lambert-W function, which is the inverse function of $x \mapsto x e^x$. I.e. $\sW$ satisfies $\sW(x) \exp[\sW(x)] = x$.
+%
+\begin{align}
+    \bP (W > w) &= \bP \left( X^{\alpha - 1} e^{-X/\gamma} > \frac{w}{c} \right) \label{eq:W_surv1}\\
+    &= \bP \left( X > - (\alpha - 1) \gamma \cdot \sW \left[ - \frac{(w/c)^{1/(\alpha-1)}}{(\alpha - 1) \gamma} \right] \right) \label{eq:W_surv2}\\
+    &= \exp \left( \frac{(\alpha - 1) \gamma}{\lambda} \cdot \sW \left[ - \frac{(w/c)^{1/(\alpha-1)}}{(\alpha - 1) \gamma} \right] \right) \label{eq:W_surv3}
+\end{align}
+%
+where we pass from (\ref{eq:W_surv1}) to (\ref{eq:W_surv2}) with the help of Wolfram Alpha.
+
+Next, we need the PDF of $W$, and later its derivative. I'm going to find it easier to do this in stages. Let $\bar{\varphi}(w) = \bP(W > w)$ and $\eta$ be the argument to $\sW$ in (\ref{eq:W_surv3}). The (negative) PDF of $w$ is obtained by differentiating $\bar{\varphi}$. Note that the derivative of $\sW$ can be obtained implicitly from its\footnote{Usually, I try not to use ``it'' to refer to anything in academic writing (Tom drilled this into me during my master's thesis revisions). Here however, I think it's a pretty good fit and doing anything else would be very wordy.} defining equation
+%
+\begin{align}
+    \nabla_w \bar{\varphi}(w) &=  \frac{(\alpha - 1) \gamma}{\lambda} \bar{\varphi}(w) \nabla_w \sW (\eta)\\
+    \nabla_w \sW(\eta) &= \frac{\sW(\eta)}{\eta [ 1 + \sW(\eta)]} \nabla_w \eta\\
+    \nabla_w \eta &= - \frac{1}{c \gamma (\alpha - 1)^2} \left( \frac{w}{c} \right)^{\frac{1}{\alpha - 1} - 1}
+\end{align}
+%
+Putting this all together, and after a surprising amount of cancellation, I get
+%
+\begin{align}
+    f(w) &:= -\nabla_w \bar{\varphi}(w)\\
+    &= - \frac{\bar{\varphi}(w)}{\lambda w} \cdot \frac{\sW(\eta)}{1 + \sW(\eta)}
+\end{align}
+
+
+\bibliographystyle{apalike}
+\bibliography{MyBib}
+
 \end{document}
