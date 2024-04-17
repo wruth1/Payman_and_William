@@ -84,21 +84,82 @@ We can now work out the survival function of $W$. We write $\sW$ for the inconve
 %
 where we pass from (\ref{eq:W_surv1}) to (\ref{eq:W_surv2}) with the help of Wolfram Alpha.
 
+\subsection{PDF}
+\label{sec:pdf}
+
 Next, we need the PDF of $W$, and later its derivative. I'm going to find it easier to do this in stages. Let $\bar{\varphi}(w) = \bP(W > w)$ and $\eta$ be the argument to $\sW$ in (\ref{eq:W_surv3}). The (negative) PDF of $w$ is obtained by differentiating $\bar{\varphi}$. Note that the derivative of $\sW$ can be obtained implicitly from its\footnote{Usually, I try not to use ``it'' to refer to anything in academic writing (Tom drilled this into me during my master's thesis revisions). Here however, I think it's a pretty good fit and doing anything else would be very wordy.} defining equation
 %
 \begin{align}
     \nabla_w \bar{\varphi}(w) &=  \frac{(\alpha - 1) \gamma}{\lambda} \bar{\varphi}(w) \nabla_w \sW (\eta)\\
     \nabla_w \sW(\eta) &= \frac{\sW(\eta)}{\eta [ 1 + \sW(\eta)]} \nabla_w \eta\\
-    \nabla_w \eta &= - \frac{1}{c \gamma (\alpha - 1)^2} \left( \frac{w}{c} \right)^{\frac{1}{\alpha - 1} - 1}
+    \nabla_w \eta &= - \frac{1}{c \gamma (\alpha - 1)^2} \left( \frac{w}{c} \right)^{\frac{1}{\alpha - 1} - 1} = \frac{\eta}{\alpha - 1}
 \end{align}
 %
 Putting this all together, and after a surprising amount of cancellation, I get
 %
 \begin{align}
-    f(w) &:= -\nabla_w \bar{\varphi}(w)\\
+    f_W(w) &:= -\nabla_w \bar{\varphi}(w)\\
     &= - \frac{\bar{\varphi}(w)}{\lambda w} \cdot \frac{\sW(\eta)}{1 + \sW(\eta)}
 \end{align}
 
+\subsection{Derivative of 1 over Hazard Rate}
+
+We return now to Theorem 1.1.8 of \citet{deH06}, specifically expression (1.1.29)\footnote{Note that, in survival analysis, the hazard rate of a distribution is defined as the density over the survival function. The quantity being differentiated in (1.1.29) before taking the limit is thus the reciprocal of the hazard rate of $W$}. We first compute the survival function of $W$ over its density, wherein we get some nice cancellation.
+%
+\begin{align}
+    \frac{\bar{\varphi}(w)}{f_W(w)} &= - \frac{\lambda w [1 + \sW(\eta)]}{\sW(\eta)} \label{eq:recip_hazard}
+\end{align}
+%
+where $\sW$ and $\eta$ are defined in Section \ref{sec:pdf}. We now need to differentiate the expression in \ref{eq:recip_hazard}. Fortunately, we can recycle identities (\ref{eq:W_surv2}) and (\ref{eq:W_surv3}). We first present an identity which helps with simplification, then proceed with computing the derivative.
+%
+\begin{align}
+    \nabla_w \sW(\eta) &= \partial \sW(\eta) \cdot \partial \eta\\
+    &= \frac{\sW(\eta)}{(\alpha - 1) [ 1 + \sW(\eta)]}\\
+    \nabla_w \left[ \frac{\bar{\varphi}(w)}{f_W(w)} \right] &= - \left( \frac{\lambda \sW(\eta) \nabla_w [w ( 1 + \sW(\eta))] - \lambda w [ 1 + \sW(\eta)] \nabla_w \sW(\eta)}{\sW(\eta)^2} \right)\\
+    &= - \left( \frac{\lambda \sW(\eta)[ (1 + \sW(\eta)) + w \sW(\eta) / ([\alpha - 1][1 + \sW(\eta)]) ] - \lambda w \sW(\eta) / (\alpha - 1)}{\sW(\eta)^2} \right)\\
+    &= \lambda \left[\frac{w}{(\alpha - 1) \sW(\eta) (1 + \sW(\eta))} - \frac{(1 + \sW(\eta))}{\sW(\eta)} \right] \label{eq:grad_recip_hazard}
+\end{align}
+%
+All that remains is to compute the limit of (\ref{eq:grad_recip_hazard}) as $w \uparrow \infty$. Note that $\eta \rightarrow - \infty$ as $w \rightarrow \infty$, so $\sW(\eta) \rightarrow - \infty$ as well. Re-write (\ref{eq:grad_recip_hazard}) as $\lambda [ A - B]$. We now explore the asymptotic behaviour of $A$ and $B$.
+
+First, it's not hard to show that $B \rightarrow 1$. However, $A$ takes more work. Recall that $\sW(\eta) \exp[\sW(\eta)] = \eta$, so we can re-write $A$ as
+%
+\begin{align}
+    A &= \frac{\eta}{\sW(\eta)} \cdot \frac{w}{(\alpha - 1) \eta [1 + \sW(\eta)]}\\
+    &= \exp[\sW(\eta)] \cdot \frac{w}{(\alpha - 1) \eta [1 + \sW(\eta)]}\\
+    &= \frac{1}{\alpha - 1} \cdot w \cdot \frac{\exp[\sW(\eta)]}{\eta [1 + \sW(\eta)]}\\
+    &=: \frac{1}{\alpha - 1} \cdot w \cdot \xi(\eta)
+\end{align}
+%
+Unfortunately, I don't have any a priori information about the relative growth rates of $w$ and $\eta$ (or any functions of $\eta$). I do know that $\xi(\eta) \rightarrow 0$ as $w \rightarrow \infty$, so we can re-write $(\alpha - 1) A = w / [1 / \xi(\eta)]$ and apply l'Hospital's Rule.
+%
+\begin{align}
+    \frac{w}{1 / \xi(\eta)} & \sim \frac{1}{\nabla_w [1 / \xi(\eta)]}\\
+    \nabla_w \left[ \frac{1}{\xi(\eta)} \right] &= \nabla_w \left( \frac{\eta [ 1 + \sW(\eta)]}{\exp[\sW(\eta)]} \right)\\
+    &= \nabla_\eta \left( \frac{\eta [ 1 + \sW(\eta)]}{\exp[\sW(\eta)]} \right) \cdot \nabla_w \eta\\
+    &= \frac{\sW(\eta)}{\alpha - 1} \cdot \frac{1 + 2 \sW(\eta)}{1 + \sW(\eta)}
+\end{align}
+%
+Where the last step comes from much expanding and simplifying. Finally, we get
+%
+\begin{align}
+    A & \sim \frac{1}{\alpha - 1} \left[ \frac{\sW(\eta)}{\alpha - 1} \cdot \frac{1 + 2 \sW(\eta)}{1 + \sW(\eta)} \right]^{-1}\\
+    & = \frac{1}{(\alpha - 1)^2} \frac{1 + \sW(\eta)}{\sW(\eta)[1 + 2 \sW(\eta)]}\\
+    & \sim \frac{1}{2(\alpha - 1)^2} \cdot \frac{1}{\sW(\eta)}\\
+    & \rightarrow 0
+\end{align}
+%
+Putting everything together, our expression for the tail index is
+%
+\begin{align}
+    \lim_{w \uparrow \infty} \nabla_w \left[ \frac{\bar{\varphi}(w)}{f_W(w)} \right] &= \lambda[A(w) - B(w)]\\
+    &= \lambda[o(1) - 1 + o(1)]\\
+    & \rightarrow -\lambda
+\end{align}
+
+\subsection{Discussion}
+
+This final conclusion, while pleasantly simple, cannot possibly be correct. I can't believe that the tail index of $W$ doesn't depend on the parameters of the target distribution. Frankly, an incorrect answer isn't terribly surprising here. It's a long derivation with lots of room for mistakes. If I have time between now and our next meeting, I'll spend some time reviewing my work. If not, I would like to go over it again with you Payman, both to explain my reasoning and to double-check my work.
 
 \bibliographystyle{apalike}
 \bibliography{MyBib}
