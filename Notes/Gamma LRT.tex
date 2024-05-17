@@ -8,6 +8,11 @@
 
 \usepackage{natbib} % For citation functions like \citet and \citep
 
+\usepackage{tikz}   % For graphing
+\usepackage{pgfplots}   % For graphing a function
+
+\usepackage{subcaption} % For sub-figures
+
 
 \newcommand{\bG}{\mathbb{G}}
 \newcommand{\bF}{\mathbb{F}}
@@ -71,7 +76,7 @@ To start, we note that the weight, $W$, can be written as a random variable in t
 %
 \begin{align}
     W(X) &= \frac{f(X)}{g(X)}\\
-    &= \frac{\lambda}{\beta^\alpha \Gamma(\alpha)} X^{\alpha - 1} \exp\left[ -X \left( \frac{1}{\beta} + \frac{1}{\lambda} \right) \right]\\
+    &= \frac{\lambda}{\beta^\alpha \Gamma(\alpha)} X^{\alpha - 1} \exp\left[ -X \left( \frac{1}{\beta} + \frac{1}{\lambda} \right) \right] \label{eq:def_W_wrong}\\
     &=: c X^{\alpha - 1} \exp(-X / \gamma)
 \end{align}
 %
@@ -135,6 +140,82 @@ All that remains is to compute the limit of (\ref{eq:grad_recip_hazard}) as $w \
 \subsection{Discussion}
 
 This final conclusion, while pleasantly simple, cannot possibly be correct. Surely, the tail index must depend on both parameters of the target distribution. Frankly, an incorrect answer isn't terribly surprising here. It's a long derivation with lots of room for mistakes. If I have time between now and our next meeting, I'll spend some time reviewing my work. If not, I would like to go over it again with you Payman, both to explain my reasoning and to double-check my work.
+
+
+\section{Second Attempt}
+
+There are a few mistakes in the above analysis. First, a typo. In the definition of $W$, the exponent should contain the difference between $1/\beta$ and $1/\lambda$ rather than their sum (see Equation (\ref{eq:def_W_wrong})). Fortunately, we just set this sum equal to $1/\gamma$ in the rest of our analysis, so we simply re-refine $\gamma = (\beta^{-1} - \lambda^{-1})^{-1}$ and the rest of our calculations hold (insofar as the rest of the calculations are themselves correct).
+
+The second error is more egregious. In moving from equation (\ref{eq:W_surv1}) to (\ref{eq:W_surv2}), we used the Lambert-W function, $\sW$, to invert a function of the form $x \mapsto ax e^{-bx}$, with $a,b>0$. However, in part of its domain, $\sW$ is multi-valued. I find it easiest to understand this behaviour geometrically. Consider the simplest function of this form, $x e^{-x}$. Figure \ref{fig:x_ex} shows this function, as well as a horizontal line at $Y=0.2$. Note that this line intersects the curve at two points, so there are two solutions to the equation $x e^{-x} = 0.2$. In fact, this will be true for any positive value of $y$ below the maximum. We will prove this fact later, but for now take it as motivation for investigating the multi-valuedness of $\sW$.
+
+\begin{figure}
+    \centering
+    % \resizebox{\columnwidth}{!}{%
+    \begin{tikzpicture}
+        \begin{axis}[xlabel=$X$, ylabel=$X e^{-X}$,domain=0:5,samples=50]
+            \addplot[blue] (x,x/e^x);
+            \addplot[red] (x, 0.2);
+        \end{axis}
+    \end{tikzpicture}
+    % }
+    \caption{Graph of $y = x e^{-x}$, with a horizontal line at $y=0.2$.}
+    \label{fig:x_ex}
+\end{figure}
+
+The ultimate reason that we care about the multi-valuedness of $\sW$ is that the set $\{ W(X) > w \}$ corresponds to an interval in $X$. Thus, the survival function of $W$ is computed as a difference in the survival function of X at two points. We now proceed with fixing our derivation of the tail index for $W$.
+
+To start, note that $W$ is defined as the likelihood ration between the $\mathrm{Gamma}(\alpha, \beta)$ and $\mathrm{Exp}(\lambda)$ distributions, evaluated at a random variable with the matching exponential distribution. 
+%
+\begin{align}
+    W(X) &= \frac{\lambda}{\beta^\alpha \Gamma(\alpha)} X^{\alpha - 1} \exp\left[ -X \left( \frac{1}{\beta} - \frac{1}{\lambda} \right) \right]\\
+    &=: c X^{\alpha - 1} \exp(-X / \gamma)
+\end{align}
+%
+Next, we need the survival function of $W$.
+%
+\begin{align}
+    \bP(W > w) &= \bP \left\{ X^{\alpha - 1} \exp(-X / \gamma) > \frac{w}{c} \right\} \label{eq:W_surv_raw}
+\end{align}
+%
+We now present some properties of the function $h(x) = x^a e^{-bx}$, which we will then use to simplify Expression (\ref{eq:W_surv_raw}).
+
+\subsection{On the function $h(x) = x^a \cdot e^{-bx}$}
+
+To start, $\lim_{x \rightarrow \infty} h(x) = 0$ and $h(0) = 0$ (we will not concern ourselves with negative arguments of $h$). We can maximize $h$ by differentiating and solving for a root. This is easier if we instead work with $\log h$.
+%
+\begin{align}
+    \nabla \log h(x) &= \nabla \left[ a \log(x) - b x \right]\\
+    &= \frac{a}{x} - b \label{eq:grad_log_h}
+\end{align}
+%
+This expression has a unique root at $x_* = a/b$. The second derivative test trivially confirms that $x_*$ is a maximizer. Evaluating $h(x_*) = (a/eb)^a=: y_*$ gives us an upper bound for $h$.
+
+Next, we attempt to invert $h$. We will proceed formally, ignoring any problems which can arise from raising negative numbers to arbitrary powers, and verify that the inverse we end up with is, well-defined. Later, we will verify that we have, in fact, found all inverses of $h$ for the parameter values we consider. Our derivation of the inverse will ultimately involve the Lambert-W function; the rest of the details revolve around setting up its application.
+%
+\begin{align}
+    x^a e^{-bx} &= y\\
+    x e^{-bx/a} &= y^{1/a}\\
+    -\frac{bx}{a} e^{-bx/a} &= -\frac{b}{a} \cdot y^{1/a} \label{eq:h_inv1}\\
+    -\frac{bx}{a} &= \sW\left( -\frac{b}{a} \cdot y^{1/a} \right) \label{eq:h_inv2}\\
+    x &= -\frac{a}{b} \cdot \sW\left( -\frac{b}{a} \cdot y^{1/a} \right) = h^{-1}(y) \label{eq:h_inv_form}
+\end{align}
+%
+A few notes. First, our final expression for $h^{-1}$ is perfectly well-defined. The only possible problem is that we could have lost one or more roots along the way. Second, in moving from (\ref{eq:h_inv1}) to (\ref{eq:h_inv2}), we have applied the $\sW$ function without checking whether it is well-defined. Doing so now, we note that $\sW(x)$ is not defined for $x < -e^{-1}$, has two real values for $-e^{-1} \leq x < 0$ (although these roots coincide for $x = -e^{-1}$), and one real value for $x \geq 0$. In the context of our $h$ function, these conditions correspond to $y > (a/eb)^a = y_*$, $y_* \geq y >0$, and $y \leq 0$ respectively. Note that solutions for $y < 0$ are negative in $x$, so are disregarded. These algebraic possibilities correspond exactly with the geometry in Figure \ref{fig:x_ex}. Above $y_*$ or below $0$ there are no inverses, below $y_*$ but above $0$ there are two inverses, and at $0$ or $y_*$ there are unique inverses. 
+
+While the above analysis is nice, it does still remain to check that we haven't missed any inverses of $h$. To this end, observe that the function $h$ is strictly monotonic both below and above $x_*$ (increasing and decreasing respectively). This can be checked easily by inspection of Equation (\ref{eq:grad_log_h}). Thus, there is at most one solution of the equation $h(x) = c$ on each of the intervals $(-\infty, x_*]$ and $[x_*, \infty)$. We have already identified all such solutions.
+
+In summary, we have completely characterized the inverses of the function $h(x) = x^a e^{-bx}$ for $x\geq 0$ and $a, b > 0$. These are given by Equation (\ref{eq:h_inv_form}), possibly with two distinct values of $\sW$. In practice, when writing code to evaluate $h^{-1}(y)$, we can check whether $y > y_*$ or $y < 0$ (no solution), $0 < y < y_*$ (two solutions), or $y \in \{ 0, y_* \}$ (one solution), where $y_* = (a/eb)^a$.
+
+\subsection{Computing the Tail Index of $W$}
+
+We now return to the problem of computing $\bP(W > w)$. Recalling Equation (\ref{eq:W_surv_raw}), this probability is
+%
+\begin{align}
+    \bP \left\{ X^{\alpha - 1} \exp(-X / \gamma) > \frac{w}{c} \right\} 
+\end{align}
+%
+From our analysis of the function $h$, we are now able to \textcolor{red}{START HERE}
+
 
 \bibliographystyle{apalike}
 \bibliography{MyBib}
