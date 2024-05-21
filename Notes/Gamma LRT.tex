@@ -206,15 +206,24 @@ While the above analysis is nice, it does still remain to check that we haven't 
 
 In summary, we have completely characterized the inverses of the function $h(x) = x^a e^{-bx}$ for $x\geq 0$ and $a, b > 0$. These are given by Equation (\ref{eq:h_inv_form}), possibly with two distinct values of $\sW$. In practice, when writing code to evaluate $h^{-1}(y)$, we can check whether $y > y_*$ or $y < 0$ (no solution), $0 < y < y_*$ (two solutions), or $y \in \{ 0, y_* \}$ (one solution), where $y_* = (a/eb)^a$.
 
+\textcolor{red}{It would be nice to use proper names for the two branches of $\sW$. I think one is called the ``principal'' branch, but I will need to confirm. Also do this in the following section.}
+
 \subsection{Computing the Tail Index of $W$}
 
-We now return to the problem of computing $\bP(W > w)$. Recalling Equation (\ref{eq:W_surv_raw}), this probability is
+We now return to the problem of computing $\bP(W > w)$. Recalling Equation (\ref{eq:W_surv_raw}) and applying our inverse formula given in Equation \ref{eq:h_inv_form}, this probability is
 %
 \begin{align}
-    \bP \left\{ X^{\alpha - 1} \exp(-X / \gamma) > \frac{w}{c} \right\} 
+    &\bP \left\{ X^{\alpha - 1} \exp(-X / \gamma) > \frac{w}{c} \right\} \\
+    &=\bP \left\{ -\gamma (\alpha - 1) \sW_u \left[ - \frac{1}{\gamma (\alpha - 1)} \left( \frac{w}{c} \right)^{1/(\alpha - 1)} \right] < X  \right. \\
+    &\left. < -\gamma (\alpha - 1) \sW_l \left[ - \frac{1}{\gamma (\alpha - 1)} \left( \frac{w}{c} \right)^{1/(\alpha - 1)} \right]\right\}\\
+    &=: \bP \left\{ X_l(w) < X < X_u(w) \right\}
 \end{align}
 %
-From our analysis of the function $h$, we are now able to \textcolor{red}{START HERE}
+where $\sW_l \leq \sW_u$ are two (possibly equal) real-valued branches of the Lambert-W function. Finally, since $X \sim \mathrm{Exp}(\lambda)$, the survival function of $W$ is $\bP(W > w) = \exp(-X_u(w)/ \gamma) - \exp(-X_l(w)/\gamma)$.
+
+Having established the survival function of $W$, we now need to compute its density (i.e. the negative derivative of the survival function; this is going to get messy). We then need to take their ratio, differentiate, and take the limit as $w \rightarrow w_*$. At some point, we may need to start working with numerical derivatives, but I would like to do as much analytically as is reasonably possible.
+
+
 
 
 \bibliographystyle{apalike}
