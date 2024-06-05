@@ -223,8 +223,69 @@ where $\sW_l \leq \sW_u$ are two (possibly equal) real-valued branches of the La
 
 Having established the survival function of $W$, we now need to compute its density (i.e. the negative derivative of the survival function; this is going to get messy). We then need to take their ratio, differentiate, and take the limit as $w \rightarrow w_*$. At some point, we may need to start working with numerical derivatives, but I would like to do as much analytically as is reasonably possible.
 
+\subsection{Density of $W$ - try 1}
 
+We start by the survival function that we just established earlier:
 
+\begin{align}
+\bP(W > w) = \exp(-X_u(w)/ \gamma) - \exp(-X_l(w)/\gamma)
+\end{align}
+
+To compute the density, we need to find the negative partial derivative w.r.t $w$. This means: 
+
+\begin{align}
+f(w) = - \frac{\partial}{\partial w} Pr(W \ge w) = \frac{\partial}{\partial w} \exp(-X_l(w)/ \gamma) - \exp(-X_u(w)/\gamma)
+\end{align}
+
+Let's start with:
+
+\begin{align}
+\frac{\partial}{\partial w} \exp \left( \frac{-X_{l}(w)}{\gamma} \right) = \frac{-1}{\gamma} \frac{\partial}{\partial w}(X_{l}(w)) \exp(\frac{-X_{l}(w)}{\gamma})
+\end{align}
+
+We note that:
+
+\begin{align}
+\frac{\partial}{\partial w}(X_{l}(w)) &= \frac{\partial}{\partial w} \left( -\gamma (\alpha - 1) \sW_l \left( \frac{-1}{\gamma (\alpha-1)} \left(\frac{w}{c}\right)^{\frac{1}{\alpha-1}} \right) \right) \\
+&= \gamma (\alpha - 1) \frac{\partial}{\partial w} \left( \sW_l(\frac{-1}{\gamma (\alpha-1)} \frac{1}{c^{\alpha-1}} w^{\frac{1}{\alpha-1}})  \right) \\
+&= -\gamma (\alpha-1) \frac{\partial}{\partial w} \left( \sW_l(A w^{\frac{1}{\alpha-1}}) \right)
+\end{align}
+
+and we used the notation of $A = \frac{-1}{\gamma (\alpha-1)} \frac{1}{c^{\alpha-1}}$ for convinience. Recall that we already established in equation (11) of this document that:
+
+\begin{align}
+\frac{\partial}{\partial x} \sW(u) = \frac{\sW(u)}{ u (1+\sW(u)) } \frac{\partial u}{\partial x}
+\end{align}
+    
+Therefore we can continue in equation 44 as:
+
+\begin{align}
+\frac{\partial}{\partial w}(X_{l}(w)) &= -\gamma (\alpha-1) \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ A w^{\frac{1}{\alpha-1}} \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right) } \frac{\partial}{\partial w}(A w^{\frac{1}{\alpha-1}}) \\
+&= -\gamma (\alpha-1) \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ A w^{\frac{1}{\alpha-1}} \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right) } A \frac{1}{\alpha-1} w^{\frac{2-\alpha}{\alpha-1}} \\
+&= -\gamma \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right)} \frac{1}{w}
+\end{align}
+        
+So we can write: 
+
+\begin{align}
+\frac{\partial}{\partial w} \exp \left( \frac{-X_{l}(w)}{\gamma} \right) &= \frac{-1}{\gamma} \frac{\partial}{\partial w}(X_{l}(w)) \exp(\frac{-X_{l}(w)}{\gamma}) \\
+&= \frac{-1}{\gamma} \left( -\gamma \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right)} \frac{1}{w} \right) \exp(\frac{-X_{l}(w)}{\gamma}) \\
+&= \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right)} \frac{1}{w} \exp(\frac{-X_{l}(w)}{\gamma}) 
+\end{align}
+    
+With a similar work, we can derive:
+
+\begin{align}
+\frac{\partial}{\partial w} \exp \left( \frac{-X_{u}(w)}{\gamma} \right) = \frac{\sW_u(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_u(A w^{ \frac{1}{\alpha-1} }) \right)} \frac{1}{w} \exp(\frac{-X_{u}(w)}{\gamma}) 
+\end{align}
+   
+Finally we can derive the pdf of $w$ as follows: 
+
+\begin{align}
+f(w) &= \frac{\partial}{\partial w} \exp(-X_l(w)/ \gamma) - \frac{\partial}{\partial w} \exp(-X_u(w)/\gamma) \\
+&= \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right)} \frac{1}{w} \exp(\frac{-X_{l}(w)}{\gamma}) - \frac{\sW_u(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_u(A w^{ \frac{1}{\alpha-1} }) \right)} \frac{1}{w} \exp(\frac{-X_{u}(w)}{\gamma})
+\end{align}
+        
 
 \bibliographystyle{apalike}
 \bibliography{MyBib}
