@@ -19,3 +19,7 @@ Anyway, those are some of my thoughts on where we're at and where we're heading.
     
 
 I'm currently reading the paper by Pickands (1975) which goes into the Pareto limit theory for tails of ``nice'' distributions. See \textit{Notes/MyBib.bib} for the reference.
+
+
+Update: 2024-06-10
+I understand some of the limit theory given in Vehtari et al. It is pretty simplistic. In particular, it doesn't really address estimation of the Pareto tail index. I didn't go as in-depth on the small-sample theory of Section 3. I think we're going to need to give more thought to our Pareto tail estimator if we're going to be able to apply stochastic approximation theory off-the-shelf. In particular, we may need an estimator whose theoretical properties are better understood than that of Zhang and Stephens.
