@@ -53,12 +53,10 @@
 \begin{frame}{Importance Sampling}
     \begin{outline}
         \1 Need to compute an expected value
-            \2 $\bE_F \varphi(X) = \int \varphi(x) f(x) dx$
+            \2 $\bE_F \varphi(X)$
         \1 Can't do the integral \newline
 
         \1 Monte Carlo approximation:
-            \2 Simulate from $F$
-            \2 Average over simulations \newline
 
         \1 $\hat{\bE} = \sum_i \frac{\varphi(X_i)}{M}$, $X_i \overset{\mathrm{iid}}{\sim} F$
     \end{outline}
@@ -68,28 +66,20 @@
 
 \begin{frame}{Importance Sampling}
     \begin{outline}
-        \1 Simulating from $F$ might be hard
-        \1 ``Multiply by 1'':
+        \1 Simulating from $F$ might be hard \newline
+        \1 Introduce ``proposal distribution'', $G$:
     \end{outline}
     \begin{align*}
-        \bE_F \varphi(X) &= \int \varphi(x) f(x) dx\\
-        & = \int \varphi(x) \frac{f(x)}{g(x)} g(x) dx\\
-        &= \bE_G \left[ \varphi(X) \cdot \frac{f(X)}{g(X)} \right]\\
-        &= \bE_G \left[ \varphi(X) \cdot w(X) \right]
+        \bE_F \varphi(X) &=  \bE_G \left[ \varphi(X) \cdot \frac{f(X)}{g(X)} \right] \\
+        &=  \bE_G \left[ \varphi(X) \cdot w(X) \right]
     \end{align*}
-    
 \end{frame}
 
 \begin{frame}{Importance Sampling}
-    \begin{equation*}
-        \bE_F \varphi(X) = \bE_G \left[ \varphi(X) \cdot w(X) \right]
-    \end{equation*}
-    \vspace{-0.5cm}
     \begin{outline}
         \1 $G$ can be nearly anything*
-            \2 *Some choices will be better than others
-        \1 Simulate from $G$ to estimate $\bE_G \left[ \varphi(X) \cdot w(X) \right]$
-            \2 By extension, estimate $\bE_F \varphi(X)$ \newline
+            \2 *Some choices will be better than others \newline
+        \1 Simulate from $G$ to estimate $\bE_F \varphi(X)$:
     \end{outline}  
     \begin{equation*}
         \hat{\bE} = \sum_i \frac{\varphi(X_i) \cdot w(X_i)}{M} \mathrm{,} \hspace{3pt} X_i \overset{\mathrm{iid}}{\sim} G
@@ -120,8 +110,7 @@
     \end{outline}
     \begin{gather*}
         ESS = \frac{\left[\sum_i w(X_i)\right]^2}{\sum_i w(X_i)^2} = \frac{M}{\hat{\rho}}\\ \\
-        1 \leq ESS \leq M\\
-        M \geq \hat{\rho} \geq 1
+        1 \leq ESS \leq M
     \end{gather*}
 \end{frame}
 
@@ -131,8 +120,8 @@
 
 \begin{frame}{Importance Sampling}
     \begin{outline}
-        \1 Problem: Low ESS $\rightarrow$ can't estimate means \newline
-        \1 But ESS \textit{is} a mean
+        \1 Problem: Low ESS $\rightarrow$ hard to estimate means \newline
+        \1 But ESS is based on means
             \2 \citep{Cha18}
     \end{outline}
 \end{frame}
@@ -150,9 +139,10 @@
 
 \begin{frame}{Improving IS}
     \begin{outline}
-        \1 Large variance in weights is bad
-            \2 Reduce variance
-            \2 Shrink large weights \newline
+        \1 Large variance in weights is bad \newline
+
+        \1 Choose a good proposal
+        \1 Modify large weights \newline
         
         \1 Truncated IS
         \1 Pareto Smoothed IS
@@ -244,11 +234,11 @@
         \1 Recall: 
     \end{outline}
     \begin{equation*}
-        ESS = \frac{M}{\sum_i w(X_i)^2} =: \frac{M}{\hat{\rho}}
+        ESS = \frac{M}{\hat{\rho}}
     \end{equation*}
     \begin{outline}
         \1 Want to maximize a population-level analog
-            \2 Equivalently, minimize $\rho = \bE_G \left[ w(X)^2 \right]$ \newline
+            \2 Equivalently, minimize $\rho = \lim_{M \rightarrow \infty} \hat{\rho}$ \newline
         \1 We only get ESS, $\hat{\rho}$
         \1 Noisy version of the function we want to optimize
     \end{outline}
@@ -256,7 +246,7 @@
 
 \begin{frame}{Stochastic Approximation}
     \begin{outline}
-        \1 If we had $\rho$, do gradient descent
+        \1 If we have $\rho$, do gradient descent
         \1 $\theta_{k+1} = \theta_k - \alpha \nabla \rho(\theta_k)$ \newline
 
         \1 Instead, do gradient descent on $\hat{\rho}$
