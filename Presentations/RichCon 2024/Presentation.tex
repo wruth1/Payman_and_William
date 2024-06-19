@@ -11,6 +11,7 @@
 \usepackage{outlines}   % For multilevel lists using the outline environment
 \usepackage{natbib}
 
+\renewcommand*{\bibfont}{\scriptsize}
 
 \newcommand{\CMA}{Causal Mediation Analysis}
 
@@ -34,7 +35,18 @@
 \end{frame}
 
 \begin{frame}
-    RichCon!
+    \centering
+    \includegraphics[height=0.9\textheight]{Figures/RichCon2.png}
+\end{frame}
+
+\begin{frame}{Introduction}
+    \begin{outline}
+        \1 Importance Sampling \newline
+        \1 Measuring performance \newline
+        \1 Improving performance
+            \2 Modifications
+            \2 Optimization
+    \end{outline}
 \end{frame}
 
 
@@ -74,7 +86,7 @@
     \end{equation*}
     \vspace{-0.5cm}
     \begin{outline}
-        \1 $G$ can be anything*
+        \1 $G$ can be nearly anything*
             \2 *Some choices will be better than others
         \1 Simulate from $G$ to estimate $\bE_G \left[ \varphi(X) \cdot w(X) \right]$
             \2 By extension, estimate $\bE_F \varphi(X)$ \newline
@@ -104,11 +116,13 @@
     \begin{outline}
         \1 Can we quantify this difference?
             \2 Yes!
-        \1 ``Effective Sample Size''
+        \1 ``Effective Sample Size'':
     \end{outline}
-    \begin{equation*}
-        ESS = \frac{M}{\sum_i w(X_i)^2} \leq M
-    \end{equation*}
+    \begin{gather*}
+        ESS = \frac{\left[\sum_i w(X_i)\right]^2}{\sum_i w(X_i)^2} = \frac{M}{\hat{\rho}}\\ \\
+        1 \leq ESS \leq M\\
+        M \geq \hat{\rho} \geq 1
+    \end{gather*}
 \end{frame}
 
 \begin{frame}{Example: Mystery Target}
@@ -136,8 +150,8 @@
 
 \begin{frame}{Improving IS}
     \begin{outline}
-        \1 Large discrepancies in weights is bad
-            \2 Reduce discrepancy
+        \1 Large variance in weights is bad
+            \2 Reduce variance
             \2 Shrink large weights \newline
         
         \1 Truncated IS
@@ -147,7 +161,8 @@
 
 \begin{frame}{Improving IS}
     \begin{outline}
-        \1 Truncated IS \citep{Ion08}: \newline
+        \1 Truncated Importance Sampling:
+            \2 \citep{Ion08} \newline
     \end{outline}
 
     \setbeamertemplate{enumerate items}[default]
@@ -173,7 +188,8 @@
 
 \begin{frame}{Improving IS}
     \begin{outline}
-    \1 Pareto Smoothing \citep{Veh22}:\newline
+    \1 Pareto Smoothed Importance Sampling:
+        \2 \citep{Veh22} \newline
     \end{outline}
 
     \setbeamertemplate{enumerate items}[default]
@@ -185,6 +201,7 @@
     \item Approximate tail with Generalized Pareto Dist.
     \begin{itemize}
         \item Fit GPD to weights above threshold
+        \item \citep{Zha09}
     \end{itemize}
     \item Replace large weights with quantiles of fitted GPD
     \end{enumerate}
@@ -211,10 +228,15 @@
         \1 Modifications are nice, but require creativity
         \1 Alternative: directly optimize ESS \newline
 
-        \1 Adaptive Importance Sampling \citep{Aky21}
-            \2 Choose a family of proposals
-            \2 Iteratively update the proposal to maximize ESS
+        \1 Adaptive Importance Sampling: 
+            \2 \citep{Aky21} \newline
     \end{outline}
+
+    \begin{enumerate}
+        \setbeamertemplate{enumerate items}[default]
+        \item Choose a family of proposals
+        \item Iteratively update the proposal to maximize ESS
+    \end{enumerate}
 \end{frame}
 
 \begin{frame}{Adaptive IS}
@@ -232,39 +254,88 @@
     \end{outline}
 \end{frame}
 
-\begin{frame}{Adaptive IS}
+\begin{frame}{Stochastic Approximation}
     \begin{outline}
-        \1 Stochastic Approximation: \newline
-
         \1 If we had $\rho$, do gradient descent
         \1 $\theta_{k+1} = \theta_k - \alpha \nabla \rho(\theta_k)$ \newline
 
         \1 Instead, do gradient descent on $\hat{\rho}$
-        \1 $\hat{\theta}_{k+1} = \hat{\theta}_k - \alpha_k \nabla \hat{\rho}(\hat{\theta}_k)$
+        \1 $\hat{\theta}_{k+1} = \hat{\theta}_k - \alpha_k \nabla \hat{\rho}(\hat{\theta}_k)$ \newline
+
+        \1 Stochastic Approximation
+            \2 \citep{Rob51}
+    \end{outline}
+\end{frame}
+
+\begin{frame}{Stochastic Approximation}
+    \begin{outline}
+        \1 Have to choose $\{ \alpha_k \}$ carefully \newline
+
+        \1 May not have $\nabla \hat{\rho}$
+            \2 Finite difference approximation
+            \2 \citep{Kie52} \newline
+
+        \1 Improve performance by cumulative averaging
     \end{outline}
 \end{frame}
 
 
 
-\begin{frame}{Adaptive IS}
-    \begin{itemize}
-        \item Overview (cite Akyldiz and Miguez)
-        \item Stochastic approximation
-    \end{itemize}
+\begin{frame}{Example: Mystery Target}
+    \begin{outline}
+        \1 Trajectory of $\hat{\theta}$
+        \1 Trajectory of ESS \newline
+
+        \1 Values of above at convergence
+    \end{outline}
 \end{frame}
 
-\begin{frame}{Pareto Tail Diagnositic}
-    \begin{itemize}
-        \item Alt. to ESS
-        \item Mention Chattergee and Diaconis
-    \end{itemize}    
+\begin{frame}{Our Method}
+    \begin{outline}
+        \1 Remember \citeauthor{Cha18}
+            \2 Be careful using IS means to diagnose IS \newline
+        
+        \1 \citeauthor{Veh22} give an alternative
+            \2 Shape parameter of fitted tail distribution, $\hat{k}$
+            \2 ``Tail Index''
+        \1 Theoretical and empirical support for $\hat{k}$ as diagnostic
+            \2 Smaller is better
+    \end{outline}
 \end{frame}
 
-\begin{frame}{Adaptive Pareto Smoothed IS}
-    \begin{itemize}
-        \item Discuss what we're doing
-        \item Gaussian example?
-    \end{itemize}
+\begin{frame}{Our Method}
+    \begin{outline}
+        \1 Their diagnostic is our objective function \newline
+
+        \1 Apply stochastic approximation to minimize $\hat{k}$
+            \2 More precisely, $k(\theta)$
+    \end{outline}
+\end{frame}
+
+\begin{frame}{Example: Mystery Target}
+    \begin{outline}
+        \1 Trajectory of $\hat{\theta}$
+        \1 Trajectory of $\hat{k}$ and $k$ \newline
+
+        \1 Values of above at convergence \newline
+
+        \1 Big reveal!
+    \end{outline}
+\end{frame}
+
+\begin{frame}{Recap}
+    \begin{outline}
+        \1 Importance sampling and extensions
+            \2 Truncation
+            \2 Pareto Smoothing \newline
+        
+        \1 Diagnostics for importance sampling
+            \2 Effective sample size
+            \2 Pareto tail index \newline
+
+        \1 Adaptive importance sampling
+            \2 Stochastic approximation
+    \end{outline}
 \end{frame}
 
 
