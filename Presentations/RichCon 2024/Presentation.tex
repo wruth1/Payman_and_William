@@ -10,6 +10,7 @@
 \usepackage{bm}
 \usepackage{outlines}   % For multilevel lists using the outline environment
 \usepackage{natbib}
+\usepackage{subcaption}
 
 \renewcommand*{\bibfont}{\scriptsize}
 
@@ -41,7 +42,7 @@
 
 \begin{frame}{Introduction}
     \begin{outline}
-        \1 Importance Sampling \newline
+        \1 Importance sampling \newline
         \1 Measuring performance \newline
         \1 Improving performance
             \2 Modifications
@@ -54,7 +55,7 @@
     \begin{outline}
         \1 Need to compute an expected value
             \2 $\bE_F \varphi(X)$
-        \1 Can't do the integral \newline
+        \1 Can't do the sum/integral \newline
 
         \1 Monte Carlo approximation
             \2 Simulating from $F$ might be hard
@@ -84,10 +85,10 @@
 
         \1 Try some proposals:
             \2 $G_1 \sim N(0.1,1)$
-            \2 $G_2 \sim N(2,1)$ \newline
+            \2 $G_2 \sim N(1.5,1)$ \newline
         \1 Use $M=1000$ samples from proposal
-            \2 $\hat{\bE}_1 = 0.974$
-            \2 $\hat{\bE}_2 = 0.603$
+            \2 $\hat{\bE}_1 = 1.07$, $SE = 0.05$
+            \2 $\hat{\bE}_2 = 1.04$, $SE = 0.19$
     \end{outline}    
 \end{frame}
 
@@ -111,7 +112,7 @@
     \centering
     \includegraphics[height=0.7\textheight, width=0.9\textwidth, keepaspectratio]{Figures/Wt Hist.pdf} \newline
     \begin{outline}
-        $ESS_1 \approx 990$ \hspace{2.5cm} $ESS_2 \approx 73$
+        $ESS_1 \approx 989$ \hspace{2.5cm} $ESS_2 \approx 131$
     \end{outline}
 \end{frame}
 
@@ -171,8 +172,8 @@
     \centering
     \includegraphics[height=0.7\textheight, width=0.9\textwidth, keepaspectratio]{Figures/Wt Hist - Trunc.pdf} \newline
     \begin{outline}
-        $ESS_1 \approx 990$ \hspace{2.5cm} $ESS_2 \approx 73$\\
-        $ESS_1^{(\mathrm{trunc})} \approx 990$ \hspace{2.5cm} $ESS_2^{(\mathrm{trunc})} \approx 93$
+        $ESS_1 \approx 989$ \hspace{2.5cm} $ESS_2 \approx 131$\\
+        $ESS_1^{(\mathrm{trunc})} \approx 989$ \hspace{2.5cm} $ESS_2^{(\mathrm{trunc})} \approx 144$
     \end{outline}
 \end{frame}
 
@@ -214,16 +215,20 @@
 \end{frame}
 
 \begin{frame}{Example: Mystery Target}
-    Histograms of weights with threshold and fitted GPD density above threshold
+    \centering
+    \includegraphics[height=0.9\textheight, width=0.9\textwidth, keepaspectratio]{Figures/Wt Hist - Pareto Smooth Zoom.pdf}
 \end{frame}
 
 \begin{frame}{Example: Mystery Target}
-    Histograms of smoothed weights
+    \centering
+    \includegraphics[height=0.5\textheight, width=0.9\textwidth, keepaspectratio]{Figures/Wt Hist - Pareto Smooth.pdf}\newline
+    \begin{outline}
+        $ESS_1 \approx 989$ \hspace{2.5cm} $ESS_2 \approx 131$\\
+        $ESS_1^{(\mathrm{trunc})} \approx 989$ \hspace{2.5cm} $ESS_2^{(\mathrm{trunc})} \approx 144$\\
+        $ESS_1^{(\mathrm{PS})} \approx 989$ \hspace{2.5cm} $ESS_2^{(\mathrm{PS})} \approx 135$
+    \end{outline}
 \end{frame}
 
-\begin{frame}{Example: Mystery Target}
-    Histograms of smoothed weights with ESS for raw, truncated and smoothed weights
-\end{frame}
 
 \begin{frame}{Adaptive IS}
     \begin{outline}
@@ -236,21 +241,15 @@
 
     \begin{enumerate}
         \setbeamertemplate{enumerate items}[default]
-        \item Choose a family of proposals
+        \item Choose a (parametric) family of proposals
         \item Iteratively update the proposal to maximize ESS
     \end{enumerate}
 \end{frame}
 
-\begin{frame}{Adaptive IS}
+\begin{frame}{Stochastic Approximation}
     \begin{outline}
         \1 Actually, we want to maximize a population-level analog: $\overline{ESS}$ \newline
 
-        \1 We only get $ESS$, not $\overline{ESS}$
-    \end{outline}
-\end{frame}
-
-\begin{frame}{Stochastic Approximation}
-    \begin{outline}
         \1 If we had $\overline{ESS}$, we would do gradient descent
         \1 $\theta_{k+1} = \theta_k - \alpha \nabla \overline{ESS}(\theta_k)$ \newline
 
@@ -266,22 +265,25 @@
     \begin{outline}
         \1 Have to choose $\{ \alpha_k \}$ carefully \newline
 
-        \1 May not have $\nabla ESS$
-            \2 Finite difference approximation
-            \2 \citep{Kie52} \newline
+        \1 Finite difference approximation to  $\nabla ESS$
+            \2 \citep{Kie52}
     \end{outline}
 \end{frame}
-
 
 
 \begin{frame}{Example: Mystery Target}
-    \begin{outline}
-        \1 Trajectory of $\hat{\theta}$
-        \1 Trajectory of $ESS$ and $\overline{ESS}$ \newline
+    \centering
+    \includegraphics[height=0.9\textheight, width=0.9\textwidth, keepaspectratio]{Figures/ESS traj.pdf}
+\end{frame}
 
-        \1 Values of above at convergence
+\begin{frame}{Example: Mystery Target}
+    \centering
+    \includegraphics[height=0.7\textheight, width=0.9\textwidth, keepaspectratio]{Figures/ESS traj.pdf} \newline
+    \begin{outline}
+        $\hat{\theta}_\mathrm{end}^{(ESS)} \approx -8 \times 10^{-4}$ \hspace{1cm} $ESS_\mathrm{end} \approx 1000 - (7 \times 10^{-4})$
     \end{outline}
 \end{frame}
+
 
 \begin{frame}{Our Method}
     \begin{outline}
@@ -304,15 +306,27 @@
 \end{frame}
 
 \begin{frame}{Example: Mystery Target}
+    \centering
+    \includegraphics[height=0.9\textheight, width=0.9\textwidth, keepaspectratio]{Figures/PS traj.pdf}
+\end{frame}
+
+\begin{frame}{Example: Mystery Target}
+    \centering
+    \includegraphics[height=0.7\textheight, width=0.9\textwidth, keepaspectratio]{Figures/PS traj.pdf} \newline
     \begin{outline}
-        \1 Trajectory of $\hat{\theta}$
-        \1 Trajectory of $\hat{k}$ and $k$ \newline
-
-        \1 Values of above at convergence \newline
-
-        \1 Big reveal!
+        $\hat{\theta}_\mathrm{end}^{(PS)} \approx 4 \times 10^{-3}$ \hspace{5cm}
     \end{outline}
 \end{frame}
+
+\begin{frame}{Example: Mystery Target}
+    \centering
+    \includegraphics[height=0.7\textheight, width=0.45\textwidth]{Figures/ESS mean traj.pdf}%
+    \includegraphics[height=0.7\textheight, width=0.45\textwidth]{Figures/PS mean traj.pdf} \newline
+    \begin{outline}
+        $\bar{\theta}_\mathrm{end}^{(ESS)} \approx -1 \times 10^{-4}$ \hspace{1.5cm} $\bar{\theta}_\mathrm{end}^{(PS)} \approx 2 \times 10^{-5}$
+    \end{outline}
+\end{frame}
+
 
 \begin{frame}{Recap}
     \begin{outline}

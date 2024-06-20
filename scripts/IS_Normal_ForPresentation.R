@@ -158,7 +158,7 @@ w1_smooth = pareto_smooth(w1, M_keep)
 w2_smooth = pareto_smooth(w2, M_keep)
 
 
-pdf(paste0(plot_dir, "Wt Hist - Pareto Smooth.pdf"), width=10, height=7)
+pdf(paste0(plot_dir, "Wt Hist - Pareto Smooth.pdf"), width=13, height=7)
 par(mfrow=c(1,2))
 
 hist(w1_smooth, 'fd', main = TeX(r'($G_1 = N(0.1,1)$)'), xlab = 'Weights', freq=F)

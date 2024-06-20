@@ -1,18 +1,3 @@
-#
-# Implementation of stochastic gradiant optimised adaptive importance sampling (normalised case)
-# Description:
-# This script implements the normalised case of  stochastic gradiant optimised adaptive importance
-# sampling method based on the paper:
-# "Convergence rates for optimised adaptive importance samplers" by Omer Deniz Akyildiz
-# and Joaquin Miguez in Statistics and Computing Journal.
-#
-# Details: Algorithm 2, Stochastic gradient OAIS on page 7 of 17 of the paper.
-#
-# I used the following example in this script:
-# target:    f(x) = ( 1/sqrt(2*pi) ) exp( -0.5 x^2 )        X ~ N(0,1)
-# proposal:  g(x) = ( 1/sqrt(2*pi) ) exp( -0.5 (x-\mu)^2 )  X ~ N(\mu,1)
-#
-
 
 
 library(latex2exp)
@@ -99,20 +84,62 @@ get_ESS = function(weights){
   return(ess)
 }
 
-set.seed(1)
+
+
+k_hat_of_theta <- function(theta, n) {
+  Xs = sample_from_proposal(n, theta)
+  wts = get_wts(Xs, theta)
+  pareto_smooth(wts, M_keep = "default", return_k = TRUE)$k_hat
+}
+
+
+grad_k_hat_of_theta = function(theta, Xs, delta = sqrt(.Machine$double.eps)) {
+  Xs_plus = Xs + delta
+  
+  wts = get_wts(Xs, theta)
+  wts_plus = get_wts(Xs_plus, theta + delta)
+  
+  k_hat = pareto_smooth(wts, M_keep = "default", return_k = TRUE)$k_hat
+  k_hat_plus = pareto_smooth(wts_plus, M_keep = "default", return_k = TRUE)$k_hat
+  (k_hat_plus - k_hat) / delta
+}
+
+# # square root of machine epsilon
+# delta = sqrt(.Machine$double.eps)
+# 
+# k_hat_of_theta(1, 1000)
+# grad_k_hat_of_theta(1, 1000)
+# 
+# ran_grad_k_hat = function(theta, n, delta = 1e-2) {
+#   k_hat = k_hat_of_theta(theta, n)
+#   k_hat_plus = k_hat_of_theta(theta + delta, n)
+#   
+#   (k_hat_plus - k_hat) / delta
+# }
+
+
+
+update_proposal = function(x, mu, stepsize){
+  grad = grad_k_hat_of_theta(mu, x)
+  new_mu = mu - grad*stepsize
+  
+  return(new_mu)
+}
+
+
+set.seed(111)
 
 #
 # Initialize values
 #
 
 # Number of Monte Carlo samples
-MC = 1000
 # MC = 100
-# MC = 5000
+MC = 1000
 
 # Initial value for mu in proposal
 mu = numeric(MC)
-ess = numeric(MC)
+all_k_hats = numeric(MC)
 
 mu[1] = 1.5
 
@@ -124,58 +151,69 @@ N = 1000
 
 xx = sample_from_proposal(N, mu[1])
 wts = get_wts(xx, mu[1])
-ess[1] = get_ESS(wts)
+all_k_hats[1] = pareto_smooth(wts, M_keep = "default", return_k = TRUE)$k_hat
 
 for(i in 2:MC){
+  print(paste0(i, " out of ", MC))
   # You can change stepsize if you run into problem
   # but it should be ok with this one (William: I think so).
-  mu[i]  = update_proposal(xx, mu[i-1], 0.2*(1/i)^(0.55) )
+  # mu[i]  = update_proposal(xx, mu[i-1], 0.2*(1/i)^(0.55) )
+  mu[i]  = update_proposal(xx, mu[i-1], 1*(1/i)^(0.90) )
   xx     = sample_from_proposal(N, mu[i])
-  ess[i] = get_ESS(get_wts(xx, mu[i]))
+  wts = get_wts(xx, mu[i])
+  all_k_hats[i] = pareto_smooth(wts, M_keep = "default", return_k = TRUE)$k_hat
 }
+# 
+# 
+# pdf(paste0(plot_dir, "PS traj.pdf"), width=10, height=7)
+# 
+# par(mfrow=c(1,2))
+# # par(mfrow=c(1,3))
+# 
+# plot(1:MC, mu, xlab = 'Iteration', ylab = TeX(r'($\hat{\theta}$)'), main = 'Parameter Estimate')
+# # abline(h = 0)
+# plot(1:MC, all_k_hats, xlab = 'Iteration', ylab = TeX(r'($\hat{k}$)'), main = 'Tail Index')
+# 
+# dev.off()
 
+# plot(20:MC, cumsum(mu[20:MC]) / 20:MC)#, ylim = c(0, 1.5))
+# 
+# 
+# mean(mu[20:MC])
 
-true_ESS = N / exp(mu^2)
+mu[MC]
+mean(mu[start:MC])
 
 
 
 MC_small = 100
 
-pdf(paste0(plot_dir, "ESS traj.pdf"), width=10, height=7)
 
+pdf(paste0(plot_dir, "PS traj.pdf"), width=10, height=7)
 par(mfrow=c(1,2))
-plot(x = 1:MC_small, y = mu[1:MC_small], xlab = 'Iteration', ylab = TeX(r'($\hat{\theta}$)'), main = 'Parameter Estimate')
-plot(x = 1:MC_small, y = ess[1:MC_small], xlab = 'Iteration', ylab = 'ESS', main = 'Effective Sample Size')
-# lines(x = 1:MC, y = true_ESS, col = 'red')
 
-
+plot(1:MC_small, mu[1:MC_small], xlab = 'Iteration', ylab = TeX(r'($\hat{\theta}$)'), main = 'Parameter Estimate')
+# abline(h = 0)
+plot(1:MC_small, all_k_hats[1:MC_small], xlab = 'Iteration', ylab = TeX(r'($\hat{k}$)'), main = 'Tail Index', ylim = c(-0.5, 0.5))
 
 dev.off()
 
 
-par(mfrow=c(1,3))
-plot(x = 1:MC, y = mu, xlab = 'Iteration', ylab = TeX(r'($\hat{\theta}$)'), main = 'Parameter Estimate')
-plot(x = 1:MC, y = ess, xlab = 'Iteration', ylab = 'ESS', main = 'Effective Sample Size')
-# lines(x = 1:MC, y = true_ESS, col = 'red')
-plot(x = 20:MC, y = cumsum(mu[20:MC]) / 20:MC)
-# 
-# 
-mean(mu[50:MC])
-
-
-
-pdf(paste0(plot_dir, "ESS mean traj.pdf"), width=5, height=7)
+pdf(paste0(plot_dir, "PS mean traj.pdf"), width=5, height=7)
 
 # par(mfrow=c(1,2))
 
 start = MC/2
 
+par(mfrow = c(1,1))
 # plot(start:MC, mu[start:MC], xlab = 'Iteration', ylab = TeX(r'($\hat{\theta}$)'), main = 'Parameter Estimate')
-plot(start:MC, cumsum(mu[start:MC])/1:(MC - start + 1), xlab = 'Iteration', ylab = "Cumulative Average", main = 'ESS - Based', ylim = c(-6e-4, 6e-4))
+plot(start:MC, cumsum(mu[start:MC])/1:(MC - start + 1), xlab = 'Iteration', ylab = "Cumulative Average", main = 'PS - Based', ylim = c(-6e-4, 6e-4))
+# abline(h = 0)
 
 dev.off()
 
-ess[MC_small]
+
 mu[MC_small]
 mu[MC]
 mean(mu[start:MC])
+
