@@ -56,9 +56,8 @@
             \2 $\bE_F \varphi(X)$
         \1 Can't do the integral \newline
 
-        \1 Monte Carlo approximation:
-
-        \1 $\hat{\bE} = \sum_i \frac{\varphi(X_i)}{M}$, $X_i \overset{\mathrm{iid}}{\sim} F$
+        \1 Monte Carlo approximation
+            \2 Simulating from $F$ might be hard
     \end{outline}
     \begin{equation*}
     \end{equation*}
@@ -66,56 +65,54 @@
 
 \begin{frame}{Importance Sampling}
     \begin{outline}
-        \1 Simulating from $F$ might be hard \newline
         \1 Introduce ``proposal distribution'', $G$:
     \end{outline}
     \begin{align*}
         \bE_F \varphi(X) &=  \bE_G \left[ \varphi(X) \cdot \frac{f(X)}{g(X)} \right] \\
         &=  \bE_G \left[ \varphi(X) \cdot w(X) \right]
     \end{align*}
-\end{frame}
-
-\begin{frame}{Importance Sampling}
     \begin{outline}
         \1 $G$ can be nearly anything*
-            \2 *Some choices will be better than others \newline
-        \1 Simulate from $G$ to estimate $\bE_F \varphi(X)$:
-    \end{outline}  
-    \begin{equation*}
-        \hat{\bE} = \sum_i \frac{\varphi(X_i) \cdot w(X_i)}{M} \mathrm{,} \hspace{3pt} X_i \overset{\mathrm{iid}}{\sim} G
-    \end{equation*}  
+            \2 *Some choices will be better than others
+    \end{outline}
 \end{frame}
 
 \begin{frame}{Example: Mystery Target}
     \begin{outline}
-        \1 $f$ unknown, but can be evaluated \newline
+        \1 $f$ unknown, but can be evaluated 
+        \1 $\varphi(X) = X^2$ \newline
+
         \1 Try some proposals:
-            \2 $G_1 \sim N(0,1)$
+            \2 $G_1 \sim N(0.1,1)$
             \2 $G_2 \sim N(2,1)$ \newline
         \1 Use $M=1000$ samples from proposal
-            \2 $\hat{\bE}_1 = $
-            \2 $\hat{\bE}_2 = $
+            \2 $\hat{\bE}_1 = 0.974$
+            \2 $\hat{\bE}_2 = 0.603$
     \end{outline}    
 \end{frame}
 
 \begin{frame}{Example: Mystery Target}
-    Histograms of weights
+    \centering
+    \includegraphics[height=0.9\textheight, width=0.9\textwidth, keepaspectratio]{Figures/Wt Hist.pdf}
 \end{frame}
 
 \begin{frame}{Importance Sampling}
     \begin{outline}
-        \1 Can we quantify this difference?
-            \2 Yes!
+        \1 We can make this difference precise
         \1 ``Effective Sample Size'':
     \end{outline}
     \begin{gather*}
-        ESS = \frac{\left[\sum_i w(X_i)\right]^2}{\sum_i w(X_i)^2} = \frac{M}{\hat{\rho}}\\ \\
+        ESS = \frac{\left[\sum_i w(X_i)\right]^2}{\sum_i w(X_i)^2}\\ \\
         1 \leq ESS \leq M
     \end{gather*}
 \end{frame}
 
 \begin{frame}{Example: Mystery Target}
-    Histograms of weights with ESS
+    \centering
+    \includegraphics[height=0.7\textheight, width=0.9\textwidth, keepaspectratio]{Figures/Wt Hist.pdf} \newline
+    \begin{outline}
+        $ESS_1 \approx 990$ \hspace{2.5cm} $ESS_2 \approx 73$
+    \end{outline}
 \end{frame}
 
 \begin{frame}{Importance Sampling}
@@ -139,8 +136,6 @@
 
 \begin{frame}{Improving IS}
     \begin{outline}
-        \1 Large variance in weights is bad \newline
-
         \1 Choose a good proposal
         \1 Modify large weights \newline
         
@@ -163,17 +158,23 @@
 \end{frame}
 
 \begin{frame}{Example: Mystery Target}
-    Histograms of weights with threshold
+    \centering
+    \includegraphics[height=0.9\textheight, width=0.9\textwidth, keepaspectratio]{Figures/Wt Hist - Thresh.pdf}
 \end{frame}
 
 \begin{frame}{Example: Mystery Target}
-    Histograms of truncated weights
+    \centering
+    \includegraphics[height=0.9\textheight, width=0.9\textwidth, keepaspectratio]{Figures/Wt Hist - Trunc.pdf}
 \end{frame}
 
 \begin{frame}{Example: Mystery Target}
-    Histograms of truncated weights with before and after ESS
+    \centering
+    \includegraphics[height=0.7\textheight, width=0.9\textwidth, keepaspectratio]{Figures/Wt Hist - Trunc.pdf} \newline
+    \begin{outline}
+        $ESS_1 \approx 990$ \hspace{2.5cm} $ESS_2 \approx 73$\\
+        $ESS_1^{(\mathrm{trunc})} \approx 990$ \hspace{2.5cm} $ESS_2^{(\mathrm{trunc})} \approx 93$
+    \end{outline}
 \end{frame}
-
 
 
 \begin{frame}{Improving IS}
@@ -231,26 +232,19 @@
 
 \begin{frame}{Adaptive IS}
     \begin{outline}
-        \1 Recall: 
-    \end{outline}
-    \begin{equation*}
-        ESS = \frac{M}{\hat{\rho}}
-    \end{equation*}
-    \begin{outline}
-        \1 Want to maximize a population-level analog
-            \2 Equivalently, minimize $\rho = \lim_{M \rightarrow \infty} \hat{\rho}$ \newline
-        \1 We only get ESS, $\hat{\rho}$
-        \1 Noisy version of the function we want to optimize
+        \1 Actually, we want to maximize a population-level analog: $\overline{ESS}$ \newline
+
+        \1 We only get $ESS$, not $\overline{ESS}$
     \end{outline}
 \end{frame}
 
 \begin{frame}{Stochastic Approximation}
     \begin{outline}
-        \1 If we have $\rho$, do gradient descent
-        \1 $\theta_{k+1} = \theta_k - \alpha \nabla \rho(\theta_k)$ \newline
+        \1 If we had $\overline{ESS}$, we would do gradient descent
+        \1 $\theta_{k+1} = \theta_k - \alpha \nabla \overline{ESS}(\theta_k)$ \newline
 
-        \1 Instead, do gradient descent on $\hat{\rho}$
-        \1 $\hat{\theta}_{k+1} = \hat{\theta}_k - \alpha_k \nabla \hat{\rho}(\hat{\theta}_k)$ \newline
+        \1 Instead, do gradient descent on $ESS$
+        \1 $\hat{\theta}_{k+1} = \hat{\theta}_k - \alpha_k \nabla ESS(\hat{\theta}_k)$ \newline
 
         \1 Stochastic Approximation
             \2 \citep{Rob51}
@@ -261,11 +255,9 @@
     \begin{outline}
         \1 Have to choose $\{ \alpha_k \}$ carefully \newline
 
-        \1 May not have $\nabla \hat{\rho}$
+        \1 May not have $\nabla ESS$
             \2 Finite difference approximation
             \2 \citep{Kie52} \newline
-
-        \1 Improve performance by cumulative averaging
     \end{outline}
 \end{frame}
 
@@ -274,7 +266,7 @@
 \begin{frame}{Example: Mystery Target}
     \begin{outline}
         \1 Trajectory of $\hat{\theta}$
-        \1 Trajectory of ESS \newline
+        \1 Trajectory of $ESS$ and $\overline{ESS}$ \newline
 
         \1 Values of above at convergence
     \end{outline}
@@ -282,20 +274,18 @@
 
 \begin{frame}{Our Method}
     \begin{outline}
-        \1 Remember \citeauthor{Cha18}
-            \2 Be careful using IS means to diagnose IS \newline
+        \1 Recall: Be careful using IS means to diagnose IS \newline
         
         \1 \citeauthor{Veh22} give an alternative
             \2 Shape parameter of fitted tail distribution, $\hat{k}$
             \2 ``Tail Index''
-        \1 Theoretical and empirical support for $\hat{k}$ as diagnostic
             \2 Smaller is better
     \end{outline}
 \end{frame}
 
 \begin{frame}{Our Method}
     \begin{outline}
-        \1 Their diagnostic is our objective function \newline
+        \1 Use diagnostic as objective function \newline
 
         \1 Apply stochastic approximation to minimize $\hat{k}$
             \2 More precisely, $k(\theta)$
