@@ -106,10 +106,10 @@ PSIS_regularize <- function(k_hat, M_keep) {
 
 # Fit GPD to all of X and return its quantiles. Outputted quantiles are in descending order
 pareto_smooth_all <- function(X, return_k = FALSE, regularize = TRUE) {
-  fit <- gpd.fit(X)
-  sigma_hat <- fit$scale
-  k_hat <- fit$shape
-  mu_hat <- fit$location
+  fit <- fit_GPD(X)
+  sigma_hat <- fit$sigma_hat
+  k_hat <- fit$k_hat
+  mu_hat <- fit$mu_hat
   
   # Check for unacceptably large k_hat
   if (k_hat > 0.7) {
@@ -155,6 +155,10 @@ pareto_smooth <- function(X, M_keep = "default", return_k = FALSE, regularize = 
   # Create smoothed copy of X
   X_smooth <- X
   X_smooth[ind_keep] <- X_keep_smooth
+  
+  for(i in seq_along(X_smooth)){
+    if(X_smooth[i] > max(X)) X_smooth[i] <- max(X)
+  }
   
   if (return_k) {
     return(list(X_smooth = X_smooth, k_hat = k_hat))

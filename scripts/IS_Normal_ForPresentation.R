@@ -1,5 +1,8 @@
 library(latex2exp)
 
+set.seed(1)
+
+
 plot_dir = "Presentations/RichCon 2024/Figures/"
 
 M <- 1000
@@ -14,7 +17,6 @@ q = function(x, mu){
   return(dnorm(x, mean = mu, sd = 1))
 }
 
-set.seed(123)
 
 
 pdf(paste0(plot_dir, "Wt Hist.pdf"), width=10, height=7)
@@ -29,10 +31,10 @@ w1 <- p(x1) / q(x1, mu = 0.1)
 hist(w1, 'fd', main = TeX(r'($G_1 = N(0.1,1)$)'), xlab = 'Weights', freq=F)
 
 
-# Proposal 2: N(2, 1)
-x2 <- rnorm(n = M, mean = 2, sd = 1)
-w2 <- p(x2) / q(x2, mu = 2)
-hist(w2, breaks = 100, main = TeX(r'($G_2 = N(2,1)$)'), xlab = 'Weights', freq=F)
+# Proposal 2: N(1.5, 1)
+x2 <- rnorm(n = M, mean = 1.5, sd = 1)
+w2 <- p(x2) / q(x2, mu = 1.5)
+hist(w2, breaks = 100, main = TeX(r'($G_2 = N(1.5,1)$)'), xlab = 'Weights', freq=F)
 
 dev.off()
 
@@ -48,28 +50,29 @@ ESS2 = sum(w2)^2 / sum(w2^2)
 
 # Truncated IS
 
-thresh = sqrt(M)
+thresh1 = sqrt(M) * mean(w1)
+thresh2 = sqrt(M) * mean(w2)
 
 ## Plot histograms with threshold
 pdf(paste0(plot_dir, "Wt Hist - Thresh.pdf"), width=10, height=7)
 par(mfrow=c(1,2))
 
 hist(w1, 'fd', main = TeX(r'($G_1 = N(0.1,1)$)'), xlab = 'Weights', freq=F)
-hist(w2, breaks = 100, main = TeX(r'($G_2 = N(2,1)$)'), xlab = 'Weights', freq=F)
-abline(v = thresh, col = 'red', lwd = 2)
+hist(w2, breaks = 100, main = TeX(r'($G_2 = N(1.5,1)$)'), xlab = 'Weights', freq=F)
+abline(v = thresh2, col = 'red', lwd = 2)
 
 dev.off()
 
 ## Plot histograms with truncated weights
 ## Use same x-axis scale as un-truncated weights
 w2_trunc = w2
-w2_trunc[w2_trunc > thresh] = thresh
+w2_trunc[w2_trunc > thresh2] = thresh2
 
 pdf(paste0(plot_dir, "Wt Hist - Trunc.pdf"), width=10, height=7)
 par(mfrow=c(1,2))
 
 hist(w1, 'fd', main = TeX(r'($G_1 = N(0.1,1)$)'), xlab = 'Weights', freq=F)
-hist(w2_trunc, breaks = 100, main = TeX(r'($G_2 = N(2,1)$)'), xlab = 'Weights', xlim = c(0, 60), freq=F)
+hist(w2_trunc, breaks = 100, main = TeX(r'($G_2 = N(1.5,1)$)'), xlab = 'Weights', xlim = c(0, max(w2)), freq=F)
 
 dev.off()
 
@@ -104,7 +107,7 @@ par(mfrow=c(1,2))
 hist(w1, 'fd', main = TeX(r'($G_1 = N(0.1,1)$)'), xlab = 'Weights', freq=F)
 abline(v = w1_thresh, col = 'red', lwd = 2)
 
-hist(w2, 'fd', main = TeX(r'($G_2 = N(2,1)$)'), xlab = 'Weights', freq=F)
+hist(w2, 'fd', main = TeX(r'($G_2 = N(1.5,1)$)'), xlab = 'Weights', freq=F)
 abline(v = w2_thresh, col = 'red', lwd = 2)
 
 dev.off()
@@ -112,3 +115,69 @@ dev.off()
 
 
 library(evmix)
+
+GPD_pars1 = fit_GPD(w1_keep)
+GPD_pars2 = fit_GPD(w2_keep)
+
+dens1 = function(w) dgpd(w, u = GPD_pars1$mu_hat, sigmau = GPD_pars1$sigma_hat, xi = GPD_pars1$k_hat, phiu = M_keep/M)
+dens2 = function(w) dgpd(w, u = GPD_pars2$mu_hat, sigmau = GPD_pars2$sigma_hat, xi = GPD_pars2$k_hat, phiu = M_keep/M)
+
+
+pdf(paste0(plot_dir, "Wt Hist - Pareto Dens.pdf"), width=10, height=7)
+par(mfrow=c(1,2))
+
+hist(w1, 'fd', main = TeX(r'($G_1 = N(0.1,1)$)'), xlab = 'Weights', freq=F)
+abline(v = w1_thresh, col = 'red', lwd = 2)
+curve(dens1, from = w1_thresh, to = max(w1), col = 3, add = T, lwd = 2)
+
+hist(w2, 'fd', main = TeX(r'($G_2 = N(1.5,1)$)'), xlab = 'Weights', freq=F)
+abline(v = w2_thresh, col = 'red', lwd = 2)
+curve(dens2, from = w2_thresh, to = max(w2), col = 3, add = T, lwd = 2)
+
+dev.off()
+
+
+## Zoom-in on tails
+pdf(paste0(plot_dir, "Wt Hist - Pareto Dens Zoom.pdf"), width=10, height=7)
+par(mfrow=c(1,2))
+
+hist(w1, 'fd', main = TeX(r'($G_1 = N(0.1,1)$)'), xlab = 'Weights', freq=F, xlim = c(1.13, max(w1)), ylim = c(0,2))
+abline(v = w1_thresh, col = 'red', lwd = 2)
+curve(dens1, from = w1_thresh, to = max(w1), col = 3, add = T, lwd = 2)
+
+hist(w2, 'fd', main = TeX(r'($G_2 = N(1.5,1)$)'), xlab = 'Weights', freq=F, xlim = c(4, max(w2)), ylim = c(0, 0.06))
+abline(v = w2_thresh, col = 'red', lwd = 2)
+curve(dens2, from = w2_thresh, to = max(w2), col = 3, add = T, lwd = 2)
+
+dev.off()
+
+
+
+## Pareto smoothed weights
+w1_smooth = pareto_smooth(w1, M_keep)
+w2_smooth = pareto_smooth(w2, M_keep)
+
+
+pdf(paste0(plot_dir, "Wt Hist - Pareto Smooth.pdf"), width=10, height=7)
+par(mfrow=c(1,2))
+
+hist(w1_smooth, 'fd', main = TeX(r'($G_1 = N(0.1,1)$)'), xlab = 'Weights', freq=F)
+hist(w2_smooth, 'fd', main = TeX(r'($G_2 = N(1.5,1)$)'), xlab = 'Weights', freq=F)
+
+dev.off()
+
+
+
+### Zoom-in on tails
+pdf(paste0(plot_dir, "Wt Hist - Pareto Smooth Zoom.pdf"), width=10, height=7)
+par(mfrow=c(1,2))
+
+hist(w1_smooth, 'fd', main = TeX(r'($G_1 = N(0.1,1)$)'), xlab = 'Weights', freq=F, xlim = c(1.13, max(w1_smooth)), ylim = c(0,2))
+
+hist(w2_smooth, 'fd', main = TeX(r'($G_2 = N(1.5,1)$)'), xlab = 'Weights', freq=F, xlim = c(4, max(w2_smooth)), ylim = c(0, 0.06))
+     
+dev.off()
+
+
+ESS1_smooth = sum(w1_smooth)^2 / sum(w1_smooth^2)
+ESS2_smooth = sum(w2_smooth)^2 / sum(w2_smooth^2)
