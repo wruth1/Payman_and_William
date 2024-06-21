@@ -103,8 +103,7 @@
         \1 ``Effective Sample Size'':
     \end{outline}
     \begin{gather*}
-        ESS = \frac{\left[\sum_i w(X_i)\right]^2}{\sum_i w(X_i)^2}\\ \\
-        1 \leq ESS \leq M
+        ESS = \frac{\left[\sum_i w(X_i)\right]^2}{\sum_i w(X_i)^2}
     \end{gather*}
 \end{frame}
 
@@ -137,11 +136,11 @@
 
 \begin{frame}{Improving IS}
     \begin{outline}
-        \1 Choose a good proposal
-        \1 Modify large weights \newline
+        \1 Choose a good proposal \newline
         
-        \1 Truncated IS
-        \1 Pareto Smoothed IS
+        \1 Modify large weights        
+            \2 Truncated IS
+            \2 Pareto Smoothed IS
     \end{outline}
 \end{frame}
 
@@ -163,10 +162,10 @@
     \includegraphics[height=0.9\textheight, width=0.9\textwidth, keepaspectratio]{Figures/Wt Hist - Thresh.pdf}
 \end{frame}
 
-\begin{frame}{Example: Mystery Target}
-    \centering
-    \includegraphics[height=0.9\textheight, width=0.9\textwidth, keepaspectratio]{Figures/Wt Hist - Trunc.pdf}
-\end{frame}
+% \begin{frame}{Example: Mystery Target}
+%     \centering
+%     \includegraphics[height=0.9\textheight, width=0.9\textwidth, keepaspectratio]{Figures/Wt Hist - Trunc.pdf}
+% \end{frame}
 
 \begin{frame}{Example: Mystery Target}
     \centering
@@ -232,8 +231,7 @@
 
 \begin{frame}{Adaptive IS}
     \begin{outline}
-        \1 Modifications are nice, but require creativity
-        \1 Alternative: directly optimize ESS \newline
+        \1 Alternative approach: directly optimize ESS \newline
 
         \1 Adaptive Importance Sampling: 
             \2 \citep{Aky21} \newline
@@ -250,31 +248,24 @@
     \begin{outline}
         \1 Actually, we want to maximize a population-level analog: $\overline{ESS}$ \newline
 
-        \1 If we had $\overline{ESS}$, we would do gradient descent
-        \1 $\theta_{k+1} = \theta_k - \alpha \nabla \overline{ESS}(\theta_k)$ \newline
+        \1 If we had $\overline{ESS}$, we would do gradient ascent
+            \2 $\theta_{k+1} = \theta_k + \alpha \nabla \overline{ESS}(\theta_k)$ \newline
 
-        \1 Instead, do gradient descent on $ESS$
-        \1 $\hat{\theta}_{k+1} = \hat{\theta}_k - \alpha_k \nabla ESS(\hat{\theta}_k)$ \newline
-
-        \1 Stochastic Approximation
-            \2 \citep{Rob51}
+        \1 Instead, do gradient ascent on $ESS$
+            \2 $\hat{\theta}_{k+1} = \hat{\theta}_k + \alpha_k \nabla ESS(\hat{\theta}_k)$
     \end{outline}
 \end{frame}
 
 \begin{frame}{Stochastic Approximation}
     \begin{outline}
-        \1 Have to choose $\{ \alpha_k \}$ carefully \newline
+        \1 Stochastic approximation
+            \2 \citep{Rob51} \newline
 
         \1 Finite difference approximation to  $\nabla ESS$
             \2 \citep{Kie52}
     \end{outline}
 \end{frame}
 
-
-\begin{frame}{Example: Mystery Target}
-    \centering
-    \includegraphics[height=0.9\textheight, width=0.9\textwidth, keepaspectratio]{Figures/ESS traj.pdf}
-\end{frame}
 
 \begin{frame}{Example: Mystery Target}
     \centering
@@ -291,8 +282,6 @@
         
         \1 \citeauthor{Veh22} give an alternative
             \2 Shape parameter of fitted tail distribution, $\hat{k}$
-            \2 ``Tail Index''
-            \2 Smaller is better
     \end{outline}
 \end{frame}
 
@@ -305,10 +294,6 @@
     \end{outline}
 \end{frame}
 
-\begin{frame}{Example: Mystery Target}
-    \centering
-    \includegraphics[height=0.9\textheight, width=0.9\textwidth, keepaspectratio]{Figures/PS traj.pdf}
-\end{frame}
 
 \begin{frame}{Example: Mystery Target}
     \centering
