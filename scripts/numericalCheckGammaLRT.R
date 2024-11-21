@@ -1,4 +1,11 @@
-# Load library for Lambert W function and numerical derivations
+# This script computes the derivative of (1-F(w))/f(w) at a given value for w
+# with both numerical and theoretical approach.
+# The theoretical steps are shown in  Gamma LRT Appendix.pdf file in Notes folder.
+# The numerical calculations are done by numDeriv package in R
+# Some of the functions used in this script are shown in section 2.3 of Gamma LRT.pdf file.
+# I put a comment in each function to refer to each pdf file.
+
+# Load libraries for Lambert W function and numerical derivations
 library(pracma)
 library(numDeriv)
 
@@ -11,6 +18,7 @@ gamma <- 3
 A     <- (-1)/(gamma * (alpha-1) * c^{alpha-1})
 
 
+# Defined in formula 38 in section 2.2 of pdf file
 Xlw = function(w){
   
   point <- ( -1/(gamma*(alpha-1)) ) * (w/c)^{1/(alpha-1)} 
@@ -20,6 +28,7 @@ Xlw = function(w){
 }
 
 
+# Defined in formula 38 in section 2.2 of pdf file
 Xuw = function(w){
   
   point <- ( -1/(gamma*(alpha-1)) ) * (w/c)^{1/(alpha-1)} 
@@ -29,13 +38,16 @@ Xuw = function(w){
 }
 
 
-OneMinusCapitalF = function(w){
+# Defined in formula 39 in section 2.3 of pdf file
+SurvivalFunction = function(w){
   
   res <- exp( -(Xuw(w)/gamma) ) - exp( -(Xlw(w)/gamma) )
   return(res)
   
 }
 
+
+# Defined in formula 53 in section 2.3 of pdf file
 f = function(w){
   
   eval_point <- A * w^{1 / (alpha-1)}
@@ -45,6 +57,7 @@ f = function(w){
   
 }
 
+# Defined in Gamma LRT Appendix.pdf
 gl = function(w){
   
   eval_point <- A * w^{1 / (alpha-1)}
@@ -54,7 +67,7 @@ gl = function(w){
   
 }
 
-
+# Defined in Gamma LRT Appendix.pdf
 gu = function(w){
   
   eval_point <- A * w^{1 / (alpha-1)}
@@ -64,6 +77,7 @@ gu = function(w){
   
 }
 
+# Defined in Gamma LRT Appendix.pdf
 fprime = function(w){
   
   eval_point <- A * w^{1 / (alpha-1)}
@@ -72,25 +86,46 @@ fprime = function(w){
   return(term1-term2)
 }
 
+# Defined in Gamma LRT Appendix.pdf
 FromTheory = function(w){
-  res = 1 + ( fprime(w)/f(w) ) * ( OneMinusCapitalF(w) / f(w) ) 
+  res = 1 + ( fprime(w)/f(w) ) * ( SurvivalFunction(w) / f(w) ) 
   return(-res)
 }
 
 
 FromNumerical = function(w){
-  OneMinusCapitalF(w) / f(w)  
+  SurvivalFunction(w) / f(w)  
 }
 
 
 # The derivative of ( (1-F(w))/f(w) ) w.r.t w at point w = 1 according to the theoretical derivation is:
-w = seq(1, 5, by=1)
+w = 1
 FromTheory(w)
 
 # Numerical check for derivative of ( (1-F(w))/f(w) ) w.r.t w at point w = 1 is:
 grad(func = FromNumerical, x = w)
 
 
-abs( FromTheory(w) - grad(func = FromNumerical, x = w) )
+#
+# The accuracy gets better for larger values of alpha
+#
+alpha <- 10
+c     <- 3
+gamma <- 3
+A     <- (-1)/(gamma * (alpha-1) * c^{alpha-1})
+
+FromTheory(w)
+grad(func = FromNumerical, x = w)
 
 
+#
+# I am not happy with the results of some parameter combinations for example: 
+#
+
+alpha <- 2
+c     <- 3
+gamma <- 3
+A     <- (-1)/(gamma * (alpha-1) * c^{alpha-1})
+
+FromTheory(w)
+grad(func = FromNumerical, x = w)
