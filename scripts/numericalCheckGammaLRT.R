@@ -19,7 +19,7 @@ A     <- (-1)/(gamma * (alpha-1) * c^{alpha-1})
 
 
 # Defined in formula 38 in section 2.2 of pdf file
-Xlw = function(w){
+Xlw = function(w, gamma, alpha, c){
   
   point <- ( -1/(gamma*(alpha-1)) ) * (w/c)^{1/(alpha-1)} 
   res   <- gamma * (alpha - 1) * lambertWn(point)
@@ -29,7 +29,7 @@ Xlw = function(w){
 
 
 # Defined in formula 38 in section 2.2 of pdf file
-Xuw = function(w){
+Xuw = function(w, gamma, alpha, c){
   
   point <- ( -1/(gamma*(alpha-1)) ) * (w/c)^{1/(alpha-1)} 
   res   <- gamma * (alpha - 1) * lambertWp(point)
@@ -39,26 +39,26 @@ Xuw = function(w){
 
 
 # Defined in formula 39 in section 2.3 of pdf file
-SurvivalFunction = function(w){
+SurvivalFunction = function(w, gamma, alpha, c){
   
-  res <- exp( -(Xuw(w)/gamma) ) - exp( -(Xlw(w)/gamma) )
+  res <- exp( -(Xuw(w, gamma, alpha, c)/gamma) ) - exp( -(Xlw(w, gamma, alpha, c)/gamma) )
   return(res)
   
 }
 
 
 # Defined in formula 53 in section 2.3 of pdf file
-f = function(w){
+f = function(w, A, gamma, alpha, c){
   
   eval_point <- A * w^{1 / (alpha-1)}
-  term1 <- ( lambertWn(eval_point) / (1 + lambertWn(eval_point)) ) * (1/w) * exp( -(Xlw(w)/gamma) )
-  term2 <- ( lambertWp(eval_point) / (1 + lambertWp(eval_point)) ) * (1/w) * exp( -(Xuw(w)/gamma) )
+  term1 <- ( lambertWn(eval_point) / (1 + lambertWn(eval_point)) ) * (1/w) * exp( -(Xlw(w, gamma, alpha, c)/gamma) )
+  term2 <- ( lambertWp(eval_point) / (1 + lambertWp(eval_point)) ) * (1/w) * exp( -(Xuw(w, gamma, alpha, c)/gamma) )
   return(term1 - term2)
   
 }
 
 # Defined in Gamma LRT Appendix.pdf
-gl = function(w){
+gl = function(w, A, gamma, alpha, c){
   
   eval_point <- A * w^{1 / (alpha-1)}
   num <- 1 - (alpha-1)*(1 + lambertWn(eval_point))  
@@ -68,7 +68,7 @@ gl = function(w){
 }
 
 # Defined in Gamma LRT Appendix.pdf
-gu = function(w){
+gu = function(w, A, gamma, alpha, c){
   
   eval_point <- A * w^{1 / (alpha-1)}
   num <- 1 - (alpha-1)*(1 + lambertWp(eval_point))  
@@ -78,32 +78,32 @@ gu = function(w){
 }
 
 # Defined in Gamma LRT Appendix.pdf
-fprime = function(w){
+fprime = function(w, A, gamma, alpha, c){
   
   eval_point <- A * w^{1 / (alpha-1)}
-  term1 <- (1/(w)^2) * (lambertWn(eval_point) / (1 + lambertWn(eval_point)) ) * exp( -(Xlw(w)/gamma) ) * gl(w)
-  term2 <- (1/(w)^2) * (lambertWp(eval_point) / (1 + lambertWp(eval_point)) ) * exp( -(Xuw(w)/gamma) ) * gu(w)
+  term1 <- (1/(w)^2) * (lambertWn(eval_point) / (1 + lambertWn(eval_point)) ) * exp( -(Xlw(w, gamma, alpha, c)/gamma) ) * gl(w, A, gamma, alpha, c)
+  term2 <- (1/(w)^2) * (lambertWp(eval_point) / (1 + lambertWp(eval_point)) ) * exp( -(Xuw(w, gamma, alpha, c)/gamma) ) * gu(w, A, gamma, alpha, c)
   return(term1-term2)
 }
 
 # Defined in Gamma LRT Appendix.pdf
-FromTheory = function(w){
-  res = 1 + ( fprime(w)/f(w) ) * ( SurvivalFunction(w) / f(w) ) 
+FromTheory = function(w, A, gamma, alpha, c){
+  res = 1 + ( fprime(w, A, gamma, alpha, c)/f(w, A, gamma, alpha, c) ) * ( SurvivalFunction(w, gamma, alpha, c) / f(w, A, gamma, alpha, c) ) 
   return(-res)
 }
 
 
-FromNumerical = function(w){
-  SurvivalFunction(w) / f(w)  
+FromNumerical = function(w, A, gamma, alpha, c){
+  SurvivalFunction(w, gamma, alpha, c) / f(w, A, gamma, alpha, c)  
 }
 
 
 # The derivative of ( (1-F(w))/f(w) ) w.r.t w at point w = 1 according to the theoretical derivation is:
 w = 1
-FromTheory(w)
+FromTheory(w, A, gamma, alpha, c)
 
 # Numerical check for derivative of ( (1-F(w))/f(w) ) w.r.t w at point w = 1 is:
-grad(func = FromNumerical, x = w)
+grad(func = FromNumerical, x = w, A = A, gamma = gamma, alpha = alpha, c = c)
 
 
 #
@@ -114,8 +114,8 @@ c     <- 3
 gamma <- 3
 A     <- (-1)/(gamma * (alpha-1) * c^{alpha-1})
 
-FromTheory(w)
-grad(func = FromNumerical, x = w)
+FromTheory(w, A, gamma, alpha, c)
+grad(func = FromNumerical, x = w, A = A, gamma = gamma, alpha = alpha, c = c)
 
 
 #
@@ -127,5 +127,5 @@ c     <- 3
 gamma <- 3
 A     <- (-1)/(gamma * (alpha-1) * c^{alpha-1})
 
-FromTheory(w)
-grad(func = FromNumerical, x = w)
+FromTheory(w, A, gamma, alpha, c)
+grad(func = FromNumerical, x = w, A = A, gamma = gamma, alpha = alpha, c = c)
