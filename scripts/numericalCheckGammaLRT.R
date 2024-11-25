@@ -12,9 +12,18 @@ library(numDeriv)
 options(digits = 22)
 
 # Set some of the parameters to constant values
-alpha <- 3
-c     <- 3
-gamma <- 3
+lambda = 2
+beta = 1
+alpha = 3
+
+gamma = 1/beta - 1/lambda
+c = lambda / (beta^alpha * gamma(alpha))
+
+
+
+# alpha <- 3
+# c     <- 3
+# gamma <- 3
 A     <- (-1)/(gamma * (alpha-1) * c^{alpha-1})
 
 
@@ -39,12 +48,17 @@ Xuw = function(w, gamma, alpha, c){
 
 
 # Defined in formula 39 in section 2.3 of pdf file
-SurvivalFunction = function(w, gamma, alpha, c){
+SurvivalFunction = function(w, lambda, gamma, alpha, c){
   
-  res <- exp( -(Xuw(w, gamma, alpha, c)/gamma) ) - exp( -(Xlw(w, gamma, alpha, c)/gamma) )
+  res <- exp( -(Xlw(w, gamma, alpha, c)/lambda) ) - exp( -(Xuw(w, gamma, alpha, c)/lambda) )
   return(res)
   
 }
+
+w = 0.1
+# w = gamma * c * (alpha - 1)
+SurvivalFunction(w, lambda, gamma, alpha, c)
+
 
 
 # Defined in formula 53 in section 2.3 of pdf file
