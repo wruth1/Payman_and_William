@@ -17,6 +17,7 @@
 \newcommand{\bG}{\mathbb{G}}
 \newcommand{\bF}{\mathbb{F}}
 \newcommand{\bP}{\mathbb{P}}
+\newcommand{\bR}{\mathbb{R}}
 
 \newcommand{\sW}{\mathscr{W}}
 \newcommand{\swe}{\mathscr{W}(\eta)}
@@ -168,7 +169,7 @@ To start, note that $W$ is defined as the likelihood ration between the $\mathrm
 %
 \begin{align}
     W(X) &= \frac{\lambda}{\beta^\alpha \Gamma(\alpha)} X^{\alpha - 1} \exp\left[ -X \left( \frac{1}{\beta} - \frac{1}{\lambda} \right) \right]\\
-    &=: c X^{\alpha - 1} \exp(-X / \gamma)
+    &=: c X^{\alpha - 1} \exp(-X / \gamma) \label{eq:W_of_X}
 \end{align}
 %
 Next, we need the survival function of $W$.
@@ -188,9 +189,9 @@ To start, $\lim_{x \rightarrow \infty} h(x) = 0$ and $h(0) = 0$ (we will not con
     &= \frac{a}{x} - b \label{eq:grad_log_h}
 \end{align}
 %
-This expression has a unique root at $x_* = a/b$. The second derivative test trivially confirms that $x_*$ is a maximizer. Evaluating $h(x_*) = (a/eb)^a=: y_*$ gives us an upper bound for $h$.
+This expression has a unique root at $x_* = a/b$. The second derivative test trivially confirms that $x_*$ is a maximizer. Evaluating $h(x_*) = (a/eb)^a=: y_*$ gives us an upper bound for $h$ (yes, this bound does involve multiplication by $e$).
 
-Next, we attempt to invert $h$. We will proceed formally, ignoring any problems which can arise from raising negative numbers to arbitrary powers, and verify that the inverse we end up with is, well-defined. Later, we will verify that we have, in fact, found all inverses of $h$ for the parameter values we consider. Our derivation of the inverse will ultimately involve the Lambert-W function; the rest of the details revolve around setting up its application.
+Next, we attempt to invert $h$. We will proceed formally, ignoring any problems which can arise from raising negative numbers to arbitrary powers, and verify that the inverse we end up with is well-defined. Later, we will verify that we have, in fact, found all inverses of $h$ for the parameter values we consider. Our derivation of the inverse will ultimately involve the Lambert-W function\footnote{The Lambert-W function, $\sW$, is defined as the inverse of the function $z \mapsto ze^z$. That is, $\sW(z) \exp[\sW(z)] = z$. Note that $\sW$ is multi-valued on (part of) $\bR$. The ``principal branch'', denoted $\sW_0$, is defined for $z \geq -1/e$. The second branch, denoted $\sW_{-1}$, is defined only for $-1/e \leq z < 0$. I don't have a great understanding of how multi-valued functions on $\mathbb{C}$ work, so I'm going to take a pragmatic approach. For appropriate values of $z$, I denote the two branches $\sW_l$ and $\sW_u$, with the convention that $\sW_l \leq \sW_u$.}; the rest of the details revolve around setting up its application.
 %
 \begin{align}
     x^a e^{-bx} &= y\\
@@ -219,7 +220,13 @@ We now return to the problem of computing $\bP(W > w)$. Recalling Equation (\ref
     &=: \bP \left\{ X_l(w) < X < X_u(w) \right\}
 \end{align}
 %
-where $\sW_l \leq \sW_u$ are two (possibly equal) real-valued branches of the Lambert-W function. Finally, since $X \sim \mathrm{Exp}(\lambda)$, the survival function of $W$ is $\bP(W > w) = \exp(-X_u(w)/ \gamma) - \exp(-X_l(w)/\gamma)$.
+where $\sW_l \leq \sW_u$ are two (possibly equal) real-valued branches of the Lambert-W function. Finally, since $X \sim \mathrm{Exp}(\lambda)$, the survival function of $W$ is $\bP(W > w) = \exp(-X_l(w)/ \gamma) - \exp(-X_u(w)/\gamma)$ (\textcolor{red}{note the order of $X_l$ and $X_u$. I still need to fix this below}).
+
+Recall that the function $h$ has an upper bound, $h \leq (a / eb)^a$. Applying this bound to our expression for $W$, Equation \eqref{eq:W_of_X}, we get
+\begin{align}
+W &\leq c \left[ \frac{\gamma (\alpha - 1)}{e} \right]^{\alpha - 1}\\
+&:= W_* \nonumber
+\end{align}
 
 Having established the survival function of $W$, we now need to compute its density (i.e. the negative derivative of the survival function; this is going to get messy). We then need to take their ratio, differentiate, and take the limit as $w \rightarrow w_*$. At some point, we may need to start working with numerical derivatives, but I would like to do as much analytically as is reasonably possible.
 

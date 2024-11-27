@@ -1,3 +1,5 @@
+
+
 # This script computes the derivative of (1-F(w))/f(w) at a given value for w
 # with both numerical and theoretical approach.
 # The theoretical steps are shown in  Gamma LRT Appendix.pdf file in Notes folder.
@@ -16,7 +18,7 @@ lambda = 2
 beta = 1
 alpha = 3
 
-gamma = 1/beta - 1/lambda
+gamma = 1/(1/beta - 1/lambda)
 c = lambda / (beta^alpha * gamma(alpha))
 
 
@@ -27,11 +29,17 @@ c = lambda / (beta^alpha * gamma(alpha))
 A     <- (-1)/(gamma * (alpha-1) * c^{alpha-1})
 
 
+#? A note about the two branches of W:
+#?      lambertWn <= lambertWp
+#?      I expect that the one with a "p" is the principal branch. More importantly for us, this determines which is W_l and which is W_u. Just use alphabetical ordering.
+
+#! Warning: lambertWp breaks for arguments too close to -1/e (it doesn't throw an error, it just runs forever). For us, that means we can't evaluate the survival function too close to the upper bound on W. I hope this won't be an issue. Otherwise, we may need to find a different implementation of W_u.
+
 # Defined in formula 38 in section 2.2 of pdf file
 Xlw = function(w, gamma, alpha, c){
   
   point <- ( -1/(gamma*(alpha-1)) ) * (w/c)^{1/(alpha-1)} 
-  res   <- gamma * (alpha - 1) * lambertWn(point)
+  res   <- -gamma * (alpha - 1) * lambertWp(point)
   return(res)
   
 }
@@ -41,11 +49,13 @@ Xlw = function(w, gamma, alpha, c){
 Xuw = function(w, gamma, alpha, c){
   
   point <- ( -1/(gamma*(alpha-1)) ) * (w/c)^{1/(alpha-1)} 
-  res   <- gamma * (alpha - 1) * lambertWp(point)
+  res   <- -gamma * (alpha - 1) * lambertWn(point)
   return(res)
   
 }
 
+Xlw(w, gamma, alpha, c)
+Xuw(w, gamma, alpha, c)
 
 # Defined in formula 39 in section 2.3 of pdf file
 SurvivalFunction = function(w, lambda, gamma, alpha, c){
@@ -56,9 +66,23 @@ SurvivalFunction = function(w, lambda, gamma, alpha, c){
 }
 
 w = 0.1
+W_star = c * (gamma * (alpha - 1) / exp(1))^(alpha - 1)
 # w = gamma * c * (alpha - 1)
 SurvivalFunction(w, lambda, gamma, alpha, c)
+SurvivalFunction(W_star, lambda, gamma, alpha, c)
 
+
+some_Ws = c(seq(2, 2.13, by = 0.001), W_star)
+
+some_survival_functions = SurvivalFunction(some_Ws, lambda, gamma, alpha, c)
+
+
+plot(some_Ws, some_survival_functions, ylim = c(-0.01, 1.01))
+abline(h = 0)
+
+some_Zs = seq(-exp(-1), 0, by = 0.01)
+lambertWp(some_Zs)
+lambertWn(some_Zs)
 
 
 # Defined in formula 53 in section 2.3 of pdf file
