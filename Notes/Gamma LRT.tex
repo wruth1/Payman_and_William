@@ -235,25 +235,25 @@ Having established the survival function of $W$, we now need to compute its dens
 We start by the survival function that we just established earlier:
 
 \begin{align}
-\bP(W > w) = \exp(-X_u(w)/ \gamma) - \exp(-X_l(w)/\gamma)
+\bP(W > w) = \exp(-X_l(w)/ \lambda) - \exp(-X_u(w)/\lambda)
 \end{align}
 
 To compute the density, we need to find the negative partial derivative w.r.t $w$. This means: 
 
 \begin{align}
-f(w) = - \frac{\partial}{\partial w} Pr(W \ge w) = \frac{\partial}{\partial w} \exp(-X_l(w)/ \gamma) - \exp(-X_u(w)/\gamma)
+f(w) = - \frac{\partial}{\partial w} Pr(W \ge w) = \frac{\partial}{\partial w} \exp(-X_u(w)/ \lambda) - \exp(-X_l(w)/\lambda)
 \end{align}
 
 Let's start with:
 
 \begin{align}
-\frac{\partial}{\partial w} \exp \left( \frac{-X_{l}(w)}{\gamma} \right) = \frac{-1}{\gamma} \frac{\partial}{\partial w}(X_{l}(w)) \exp(\frac{-X_{l}(w)}{\gamma})
+\frac{\partial}{\partial w} \exp \left( \frac{-X_{u}(w)}{\lambda} \right) = \frac{-1}{\lambda} \frac{\partial}{\partial w}(X_{u}(w)) \exp(\frac{-X_{u}(w)}{\lambda})
 \end{align}
 
 We note that:
 
 \begin{align}
-\frac{\partial}{\partial w}(X_{l}(w)) &= \frac{\partial}{\partial w} \left( -\gamma (\alpha - 1) \sW_l \left( \frac{-1}{\gamma (\alpha-1)} \left(\frac{w}{c}\right)^{\frac{1}{\alpha-1}} \right) \right) \\
+\frac{\partial}{\partial w}(X_{u}(w)) &= \frac{\partial}{\partial w} \left( -\gamma (\alpha - 1) \sW_l \left( \frac{-1}{\gamma (\alpha-1)} \left(\frac{w}{c}\right)^{\frac{1}{\alpha-1}} \right) \right) \\
 &= \gamma (\alpha - 1) \frac{\partial}{\partial w} \left( \sW_l(\frac{-1}{\gamma (\alpha-1)} \frac{1}{c^{\alpha-1}} w^{\frac{1}{\alpha-1}})  \right) \\
 &= -\gamma (\alpha-1) \frac{\partial}{\partial w} \left( \sW_l(A w^{\frac{1}{\alpha-1}}) \right)
 \end{align}
@@ -267,7 +267,7 @@ and we used the notation of $A = \frac{-1}{\gamma (\alpha-1)} \frac{1}{c^{\alpha
 Therefore we can continue in equation 44 as:
 
 \begin{align}
-\frac{\partial}{\partial w}(X_{l}(w)) &= -\gamma (\alpha-1) \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ A w^{\frac{1}{\alpha-1}} \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right) } \frac{\partial}{\partial w}(A w^{\frac{1}{\alpha-1}}) \\
+\frac{\partial}{\partial w}(X_{u}(w)) &= -\gamma (\alpha-1) \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ A w^{\frac{1}{\alpha-1}} \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right) } \frac{\partial}{\partial w}(A w^{\frac{1}{\alpha-1}}) \\
 &= -\gamma (\alpha-1) \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ A w^{\frac{1}{\alpha-1}} \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right) } A \frac{1}{\alpha-1} w^{\frac{2-\alpha}{\alpha-1}} \\
 &= -\gamma \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right)} \frac{1}{w}
 \end{align}
@@ -275,22 +275,22 @@ Therefore we can continue in equation 44 as:
 So we can write: 
 
 \begin{align}
-\frac{\partial}{\partial w} \exp \left( \frac{-X_{l}(w)}{\gamma} \right) &= \frac{-1}{\gamma} \frac{\partial}{\partial w}(X_{l}(w)) \exp(\frac{-X_{l}(w)}{\gamma}) \\
-&= \frac{-1}{\gamma} \left( -\gamma \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right)} \frac{1}{w} \right) \exp(\frac{-X_{l}(w)}{\gamma}) \\
-&= \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right)} \frac{1}{w} \exp(\frac{-X_{l}(w)}{\gamma}) 
+\frac{\partial}{\partial w} \exp \left( \frac{-X_{u}(w)}{\lambda} \right) &= \frac{-1}{\lambda} \frac{\partial}{\partial w}(X_{u}(w)) \exp(\frac{-X_{u}(w)}{\lambda}) \\
+&= \frac{-1}{\lambda} \left( -\gamma \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right)} \frac{1}{w} \right) \exp(\frac{-X_{u}(w)}{\lambda}) \\
+&= \frac{\gamma}{\lambda w} \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right)} \exp(\frac{-X_{u}(w)}{\lambda}) 
 \end{align}
     
 With a similar work, we can derive:
 
 \begin{align}
-\frac{\partial}{\partial w} \exp \left( \frac{-X_{u}(w)}{\gamma} \right) = \frac{\sW_u(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_u(A w^{ \frac{1}{\alpha-1} }) \right)} \frac{1}{w} \exp(\frac{-X_{u}(w)}{\gamma}) 
+\frac{\partial}{\partial w} \exp \left( \frac{-X_{l}(w)}{\lambda} \right) = \frac{\gamma}{\lambda w} \frac{\sW_u(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_u(A w^{ \frac{1}{\alpha-1} }) \right)} \exp(\frac{-X_{l}(w)}{\lambda}) 
 \end{align}
    
 Finally we can derive the pdf of $w$ as follows: 
 
 \begin{align}
-f(w) &= \frac{\partial}{\partial w} \exp(-X_l(w)/ \gamma) - \frac{\partial}{\partial w} \exp(-X_u(w)/\gamma) \\
-&= \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right)} \frac{1}{w} \exp(\frac{-X_{l}(w)}{\gamma}) - \frac{\sW_u(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_u(A w^{ \frac{1}{\alpha-1} }) \right)} \frac{1}{w} \exp(\frac{-X_{u}(w)}{\gamma})
+f(w) &= \frac{\partial}{\partial w} \exp(-X_u(w)/ \lambda) - \frac{\partial}{\partial w} \exp(-X_l(w)/\lambda) \\
+&= \frac{\gamma}{\lambda w} \left[ \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right)} \exp\left(\frac{-X_{u}(w)}{\lambda}\right) - \frac{\sW_u(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_u(A w^{ \frac{1}{\alpha-1} }) \right)}  \exp\left(\frac{-X_{l}(w)}{\lambda}\right) \right]
 \end{align}
         
 

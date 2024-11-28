@@ -26,7 +26,11 @@ c = lambda / (beta^alpha * gamma(alpha))
 # alpha <- 3
 # c     <- 3
 # gamma <- 3
-A     <- (-1)/(gamma * (alpha-1) * c^{alpha-1})
+A     <- (-1)/(gamma * (alpha-1) * c^(alpha-1))
+
+
+w = 1
+w_star = c * (gamma * (alpha - 1) * exp(-1))^(alpha - 1)
 
 
 #? A note about the two branches of W:
@@ -54,9 +58,6 @@ Xuw = function(w, gamma, alpha, c){
   
 }
 
-Xlw(w, gamma, alpha, c)
-Xuw(w, gamma, alpha, c)
-
 # Defined in formula 39 in section 2.3 of pdf file
 SurvivalFunction = function(w, lambda, gamma, alpha, c){
   
@@ -65,35 +66,31 @@ SurvivalFunction = function(w, lambda, gamma, alpha, c){
   
 }
 
-w = 0.1
-W_star = c * (gamma * (alpha - 1) / exp(1))^(alpha - 1)
-# w = gamma * c * (alpha - 1)
-SurvivalFunction(w, lambda, gamma, alpha, c)
-SurvivalFunction(W_star, lambda, gamma, alpha, c)
-
-
-some_Ws = c(seq(2, 2.13, by = 0.001), W_star)
-
-some_survival_functions = SurvivalFunction(some_Ws, lambda, gamma, alpha, c)
-
-
-plot(some_Ws, some_survival_functions, ylim = c(-0.01, 1.01))
-abline(h = 0)
-
-some_Zs = seq(-exp(-1), 0, by = 0.01)
-lambertWp(some_Zs)
-lambertWn(some_Zs)
 
 
 # Defined in formula 53 in section 2.3 of pdf file
-f = function(w, A, gamma, alpha, c){
+f = function(w, lambda, A, gamma, alpha, c){
   
   eval_point <- A * w^{1 / (alpha-1)}
-  term1 <- ( lambertWn(eval_point) / (1 + lambertWn(eval_point)) ) * (1/w) * exp( -(Xlw(w, gamma, alpha, c)/gamma) )
-  term2 <- ( lambertWp(eval_point) / (1 + lambertWp(eval_point)) ) * (1/w) * exp( -(Xuw(w, gamma, alpha, c)/gamma) )
-  return(term1 - term2)
+  term1 <- ( lambertWn(eval_point) / (1 + lambertWn(eval_point)) ) * exp( -(Xuw(w, gamma, alpha, c)/lambda) )
+  term2 <- ( lambertWp(eval_point) / (1 + lambertWp(eval_point)) ) * exp( -(Xlw(w, gamma, alpha, c)/lambda) )
+  output = gamma * (term1 - term2) / (lambda * w)
+  return(output)
   
 }
+
+w = 1
+
+some_Ws = seq(0.1, 2, by = 0.01)
+
+num_grad = - grad(func = SurvivalFunction, x = some_Ws, lambda = lambda, gamma = gamma, alpha = alpha, c = c)
+math_grad = f(some_Ws, lambda, A, gamma, alpha, c)
+
+max((num_grad - math_grad) / num_grad)
+
+
+
+
 
 # Defined in Gamma LRT Appendix.pdf
 gl = function(w, A, gamma, alpha, c){
