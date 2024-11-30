@@ -39,6 +39,8 @@ w_star = c * (gamma * (alpha - 1) * exp(-1))^(alpha - 1)
 
 #! Warning: lambertWp breaks for arguments too close to -1/e (it doesn't throw an error, it just runs forever). For us, that means we can't evaluate the survival function too close to the upper bound on W. I hope this won't be an issue. Otherwise, we may need to find a different implementation of W_u.
 
+
+
 # Defined in formula 38 in section 2.2 of pdf file
 Xlw = function(w, gamma, alpha, c){
   
