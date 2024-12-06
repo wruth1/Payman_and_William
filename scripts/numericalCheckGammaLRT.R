@@ -9,7 +9,7 @@
 library(pracma)
 library(numDeriv)
 
-options(digits = 22)
+options(digits = 18)
 
 # Set some of the parameters to constant values
 alpha <- 3
@@ -129,3 +129,28 @@ A     <- (-1)/(gamma * (alpha-1) * c^{alpha-1})
 
 FromTheory(w, A, gamma, alpha, c)
 grad(func = FromNumerical, x = w, A = A, gamma = gamma, alpha = alpha, c = c)
+
+
+b = 2
+lambda = 1
+c = 
+
+
+
+#
+# Test pdf f(w)
+#
+w = 0
+grad(func = SurvivalFunction, x = w, gamma = gamma, alpha = alpha, c = c, method.args=list(r=6) )
+
+f(w,A,gamma,alpha,c)
+
+SurvivalFunction(w=1e-20, gamma, alpha, c)
+y <- SurvivalFunction(w=w, gamma, alpha, c)
+plot(w,y)
+
+
+gamma * c * (alpha-1)
+
+
+
