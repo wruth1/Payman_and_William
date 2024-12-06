@@ -1,3 +1,5 @@
+
+
 # This script computes the derivative of (1-F(w))/f(w) at a given value for w
 # with both numerical and theoretical approach.
 # The theoretical steps are shown in  Gamma LRT Appendix.pdf file in Notes folder.
@@ -12,17 +14,38 @@ library(numDeriv)
 options(digits = 18)
 
 # Set some of the parameters to constant values
-alpha <- 3
-c     <- 3
-gamma <- 3
-A     <- (-1)/(gamma * (alpha-1) * c^{alpha-1})
+lambda = 2
+beta = 1
+alpha = 3
+
+gamma = 1/(1/beta - 1/lambda)
+c = lambda / (beta^alpha * gamma(alpha))
+
+
+
+# alpha <- 3
+# c     <- 3
+# gamma <- 3
+A     <- (-1)/(gamma * (alpha-1) * c^(alpha-1))
+
+
+w = 1
+w_star = c * (gamma * (alpha - 1) * exp(-1))^(alpha - 1)
+
+
+#? A note about the two branches of W:
+#?      lambertWn <= lambertWp
+#?      I expect that the one with a "p" is the principal branch. More importantly for us, this determines which is W_l and which is W_u. Just use alphabetical ordering.
+
+#! Warning: lambertWp breaks for arguments too close to -1/e (it doesn't throw an error, it just runs forever). For us, that means we can't evaluate the survival function too close to the upper bound on W. I hope this won't be an issue. Otherwise, we may need to find a different implementation of W_u.
+
 
 
 # Defined in formula 38 in section 2.2 of pdf file
 Xlw = function(w, gamma, alpha, c){
   
   point <- ( -1/(gamma*(alpha-1)) ) * (w/c)^{1/(alpha-1)} 
-  res   <- gamma * (alpha - 1) * lambertWn(point)
+  res   <- -gamma * (alpha - 1) * lambertWp(point)
   return(res)
   
 }
@@ -32,30 +55,44 @@ Xlw = function(w, gamma, alpha, c){
 Xuw = function(w, gamma, alpha, c){
   
   point <- ( -1/(gamma*(alpha-1)) ) * (w/c)^{1/(alpha-1)} 
-  res   <- gamma * (alpha - 1) * lambertWp(point)
+  res   <- -gamma * (alpha - 1) * lambertWn(point)
   return(res)
   
 }
-
 
 # Defined in formula 39 in section 2.3 of pdf file
-SurvivalFunction = function(w, gamma, alpha, c){
+SurvivalFunction = function(w, lambda, gamma, alpha, c){
   
-  res <- exp( -(Xuw(w, gamma, alpha, c)/gamma) ) - exp( -(Xlw(w, gamma, alpha, c)/gamma) )
+  res <- exp( -(Xlw(w, gamma, alpha, c)/lambda) ) - exp( -(Xuw(w, gamma, alpha, c)/lambda) )
   return(res)
   
 }
+
 
 
 # Defined in formula 53 in section 2.3 of pdf file
-f = function(w, A, gamma, alpha, c){
+f = function(w, lambda, A, gamma, alpha, c){
   
   eval_point <- A * w^{1 / (alpha-1)}
-  term1 <- ( lambertWn(eval_point) / (1 + lambertWn(eval_point)) ) * (1/w) * exp( -(Xlw(w, gamma, alpha, c)/gamma) )
-  term2 <- ( lambertWp(eval_point) / (1 + lambertWp(eval_point)) ) * (1/w) * exp( -(Xuw(w, gamma, alpha, c)/gamma) )
-  return(term1 - term2)
+  term1 <- ( lambertWn(eval_point) / (1 + lambertWn(eval_point)) ) * exp( -(Xuw(w, gamma, alpha, c)/lambda) )
+  term2 <- ( lambertWp(eval_point) / (1 + lambertWp(eval_point)) ) * exp( -(Xlw(w, gamma, alpha, c)/lambda) )
+  output = gamma * (term1 - term2) / (lambda * w)
+  return(output)
   
 }
+
+w = 1
+
+some_Ws = seq(0.1, 2, by = 0.01)
+
+num_grad = - grad(func = SurvivalFunction, x = some_Ws, lambda = lambda, gamma = gamma, alpha = alpha, c = c)
+math_grad = f(some_Ws, lambda, A, gamma, alpha, c)
+
+max((num_grad - math_grad) / num_grad)
+
+
+
+
 
 # Defined in Gamma LRT Appendix.pdf
 gl = function(w, A, gamma, alpha, c){
