@@ -307,7 +307,7 @@ Our next broad step is to compute the tail index of $W$. From Equation (1.1.29) 
 %
 where $F$ and $f$ are the CDF and density respectively of $W$. We denote the tail index by $\zeta$.
 
-In order to compute $\zeta$, we need to make a few intermediate steps. First, not that the derivative of the ratio in \eqref{eq:tail_defn} can be re-written as
+In order to compute $\zeta$, we need to make a few intermediate steps. First, note that the derivative of the ratio in \eqref{eq:tail_defn} can be re-written as
 %
 \begin{align}
     \left( \frac{1 - F(w)}{f(w)} \right)' &= \frac{-f(w)^2 - (1 - F(w)) f'(w)}{f(w)^2}\\
@@ -331,7 +331,7 @@ with equivalent expressions when the branches are reversed. We also recall our e
     f(w) &= \frac{\partial}{\partial w} \exp(-X_u(w)/ \lambda) - \frac{\partial}{\partial w} \exp(-X_l(w)/\lambda) \\
     &= \frac{\gamma}{\lambda w} \left[ \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right)} \exp\left(\frac{-X_{u}(w)}{\lambda}\right) - \frac{\sW_u(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_u(A w^{ \frac{1}{\alpha-1} }) \right)}  \exp\left(\frac{-X_{l}(w)}{\lambda}\right) \right]\\
     &= \left[ - \frac{X'_u(w)}{\lambda} \exp\left(\frac{-X_{u}(w)}{\lambda}\right) \right] - \left[- \frac{X'_l(w)}{\lambda} \exp\left(\frac{-X_{l}(w)}{\lambda}\right) \right] \label{eq:wt_dens}\\
-    &=: f_u(w) - f_l(w).
+    &=: f_u(w) - f_l(w). \label{eq:f_u_f_l}
 \end{align}
 %
 The first new quantity we will obtain is the second derivative of $\sW$.
@@ -342,20 +342,20 @@ The first new quantity we will obtain is the second derivative of $\sW$.
     \end{equation}
 \end{lemma}
 \begin{proof}
-    The proof proceeds by routine, albeit messy, calculus and algebra. We start by applying the quotient and product rules to $\sW'$. For notational simplicity, we write $\sV(w) = 1 + \sW(w)$, and suppress the arguments from $\sW$ and $\sV$.
+    The proof proceeds by routine, albeit messy, calculus and algebra. We start by applying the quotient rule to $\sW'$. For notational simplicity, we write $\sV(w) = 1 + \sW(w)$, and suppress the arguments from $\sW$ and $\sV$.
     %
     \begin{align}
         \sW'' &= \left( \frac{\sW}{w \sV} \right)'\\
         &= \frac{w \sV \sW' - \sW ( \sV + w \sV')}{w^2 \sV^2}\\
         &= \frac{\sW - \sW (\sV + w \sW')}{w^2 \sV^2}\\
-        &= \frac{\sW}{w^2 \sV^2} ( 1 - \sV - \sW / \sV)\\
-        &= \frac{\sW}{w^2 \sV^2} (- \sW - \sW / \sV)\\
+        &= \frac{\sW}{w^2 \sV^2} ( 1 - \sV - \sW / \sV) \label{eq:w_prime_prime_1}\\
+        &= \frac{\sW}{w^2 \sV^2} (- \sW - \sW / \sV) \label{eq:w_prime_prime_2}\\
         &= -\frac{\sW^2}{w^2 \sV^2} \left( \frac{2 + \sW}{1 + \sW} \right)\\
-        &= - (\sW')^2 \left( \frac{2 + \sW}{1 + \sW} \right)
+        &= - (\sW')^2 \left( \frac{2 + \sW}{1 + \sW} \right),
     \end{align}
 \end{proof}
 
-We are now equipped to start un-tangling the mess that is Equation \eqref{eq:wt_dens}. We start with $f'_u$. The structure of $f_l'$ will be analogous. 
+where moving from \ref{eq:w_prime_prime_1} to \ref{eq:w_prime_prime_2} uses the definition of $\sV$. We are now equipped to start un-tangling the mess that is Equation \eqref{eq:wt_dens}. We start with $f'_u$ (defined in Equation \eqref{eq:f_u_f_l}). The structure of $f_l'$ will be analogous. 
 
 \begin{align}
     f'_u(w) &= - \left[ \frac{X_u''(w)}{\lambda} \exp \left( \frac{-X_u(w)}{\lambda} \right) - \frac{X_u'(w)^2}{\lambda^2} \exp \left( \frac{-X_u(w)}{\lambda} \right)\right]\\
@@ -365,7 +365,7 @@ We are now equipped to start un-tangling the mess that is Equation \eqref{eq:wt_
     & \hspace{1cm} - \frac{\gamma^2}{\lambda^2} \exp \left( \frac{-X_u(w)}{\lambda} \right) \sW_l'\left(A w^{1/(\alpha - 1)}\right)^2. \label{eq:f_u_prime}
 \end{align}
 %
-This reduces $f'_u$ to an expression in terms of things we know how to compute, namely $X_u$ and $\sW_l''$. The latter of these has an expression in terms of $\sW_l$ and $\sW_l'$ (Equation \eqref{eq:W_prime_prime}). Finally, $\sW_l'$ can be written in terms of $\sW$ (Equation \eqref{eq:W_prime}). An analogous expression holds for $f_l'$.
+This reduces $f'_u$ to an expression in terms of things we know how to compute, namely $X_u$, $\sW_l'$ and $\sW_l''$. The latter of these has an expression in terms of $\sW_l$ and $\sW_l'$ (Equation \eqref{eq:W_prime_prime}). Finally, $\sW_l'$ can be written in terms of $\sW_l$ (Equation \eqref{eq:W_prime}). An analogous expression holds for $f_l'$.
 
 \section*{Next Steps}
 \begin{itemize}
