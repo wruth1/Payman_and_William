@@ -31,22 +31,42 @@ Xuw = function(w, gamma, alpha, c){
 
 
 lambertWp2prime = function(w){
-  num <- 2 + lambertWp(x=w)
-  den <- 1 + lambertWp(x=w)
-  prime <- grad(func = lambertWp, x = w)
-  res <- (-1) * prime^2 * (num/den)
+  LLWp <- lambertWp(x=w)
+  num <- 2 + LLWp
+  den <- 1 + LLWp
+  prime <-  LLWp / (w * (1 + LLWp) )
+  res <- (-1) * prime * prime * (num/den)
   return(res)
 }
 
 
 lambertWn2prime = function(w){
-  num <- 2 + lambertWn(x=w)
-  den <- 1 + lambertWn(x=w)
-  prime <- grad(func = lambertWn, x = w)
-  res <- (-1) * prime^2 * (num/den)
+  LLWn <- lambertWn(x=w)
+  num <- 2 + LLWn
+  den <- 1 + LLWn
+  prime <-  LLWn / (w * (1 + LLWn) )
+  res <- (-1) * prime * prime * (num/den)
   return(res)
 }
 
+
+lambertWpDeriv = function(w){
+  LLWp <- lambertWp(x=w)
+  num  <- LLWp
+  den  <- w * (1 + LLWp)
+  res  <- num / den
+  return(res)
+}
+
+
+lambertWnDeriv = function(w){
+  print(w)
+  LLWn <- lambertWn(x=w)
+  num  <- LLWn
+  den  <- w * (1 + LLWn)
+  res  <- num / den
+  return(res)
+}
 
 
 # Defined in formula 40 in section 2.3 of pdf file
@@ -93,19 +113,19 @@ gu = function(w, A, gamma, alpha, c){
 # Defined in formula 79 of Gamma LRT.pdf
 fprime = function(w, lambda, A, gamma, alpha, c){
   
-  eval_point <- A * w^{1 / (alpha-1)}
+  eval_point <- A * w^( 1 / (alpha-1) )
   
   mult_term <- (A/(alpha-1)) * w^( (2-alpha) / (alpha-1) )
   
-  term1 <- (gamma/lambda) * exp( -(Xuw(w, gamma, alpha, c)/lambda) ) * lambertWp2prime(eval_point) * mult_term
-  term2 <- (gamma^2/lambda^2) * exp( -(Xuw(w, gamma, alpha, c)/lambda) ) * grad(func = lambertWp, x = eval_point) 
-  fprime_p <- term1 - term2
+  term1 <- (gamma/lambda) * exp( -(Xuw(w, gamma, alpha, c)/lambda) ) * lambertWn2prime(eval_point) * mult_term
+  term2 <- (gamma^2/lambda^2) * exp( -(Xuw(w, gamma, alpha, c)/lambda) ) * lambertWnDeriv(eval_point)
+  fprime_u <- term1 - term2
+
+  term1 <- (gamma/lambda) * exp( -(Xlw(w, gamma, alpha, c)/lambda) ) * lambertWp2prime(eval_point) * mult_term
+  term2 <- (gamma^2/lambda^2) * exp( -(Xlw(w, gamma, alpha, c)/lambda) ) * lambertWpDeriv(eval_point)
+  fprime_l <- term1 - term2
   
-  term1 <- (gamma/lambda) * exp( -(Xlw(w, gamma, alpha, c)/lambda) ) * lambertWn2prime(eval_point) * mult_term
-  term2 <- (gamma^2/lambda^2) * exp( -(Xlw(w, gamma, alpha, c)/lambda) ) * grad(func = lambertWn, x = eval_point) 
-  fprime_n <- term1 - term2
-  
-  return(fprime_p - fprime_n)
+  return(fprime_u - fprime_l)
 }
 
 # Defined in Gamma LRT Appendix.pdf
@@ -137,11 +157,13 @@ some_Ws <- seq(0.1, 2, by = 0.01)
 # Test 1: If f(w) equals to negative derivative of survival function
 #
 
+# We can check it with more parameter settings too
+
 math_calc <- f(some_Ws, lambda, A, gamma, alpha, c)
 num_grad  <- (-1) * grad(func = SurvivalFunction, x = some_Ws, lambda = lambda, gamma = gamma, alpha = alpha, c = c)
 
 testthat::expect_equal(num_grad, math_calc)
-
+math_calc - num_grad
 
 
 #
