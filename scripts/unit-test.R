@@ -146,7 +146,8 @@ beta   <- 1
 alpha  <- 3
 gamma  <- 1/(1/beta - 1/lambda)
 c      <- lambda / (beta^alpha * gamma(alpha))
-A      <- (-1)/(gamma * (alpha-1) * c^(alpha-1))
+#A      <- (-1)/(gamma * (alpha-1) * c^(alpha-1))
+A      <- (-1)/(gamma * (alpha-1) * c^( 1/(alpha-1) ))
 w      <- 1
 w_star <- c * (gamma * (alpha - 1) * exp(-1))^(alpha - 1)
 some_Ws <- seq(0.1, 2, by = 0.01)
@@ -181,12 +182,12 @@ testthat::expect_equal(num_grad, math_calc)
 
 xuprime = function(w, A, gamma, alpha){
   eval_point <- A * w^( 1 / (alpha-1) )
-  (-1) * gamma * lambertWnDeriv(eval_point)
+  (-1) * gamma * A * w^( (2-alpha)/(alpha-1) ) * lambertWnDeriv(eval_point)
 }
 
 xlprime = function(w, A, gamma, alpha){
   eval_point <- A * w^( 1 / (alpha-1) )
-  (-1) * gamma * lambertWpDeriv(eval_point)
+  (-1) * gamma * A * w^( (2-alpha)/(alpha-1) ) * lambertWpDeriv(eval_point)
 }
 
 fuw = function(w, lambda){
