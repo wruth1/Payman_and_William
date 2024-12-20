@@ -60,7 +60,6 @@ lambertWpDeriv = function(w){
 
 
 lambertWnDeriv = function(w){
-  print(w)
   LLWn <- lambertWn(x=w)
   num  <- LLWn
   den  <- w * (1 + LLWn)
@@ -176,7 +175,28 @@ num_grad  <- grad(func = f, x = some_Ws, lambda = lambda, A = A, gamma = gamma, 
 testthat::expect_equal(num_grad, math_calc)
 
 
+#
+# Test 3: f(w) = f_u(w) - f_l(w)
+#
 
+xuprime = function(w, A, gamma, alpha){
+  eval_point <- A * w^( 1 / (alpha-1) )
+  (-1) * gamma * lambertWnDeriv(eval_point)
+}
+
+xlprime = function(w, A, gamma, alpha){
+  eval_point <- A * w^( 1 / (alpha-1) )
+  (-1) * gamma * lambertWpDeriv(eval_point)
+}
+
+fuw = function(w, lambda){
+  (-1) * (xuprime(w) / lambda) * exp(-Xuw()/lambda)
+  
+}
+
+math_eval <- xuprime(w=some_Ws, A = A, gamma = gamma, alpha = alpha)
+num_eval  <- grad(x = some_Ws, func = Xuw, gamma = gamma, alpha = alpha, c = c)
+testthat::expect_equal(num_eval, math_eval)
 
 # The derivative of ( (1-F(w))/f(w) ) w.r.t w at point w = 1 according to the theoretical derivation is:
 w = 1
