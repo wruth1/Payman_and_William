@@ -258,11 +258,11 @@ We note that:
 
 \begin{align}
 \frac{\partial}{\partial w}(X_{u}(w)) &= \frac{\partial}{\partial w} \left( -\gamma (\alpha - 1) \sW_l \left( \frac{-1}{\gamma (\alpha-1)} \left(\frac{w}{c}\right)^{\frac{1}{\alpha-1}} \right) \right) \\
-&= \gamma (\alpha - 1) \frac{\partial}{\partial w} \left( \sW_l(\frac{-1}{\gamma (\alpha-1)} \frac{1}{c^{\alpha-1}} w^{\frac{1}{\alpha-1}})  \right) \\
+&= \gamma (\alpha - 1) \frac{\partial}{\partial w} \left( \sW_l(\frac{-1}{\gamma (\alpha-1)} \frac{1}{c^{1/(\alpha-1)}} w^{\frac{1}{\alpha-1}})  \right) \\
 &= -\gamma (\alpha-1) \frac{\partial}{\partial w} \left( \sW_l(A w^{\frac{1}{\alpha-1}}) \right)
 \end{align}
 
-and we used the notation of $A = \frac{-1}{\gamma (\alpha-1)} \frac{1}{c^{\alpha-1}}$ for convinience. Recall that we already established in equation (11) of this document that:
+and we used the notation of $A = \frac{-1}{\gamma (\alpha-1)} \frac{1}{c^{1/(\alpha-1)}}$ for convinience. Recall that we already established in equation (11) of this document that:
 
 \begin{align}
 \frac{\partial}{\partial x} \sW(u) = \frac{\sW(u)}{ u (1+\sW(u)) } \frac{\partial u}{\partial x}
@@ -273,31 +273,34 @@ Therefore we can continue in equation 44 as:
 \begin{align}
 \frac{\partial}{\partial w}(X_{u}(w)) &= -\gamma (\alpha-1) \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ A w^{\frac{1}{\alpha-1}} \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right) } \frac{\partial}{\partial w}(A w^{\frac{1}{\alpha-1}}) \\
 &= -\gamma (\alpha-1) \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ A w^{\frac{1}{\alpha-1}} \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right) } A \frac{1}{\alpha-1} w^{\frac{2-\alpha}{\alpha-1}} \\
-&= -\gamma \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right)} \frac{1}{w}
+&= -\gamma A w^{\frac{2-\alpha}{\alpha-1}} \sW_l'(Aw^{\frac{1}{\alpha - 1}})
+%  \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right)}
 \end{align}
         
 So we can write: 
 
 \begin{align}
 \frac{\partial}{\partial w} \exp \left( \frac{-X_{u}(w)}{\lambda} \right) &= \frac{-1}{\lambda} \frac{\partial}{\partial w}(X_{u}(w)) \exp(\frac{-X_{u}(w)}{\lambda}) \\
-&= \frac{-1}{\lambda} \left( -\gamma \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right)} \frac{1}{w} \right) \exp(\frac{-X_{u}(w)}{\lambda}) \\
-&= \frac{\gamma}{\lambda w} \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right)} \exp(\frac{-X_{u}(w)}{\lambda}) 
+&= \frac{-1}{\lambda} \left( -\gamma A w^{\frac{2-\alpha}{\alpha-1}} \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right)} \right) \exp(\frac{-X_{u}(w)}{\lambda}) \\
+&= \frac{\gamma A }{\lambda} w^{\frac{2-\alpha}{\alpha-1}} \sW_l'(A w^{ \frac{1}{\alpha-1} }) \exp(\frac{-X_{u}(w)}{\lambda}) 
 \end{align}
     
-With a similar work, we can derive:
+Similarly, we can derive:
 
 \begin{align}
-\frac{\partial}{\partial w} \exp \left( \frac{-X_{l}(w)}{\lambda} \right) = \frac{\gamma}{\lambda w} \frac{\sW_u(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_u(A w^{ \frac{1}{\alpha-1} }) \right)} \exp(\frac{-X_{l}(w)}{\lambda}) 
+\frac{\partial}{\partial w} \exp \left( \frac{-X_{l}(w)}{\lambda} \right) = \frac{\gamma A }{\lambda} w^{\frac{2-\alpha}{\alpha-1}} \sW_u'(A w^{ \frac{1}{\alpha-1} }) \exp(\frac{-X_{l}(w)}{\lambda}) 
 \end{align}
    
 Finally we can derive the pdf of $w$ as follows: 
 
 \begin{align}
 f(w) &= \frac{\partial}{\partial w} \exp(-X_u(w)/ \lambda) - \frac{\partial}{\partial w} \exp(-X_l(w)/\lambda) \\
-&= \frac{\gamma}{\lambda w} \left[ \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right)} \exp\left(\frac{-X_{u}(w)}{\lambda}\right) - \frac{\sW_u(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_u(A w^{ \frac{1}{\alpha-1} }) \right)}  \exp\left(\frac{-X_{l}(w)}{\lambda}\right) \right]
+&= \frac{\gamma A }{\lambda} w^{\frac{2-\alpha}{\alpha-1}} \left[ \sW_l'(A w^{ \frac{1}{\alpha-1} }) \exp\left(\frac{-X_{u}(w)}{\lambda}\right) - \sW_u'(A w^{ \frac{1}{\alpha-1} }) \exp\left(\frac{-X_{l}(w)}{\lambda}\right) \right]
 \end{align}
 
 \section{Tail Index of $W$}
+
+\textcolor{red}{Start Here. I've fixed the definitions of $A$ and $X_u'/X_l'$ above, but not below.}
 
 Our next broad step is to compute the tail index of $W$. From Equation (1.1.29) of \citet{deH06}, this tail index is defined as
 %
