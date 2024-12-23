@@ -325,7 +325,7 @@ First, we recall a few facts that will be useful here:
     X_u(w) &= -\gamma (\alpha - 1) \sW_l\left[ - \frac{1}{\gamma (\alpha - 1)} \left( \frac{w}{c} \right)^{1 / (\alpha - 1)} \right]\\
     \sW_l'(w) &= \frac{\sW_l(w)}{w [1 + \sW_l(w)]} \label{eq:W_prime}\\
     X_u'(w) &= - \gamma A  w^{\frac{2-\alpha}{\alpha-1}} \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right)}\\
-    &= - \gamma A  w^{\frac{2-\alpha}{\alpha-1}} \sW_l'(A w^{ \frac{1}{\alpha-1} }),
+    &= - \gamma A  w^{\frac{2-\alpha}{\alpha-1}} \sW_l'(A w^{ \frac{1}{\alpha-1} }), \label{eq:X_u_prime}
 \end{align}
 %
 with equivalent expressions when the branches are reversed. We also recall our expression for the density, $f$:
@@ -343,6 +343,7 @@ The first new quantity we will obtain is the second derivative of $\sW$.
     \begin{equation}
         \sW''(w) = - \sW'(w)^2 \left(\frac{2 + \sW(w)}{1 + \sW(w)}\right) \label{eq:W_prime_prime}
     \end{equation}
+    \label{lem:W_prime_prime}
 \end{lemma}
 \begin{proof}
     The proof proceeds by routine, albeit messy, calculus and algebra. We start by applying the quotient rule to $\sW'$. For notational simplicity, we write $\sV(w) = 1 + \sW(w)$, and suppress the arguments from $\sW$ and $\sV$.
@@ -357,26 +358,24 @@ The first new quantity we will obtain is the second derivative of $\sW$.
         &= - (\sW')^2 \left( \frac{2 + \sW}{1 + \sW} \right),
     \end{align}
 \end{proof}
-
-\textcolor{red}{Start Here. I've fixed the definitions of $A$ and $X_u'$, $X_l'$ above, but not below.}
+where moving from \ref{eq:w_prime_prime_1} to \ref{eq:w_prime_prime_2} uses the definition of $\sV$.
 
 \begin{corollary}
     \begin{equation}
-        X_u''(w) = 
+        X_u''(w) = - \frac{\gamma A  w^{\frac{2-\alpha}{\alpha-1}}}{\alpha-1} \left[ (2-\alpha) w^{(3-2\alpha)(\alpha-1)} \sW'_l(A w^{1/(\alpha-1)}) + A w^{2(\alpha-1)} \sW_l''(A w^{1/(\alpha-1)}) \right]
     \end{equation}
 \end{corollary}
+\begin{proof}
+    This follows immediately from combining Equation \ref{eq:X_u_prime} with Lemma \ref{lem:W_prime_prime} and applying the product rule.
+\end{proof}
 
-where moving from \ref{eq:w_prime_prime_1} to \ref{eq:w_prime_prime_2} uses the definition of $\sV$. We are now equipped to start un-tangling the mess that is Equation \eqref{eq:wt_dens}. We start with $f'_u$ (defined in Equation \eqref{eq:f_u_f_l}). The structure of $f_l'$ will be analogous. 
+ We are now equipped to start un-tangling the mess that is Equation \eqref{eq:wt_dens}. We start with $f'_u$ (defined in Equation \eqref{eq:f_u_f_l}). The structure of $f_l'$ will be analogous. 
 
 \begin{align}
-    f'_u(w) &= - \left[ \frac{X_u''(w)}{\lambda} \exp \left( \frac{-X_u(w)}{\lambda} \right) - \frac{X_u'(w)^2}{\lambda^2} \exp \left( \frac{-X_u(w)}{\lambda} \right)\right]\\
-    &= \frac{\gamma}{\lambda} \exp \left( \frac{-X_u(w)}{\lambda} \right) \nabla_w \sW_l'(Aw^{1/(\alpha - 1)}) \\
-    &\hspace{1cm}- \frac{\gamma^2}{\lambda^2} \exp \left( \frac{-X_u(w)}{\lambda} \right) \sW_l'\left(A w^{1/(\alpha - 1)}\right)^2\\
-    &= \frac{\gamma}{\lambda} \exp \left( \frac{-X_u(w)}{\lambda} \right) \sW_l''(A w^{1/(\alpha - 1)}) \frac{A}{\alpha - 1}w^{\frac{2 - \alpha}{\alpha - 1}}\\
-    & \hspace{1cm} - \frac{\gamma^2}{\lambda^2} \exp \left( \frac{-X_u(w)}{\lambda} \right) \sW_l'\left(A w^{1/(\alpha - 1)}\right)^2. \label{eq:f_u_prime}
+    f'_u(w) &= - \left[ \frac{X_u''(w)}{\lambda} \exp \left( \frac{-X_u(w)}{\lambda} \right) - \frac{X_u'(w)^2}{\lambda^2} \exp \left( \frac{-X_u(w)}{\lambda} \right)\right] \label{eq:f_u_prime}
 \end{align}
 %
-This reduces $f'_u$ to an expression in terms of things we know how to compute, namely $X_u$, $\sW_l'$ and $\sW_l''$. The latter of these has an expression in terms of $\sW_l$ and $\sW_l'$ (Equation \eqref{eq:W_prime_prime}). Finally, $\sW_l'$ can be written in terms of $\sW_l$ (Equation \eqref{eq:W_prime}). An analogous expression holds for $f_l'$.
+This reduces $f'_u$ to an expression in terms of things we know how to compute, namely $X_u$ and its first two derivatives, which are themselves defined in terms of $\sW_l$ and its first two derivatives. These derivatives of $\sW$ can be expressed in terms of $\sW$ itself. An analogous expression holds for $f_l'$.
 
 \section*{Next Steps}
 \begin{itemize}
