@@ -28,6 +28,7 @@
 \newcommand{\dfdgfrac}{\frac{d \bF}{d \bG}}
 
 \newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
 
 
 \title{Gamma LRT}
@@ -300,7 +301,6 @@ f(w) &= \frac{\partial}{\partial w} \exp(-X_u(w)/ \lambda) - \frac{\partial}{\pa
 
 \section{Tail Index of $W$}
 
-\textcolor{red}{Start Here. I've fixed the definitions of $A$ and $X_u'/X_l'$ above, but not below.}
 
 Our next broad step is to compute the tail index of $W$. From Equation (1.1.29) of \citet{deH06}, this tail index is defined as
 %
@@ -324,8 +324,8 @@ First, we recall a few facts that will be useful here:
 \begin{align}
     X_u(w) &= -\gamma (\alpha - 1) \sW_l\left[ - \frac{1}{\gamma (\alpha - 1)} \left( \frac{w}{c} \right)^{1 / (\alpha - 1)} \right]\\
     \sW_l'(w) &= \frac{\sW_l(w)}{w [1 + \sW_l(w)]} \label{eq:W_prime}\\
-    X_u'(w) &= - \frac{\gamma}{w} \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right)}\\
-    &= - \gamma \sW_l'(A w^{ \frac{1}{\alpha-1} }),
+    X_u'(w) &= - \gamma A  w^{\frac{2-\alpha}{\alpha-1}} \frac{\sW_l(A w^{ \frac{1}{\alpha-1} })}{ \left( 1 + \sW_l(A w^{ \frac{1}{\alpha-1} }) \right)}\\
+    &= - \gamma A  w^{\frac{2-\alpha}{\alpha-1}} \sW_l'(A w^{ \frac{1}{\alpha-1} }),
 \end{align}
 %
 with equivalent expressions when the branches are reversed. We also recall our expression for the density, $f$:
@@ -357,6 +357,14 @@ The first new quantity we will obtain is the second derivative of $\sW$.
         &= - (\sW')^2 \left( \frac{2 + \sW}{1 + \sW} \right),
     \end{align}
 \end{proof}
+
+\textcolor{red}{Start Here. I've fixed the definitions of $A$ and $X_u'$, $X_l'$ above, but not below.}
+
+\begin{corollary}
+    \begin{equation}
+        X_u''(w) = 
+    \end{equation}
+\end{corollary}
 
 where moving from \ref{eq:w_prime_prime_1} to \ref{eq:w_prime_prime_2} uses the definition of $\sV$. We are now equipped to start un-tangling the mess that is Equation \eqref{eq:wt_dens}. We start with $f'_u$ (defined in Equation \eqref{eq:f_u_f_l}). The structure of $f_l'$ will be analogous. 
 
