@@ -383,6 +383,31 @@ This reduces $f'_u$ to an expression in terms of things we know how to compute, 
     \item Verify numerically that $f' = f_u' - f_l'$.
     \item Start thinking about how to evaluate the limit in \eqref{eq:tail_defn}.
 \end{itemize}
+
+\textcolor{red}{Payman:}
+\begin{itemize}
+    \item Verify/re-implement $\sW$, $\sW'$, $\sW''$, $X$, $X'$, $X''$; both branches
+        \subitem Unit tests (compare $\text{fun}'$ with numerical derivative of $\text{fun}$)
+    \item Implement $f'$ \& verify implementation of $f$; both branches
+        \subitem Unit tests
+    \item Organize code into package
+        \subitem \texttt{R} and \texttt{Julia} (start with former). Consider AI tools for translating between languages.
+        \subitem How to organize functions in package?
+        \subitem Skeleton of our method.
+        \subitem Document functions.
+\end{itemize}
+
+\textcolor{red}{William:}
+\begin{itemize}
+    \item What can we say about the value of the limit in \eqref{eq:tail_defn}?
+    \item What can we say about convergence of SA algorithm in our problem?
+\end{itemize}
+
+\textcolor{red}{Jan 17, 2025}
+\begin{itemize}
+    \item Make package project
+    \item Implement and test $\sW$, $X$ and their (first and second) derivatives. See how much progress you make. Try to at least get through $\sW$ and $\sW'$ and their unit tests. 
+\end{itemize}
         
 
 \bibliographystyle{apalike}
