@@ -229,7 +229,7 @@ where $\sW_l \leq \sW_u$ are two (possibly equal) real-valued branches of the La
 
 Recall that the function $h$ has an upper bound, $h \leq (a / eb)^a$. Applying this bound to our expression for $W$, Equation \eqref{eq:W_of_X}, we get
 \begin{align}
-W &\leq c \left[ \frac{\gamma (\alpha - 1)}{e} \right]^{\alpha - 1}\\
+W &\leq c \left[ \frac{\gamma (\alpha - 1)}{e} \right]^{\alpha - 1} \label{eq:W_max}\\
 &:= W_* \nonumber
 \end{align}
 
@@ -400,6 +400,7 @@ This reduces $f'_u$ to an expression in terms of things we know how to compute, 
 \textcolor{red}{William:}
 \begin{itemize}
     \item What can we say about the value of the limit in \eqref{eq:tail_defn}?
+        \subitem There actually isn't much to say. We have an analytical expression for the upper bound on $W$, $W^*$ (Equation \eqref{eq:W_max}), and an analytical expression for \eqref{eq:tail_defn} (Equation \eqref{eq:alt_tail_defn} and our various expressions obtained elsewhere for $F$, $f$ and $f'$). By continuity, the limit can be computed by just evaluating the function at the upper bound of its domain (I don't see any reason that the function wouldn't be continuous, although I haven't really looked that closely yet). While I don't think we could learn much doing this by hand, it does mean that we have a computable expression for the tail index. Great news!
     \item What can we say about convergence of SA algorithm in our problem?
 \end{itemize}
 
