@@ -35,11 +35,6 @@
     \titlepage
 \end{frame}
 
-\begin{frame}
-    \centering
-    \includegraphics[height=0.9\textheight]{Figures/RichCon2.png}
-\end{frame}
-
 \begin{frame}{Introduction}
     \begin{outline}
         \1 Importance sampling \newline
@@ -246,10 +241,10 @@
 
 \begin{frame}{Stochastic Approximation}
     \begin{outline}
-        \1 Actually, we want to maximize a population-level analog: $\overline{ESS}$ \newline
+        \1 Actually, we want to maximize a population-level analog: $ESS^*$ \newline
 
-        \1 If we had $\overline{ESS}$, we would do gradient ascent
-            \2 $\theta_{k+1} = \theta_k + \alpha \nabla \overline{ESS}(\theta_k)$ \newline
+        \1 If we had $ESS^*$, we would do gradient ascent
+            \2 $\theta_{k+1} = \theta_k + \alpha \nabla ESS^*(\theta_k)$ \newline
 
         \1 Instead, do gradient ascent on $ESS$
             \2 $\hat{\theta}_{k+1} = \hat{\theta}_k + \alpha_k \nabla ESS(\hat{\theta}_k)$
@@ -304,11 +299,25 @@
 \end{frame}
 
 \begin{frame}{Example: Mystery Target}
+    \begin{outline}
+        \1 Performance tends to be better if we average all the estimates \newline
+
+        \1 Call this $\bar{\theta}$
+    \end{outline}
+\end{frame}
+
+\begin{frame}{Example: Mystery Target}
     \centering
     \includegraphics[height=0.7\textheight, width=0.45\textwidth]{Figures/ESS mean traj.pdf}%
     \includegraphics[height=0.7\textheight, width=0.45\textwidth]{Figures/PS mean traj.pdf} \newline
     \begin{outline}
         $\bar{\theta}_\mathrm{end}^{(ESS)} \approx -1 \times 10^{-4}$ \hspace{1.5cm} $\bar{\theta}_\mathrm{end}^{(PS)} \approx 2 \times 10^{-5}$
+    \end{outline}
+\end{frame}
+
+\begin{frame}{Another Example}
+    \begin{outline}
+        \1 
     \end{outline}
 \end{frame}
 
@@ -342,9 +351,6 @@
 %     \end{itemize}
 % \end{frame}
 
-\begin{frame}{Acknowledgements}
-    \includegraphics[width=\textwidth]{Figures/Convocation Image.jpg}
-\end{frame}
 
 \begin{frame}
     \centering
