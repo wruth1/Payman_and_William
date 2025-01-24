@@ -27,7 +27,7 @@ f = function(x){
 # For any values of x and \mu, returns the p.d.f of N(\mu,1)
 #
 g = function(x, sigma){
-  (1/(sigma * sqrt(2*pi))) * exp(-0.5 * (x)^2 / sigma)
+  (1/(sigma * sqrt(2*pi))) * exp(-0.5 * (x)^2 / sigma^2)
 }
 
 
