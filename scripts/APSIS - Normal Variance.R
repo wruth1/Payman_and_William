@@ -17,7 +17,8 @@ plot_dir = "Presentations/RichCon 2024/Figures/"
 # The function Takes x and returns p.d.f of N(0,1)
 #
 f = function(x){
-  ( 1/sqrt(2*pi) ) * exp( -0.5*(x)^2 )
+  mu = 1
+  ( 1/sqrt(2*pi) ) * exp( -0.5*(x - mu)^2 )
 }
 
 
@@ -31,7 +32,7 @@ g = function(x, sigma){
 }
 
 
-sample_from_proposal = function(n, simga){
+sample_from_proposal = function(n, sigma){
   u = rnorm(n = n, mean = 0, sd = sigma)
   return(u)
 }
@@ -50,38 +51,194 @@ get_wts = function(Xs, sigma){
 # ---------------------------------------------------------------------------- #
 
 
-# Use fit_GPD(W) to estimate the parameters for the generalized Pareto distribution from a vector of weights, W
 
 
-
-
-
-k_hat_of_theta <- function(theta, n) {
+theta_2_k_hat <- function(theta, n) {
   Xs = sample_from_proposal(n, theta)
   wts = get_wts(Xs, theta)
   pareto_smooth(wts, M_keep = "default", return_k = TRUE)$k_hat
 }
 
-
-grad_k_hat_of_theta = function(theta, Xs, delta = sqrt(.Machine$double.eps)) {
-  Xs_plus = Xs + delta
-  
+Xs_2_k_hat <- function(theta, Xs) {
   wts = get_wts(Xs, theta)
-  wts_plus = get_wts(Xs_plus, theta + delta)
-  
-  k_hat = pareto_smooth(wts, M_keep = "default", return_k = TRUE)$k_hat
-  k_hat_plus = pareto_smooth(wts_plus, M_keep = "default", return_k = TRUE)$k_hat
-  (k_hat_plus - k_hat) / delta
+  pareto_smooth(wts, M_keep = "default", return_k = TRUE)$k_hat
 }
 
 
+theta_2_grad_k_hat = function(theta, n, delta = sqrt(.Machine$double.eps)) {
+ 
+  theta_plus = theta + delta
+  theta_minus = theta - delta
+
+  Xs_plus = sample_from_proposal(n, theta_plus)
+  Xs_minus = sample_from_proposal(n, theta_minus)
+
+  wts_plus = get_wts(Xs_plus, theta_plus)
+  wts_minus = get_wts(Xs_minus, theta_minus)
+  
+  k_hat_plus = pareto_smooth(wts_plus, M_keep = "default", return_k = TRUE)$k_hat
+  k_hat_minus = pareto_smooth(wts_minus, M_keep = "default", return_k = TRUE)$k_hat
+  grad_hat = (k_hat_plus - k_hat_minus) / (2 * delta)
+
+  return(grad_hat)
+}
+
+Xs_2_grad_k_hat = function(theta, Xs, delta = sqrt(.Machine$double.eps)) {
+ 
+  Xs_plus = Xs                                                                          #! Need to more explicitly handle dependance of Xs on theta
+  Xs_minus = Xs
+
+  theta_plus = theta + delta
+  theta_minus = theta - delta
+
+  wts_plus = get_wts(Xs_plus, theta_plus)
+  wts_minus = get_wts(Xs_minus, theta_minus)
+  
+  k_hat_plus = pareto_smooth(wts_plus, M_keep = "default", return_k = TRUE)$k_hat
+  k_hat_minus = pareto_smooth(wts_minus, M_keep = "default", return_k = TRUE)$k_hat
+  grad_hat = (k_hat_plus - k_hat_minus) / (2 * delta)
+
+  return(grad_hat)
+}
+
+
+# ------------------------------- Test Gradient ------------------------------ #
+
+set.seed(1)
+theta = 3
+n_test = 1000000
+
+
+(math_grad = theta_2_grad_k_hat(theta, n_test, delta = (.Machine$double.eps)^(1/4)))
+(num_grad = numDeriv::grad(func = theta_2_k_hat, x = theta, n = n_test))
+
+rel_err = abs((num_grad - math_grad) / num_grad)
+testthat::expect_true(rel_err < 1e-2)
 
 
 
 
+#* Note: I tried theta = 2, 0.5 and 3. Much better results with 0.5
+
+set.seed(1)
+theta = 3
+n_test = 10000
+delta = (.Machine$double.eps)^(1/4)
+
+
+Xs = sample_from_proposal(n_test, theta)
+Xs_plus = Xs * (theta + delta) / theta
+Xs_minus = Xs * (theta - delta) / theta
+
+math_grad = Xs_2_grad_k_hat(theta, Xs_plus, Xs_minus, delta = delta)
+num_grad = numDeriv::grad(func = Xs_2_k_hat, x = theta, Xs = Xs)
+
+rel_err = abs((num_grad - math_grad) / num_grad)
+testthat::expect_true(rel_err < 1e-2)
+
+
+# --------------- Functions involving log(sigma), denoted zeta --------------- #
+
+zeta_sample_from_proposal = function(n, zeta){
+  sigma = exp(zeta)
+  Xs = sample_from_proposal(n, sigma)
+  return(Xs)
+}
+
+
+zeta_2_k_hat <- function(zeta, n) {
+  sigma = exp(zeta)
+  theta_2_k_hat(sigma, n)
+}
+
+zeta_Xs_2_k_hat <- function(zeta, Xs) {
+  sigma = exp(zeta)
+  Xs_2_k_hat(sigma, Xs)
+}
+
+zeta_Xs_2_grad_k_hat <- function(zeta, Xs, delta = sqrt(.Machine$double.eps)) {
+  sigma = exp(zeta)
+  d_k_d_sigma = Xs_2_grad_k_hat(sigma, Xs, delta)
+
+  d_sigma_d_zeta = exp(zeta)
+  grad_hat = d_k_d_sigma * d_sigma_d_zeta
+
+  return(grad_hat)
+}
+
+# ---------------------------- Test zeta gradient ---------------------------- #
+
+
+set.seed(1)
+zeta = 1.5
+n_test = 10000
+
+Xs = zeta_sample_from_proposal(n_test, zeta)
+
+math_grad = zeta_Xs_2_grad_k_hat(zeta, Xs, delta = (.Machine$double.eps)^(1/3))
+num_grad = numDeriv::grad(func = zeta_Xs_2_k_hat, x = zeta, Xs = Xs)
+
+rel_err = abs((num_grad - math_grad) / num_grad)
+testthat::expect_true(rel_err < 1e-2)
 
 
 
+# ---------------------------------------------------------------------------- #
+#                           Stochastic Approximation                           #
+# ---------------------------------------------------------------------------- #
+
+n_SA = 1000
+
+step_size_power = 1   # Step size at iteration i is 1/i^step_size_power
+grad_step_size_power = 0.25
+
+# Test that step size powers are valid
+if(step_size_power > 1) stop("Step sizes must have divergent sum (i.e. step size power must be at most 1)")
+if(step_size_power + grad_step_size_power <= 1) stop("Product of step sizes must have convergent sum (i.e. step size powers must satisfy step_size_power + grad_step_size_power > 1)")
+if(step_size_power - grad_step_size_power <= 0.5) stop("Ratio of squared step sizes must have convergent sum (i.e. step size powers must satisfy step_size_power - grad_step_size_power > 0.5)")
+
+
+
+# Setup algorithm
+zeta_old = 3
+
+num_iterations = 2000
+
+zeta_traj = numeric(num_iterations+1)
+zeta_traj[1] = zeta_old
+
+k_hat_traj = numeric(num_iterations+1)
+k_hat_traj[1] = zeta_2_k_hat(zeta_old, n_SA)
+
+grad_k_hat_traj = numeric(num_iterations+1)
+grad_k_hat_traj[1] = zeta_Xs_2_grad_k_hat(zeta_old, zeta_sample_from_proposal(n_SA, zeta_old))
+
+
+for(i in 1:num_iterations){
+  if(i %% 100 == 0) print(paste0("Iteration ", i, " of ", num_iterations))
+  
+  this_Xs = zeta_sample_from_proposal(n_SA, zeta_old)
+  this_grad_hat = zeta_Xs_2_grad_k_hat(zeta_old, this_Xs, delta = 1/i^grad_step_size_power)
+  
+  this_step_len = 1/i^step_size_power
+  
+  zeta_new = zeta_old - this_step_len * this_grad_hat   #* Subtracting the gradient here moves us downhill
+
+
+
+  k_hat_traj[i+1] = zeta_2_k_hat(zeta_new, n_SA)
+  grad_k_hat_traj[i+1] = zeta_Xs_2_grad_k_hat(zeta_new, zeta_sample_from_proposal(n_SA, zeta_new))
+
+  zeta_traj[i+1] = zeta_new
+  zeta_old = zeta_new
+}
+
+plot(zeta_traj)
+plot(exp(zeta_traj), ylab = "sigma")
+plot(k_hat_traj)
+plot(grad_k_hat_traj)
+
+k_hat_traj
 
 
 
