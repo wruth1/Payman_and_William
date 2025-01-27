@@ -79,11 +79,11 @@
         \1 $\varphi(X) = X^2$ \newline
 
         \1 Try some proposals:
-            \2 $G_1 \sim N(0.1,1)$
-            \2 $G_2 \sim N(1.5,1)$ \newline
+            \2 $G_1 \sim N(0, 2^2)$
+            \2 $G_2 \sim N(0, 0.6^2)$ \newline
         \1 Use $M=1000$ samples from proposal
-            \2 $\hat{\bE}_1 = 1.07$, $SD = 0.05$
-            \2 $\hat{\bE}_2 = 1.04$, $SD = 0.19$
+            \2 $\hat{\bE}_1 = 0.99$, $\hat{\text{SD}} = 1.97$
+            \2 $\hat{\bE}_2 = 1.10$, $\hat{\text{SD}} = 2.32$
     \end{outline}    
 \end{frame}
 
@@ -94,6 +94,9 @@
 
 \begin{frame}{Importance Sampling}
     \begin{outline}
+        \1 $G_1$ weights look fine
+        \1 $G_2$ weights dominated by one large value \newline
+
         \1 We can make this difference precise
         \1 ``Effective Sample Size'':
     \end{outline}
@@ -106,7 +109,7 @@
     \centering
     \includegraphics[height=0.7\textheight, width=0.9\textwidth, keepaspectratio]{Figures/Wt Hist.pdf} \newline
     \begin{outline}
-        $ESS_1 \approx 989$ \hspace{2.5cm} $ESS_2 \approx 131$
+        $ESS_1 \approx 662$ \hspace{2.5cm} $ESS_2 \approx 54$
     \end{outline}
 \end{frame}
 
@@ -148,8 +151,11 @@
     \setbeamertemplate{enumerate items}[default]
     \begin{enumerate}
         \item Choose a threshold
-        \item Set any weights above threshold equal to threshold
+        \item Apply hard thresholding to any large weights \newline
     \end{enumerate}
+    \begin{outline}
+        \1 Still consistent for the target
+    \end{outline}
 \end{frame}
 
 \begin{frame}{Example: Mystery Target}
@@ -166,8 +172,8 @@
     \centering
     \includegraphics[height=0.7\textheight, width=0.9\textwidth, keepaspectratio]{Figures/Wt Hist - Trunc.pdf} \newline
     \begin{outline}
-        $ESS_1 \approx 989$ \hspace{2.5cm} $ESS_2 \approx 131$\\
-        $ESS_1^{(\mathrm{trunc})} \approx 989$ \hspace{2.5cm} $ESS_2^{(\mathrm{trunc})} \approx 144$
+        $ESS_1 \approx 662$ \hspace{2.5cm} $ESS_2 \approx 54$\\
+        $ESS_1^{(\mathrm{trunc})} \approx 662$ \hspace{2.5cm} $ESS_2^{(\mathrm{trunc})} \approx 245$
     \end{outline}
 \end{frame}
 
@@ -200,7 +206,10 @@
 
 \begin{frame}{Example: Mystery Target}
     \centering
-    \includegraphics[height=0.9\textheight, width=0.9\textwidth, keepaspectratio]{Figures/Wt Hist - Pareto Dens.pdf}
+    \includegraphics[height=0.7\textheight, width=0.9\textwidth, keepaspectratio]{Figures/Wt Hist - Pareto Dens.pdf} \newline
+    \begin{outline}
+        $\hat{k}_1 \approx -1.81$ \hspace{2cm} $\hat{k}_2 \approx 0.72$
+    \end{outline}
 \end{frame}
 
 \begin{frame}{Example: Mystery Target}
@@ -215,11 +224,11 @@
 
 \begin{frame}{Example: Mystery Target}
     \centering
-    \includegraphics[height=0.5\textheight, width=0.9\textwidth, keepaspectratio]{Figures/Wt Hist - Pareto Smooth.pdf}\newline
+    \includegraphics[height=0.5\textheight, width=0.9\textwidth]{Figures/Wt Hist - Pareto Smooth.pdf}\newline
     \begin{outline}
-        $ESS_1 \approx 989$ \hspace{2.5cm} $ESS_2 \approx 131$\\
-        $ESS_1^{(\mathrm{trunc})} \approx 989$ \hspace{2.5cm} $ESS_2^{(\mathrm{trunc})} \approx 144$\\
-        $ESS_1^{(\mathrm{PS})} \approx 989$ \hspace{2.5cm} $ESS_2^{(\mathrm{PS})} \approx 135$
+        $ESS_1 \approx 662$ \hspace{2.5cm} $ESS_2 \approx 54$\\
+        $ESS_1^{(\mathrm{trunc})} \approx 662$ \hspace{2.5cm} $ESS_2^{(\mathrm{trunc})} \approx 245$\\
+        $ESS_1^{(\mathrm{PS})} \approx 662$ \hspace{2.5cm} $ESS_2^{(\mathrm{PS})} \approx 160$
     \end{outline}
 \end{frame}
 
@@ -251,16 +260,20 @@
     \end{outline}
 \end{frame}
 
+
 \begin{frame}{Stochastic Approximation}
     \begin{outline}
-        \1 Stochastic approximation
+        \1 Originally developed for root finding with noise
             \2 \citep{Rob51} \newline
 
-        \1 Finite difference approximation to  $\nabla ESS$
-            \2 \citep{Kie52}
+        \1 Quickly adapted for optimization
+            \2 Use noisy evaluations for finite difference
+            \2 \citep{Kie52} \newline
+
+        \1 Very well developed theory
+        \1 Stochastic gradient descent
     \end{outline}
 \end{frame}
-
 
 \begin{frame}{Example: Mystery Target}
     \centering
