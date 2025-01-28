@@ -438,29 +438,182 @@ update_sigma_using_rho <- function(sigma_old, step_size, Xs, wts){
 
 set.seed(1)
 
-zeta_old = log(0.9)                         #! Check if I can get away with log(0.5) or log(0.3). rho is infinite for sigma^2 < 0.5
+# Note: ESS is undefined for sigma < sqrt(0.5) \approx 0.71
+# Candidate values that seem to be working numerically: 0.5, 0.75, 0.9
+sigma_old = 0.8
 
 step_size_power = 1
 
 B_EG_ESS = 100
 
-all_zetas = numeric(B_EG_ESS + 1)
-all_zetas[1] = zeta_old
+all_sigmas = numeric(B_EG_ESS + 1)
+all_sigmas[1] = sigma_old
+
+all_ESS = numeric(B_EG_ESS)
 
 for(i in 1:B_EG_ESS){
   if(i %% 10 == 0) print(paste0(i, " of ", B_EG_ESS))
 
-  sigma_old = exp(zeta_old)
   Xs = sample_from_proposal(n_EG, sigma_old)
-  log_wts = get_log_wts(Xs, sigma_old)
   wts = get_wts(Xs, sigma_old)
   step_size = 1/i^step_size_power
-  zeta_new = update_zeta_using_rho(zeta_old, step_size, Xs, wts)
+  sigma_new = update_sigma_using_rho(sigma_old, step_size, Xs, wts)
 
-  all_zetas[i+1] = zeta_new
-  zeta_old = zeta_new
+  all_sigmas[i+1] = sigma_new
+  sigma_old = sigma_new
+
+  this_ESS = get_ESS(wts)
+  all_ESS[i] = this_ESS
 
 }
+
+print(all_sigmas)
+print(all_ESS)
+
+some_sigma_trajectories = list()
+some_sigma_trajectories[["0.8"]] = all_sigmas
+
+
+#* Make plots
+pdf(paste0(plot_dir, "ESS Traj - 0,5.pdf"), width=10, height=7)
+plot(some_sigma_trajectories[["0.5"]], type = "l", ylab = TeX(r'($\hat{\sigma}$)'), xlab = "Iteration", main = TeX(r"($\hat{\sigma}_0 = 0.5$)"))
+abline(h = 1, col = "red", lwd = 2)
+dev.off()
+
+pdf(paste0(plot_dir, "ESS Traj - 0,9.pdf"), width=10, height=7)
+plot(some_sigma_trajectories[["0.9"]], type = "l", ylab = TeX(r'($\hat{\sigma}$)'), xlab = "Iteration", main = TeX(r"($\hat{\sigma}_0 = 0.9$)"))
+abline(h = 1, col = "red", lwd = 2)
+dev.off()
+
+pdf(paste0(plot_dir, "ESS Traj - 2.pdf"), width=10, height=7)
+plot(some_sigma_trajectories[["2"]], type = "l", ylab = TeX(r'($\hat{\sigma}$)'), xlab = "Iteration", main = TeX(r"($\hat{\sigma}_0 = 2$)"))
+abline(h = 1, col = "red", lwd = 2)
+dev.off()
+
+pdf(paste0(plot_dir, "ESS Traj - 10.pdf"), width=10, height=7)
+plot(some_sigma_trajectories[["10"]], type = "l", ylab = TeX(r'($\hat{\sigma}$)'), xlab = "Iteration", main = TeX(r"($\hat{\sigma}_0 = 10$)"))
+abline(h = 1, col = "red", lwd = 2)
+dev.off()
+
+
+
+
+# ------------------ Stochastic Approximation - Pareto Tail ------------------ #
+
+  Xs_2_k_hat <- function(theta, Xs) {
+    wts = get_wts(Xs, theta)
+    pareto_smooth(wts, M_keep = "default", return_k = TRUE)$k_hat
+  }
+
+
+d_k_hat_d_sigma <- function(sigma, Xs){
+  numDeriv::grad(func = Xs_2_k_hat, x = sigma, Xs = Xs)
+}
+
+score_g_one_sample <- function(sigma, Xs){
+  all_scores = (Xs^2 - sigma^2) / (sigma^3)
+  return(sum(all_scores))                       #! Should this be mean? It would likely work better if it is ***********************
+}
+
+
+grad_k_hat <- function(sigma, Xs){
+  A = d_k_hat_d_sigma(sigma, Xs)
+
+  B = Xs_2_k_hat(sigma, Xs)
+  C = score_g_one_sample(sigma, Xs)
+
+  return(A + B*C)
+}
+
+
+
+
+#* Run one iteration of SA
+
+
+# Setup cluster
+# cl = makeCluster(detectCores() - 2)
+# cl = makeCluster(15)
+cl = makeCluster(10)
+# clusterExport(cl, c("N", "b_Y", "theta_Y", "b_M", "theta_M", "which_REs"))
+clusterExport(cl, c("sample_from_proposal", "grad_k_hat", "n_EG", "d_k_hat_d_sigma", "Xs_2_k_hat", "score_g_one_sample", "sigma", "get_wts", "f", "g"))
+clusterEvalQ(cl, {
+    source("src/Pareto_Smoothing.R")
+})
+clusterSetRNGStream(cl = cl, 11111111)
+
+set.seed(1)
+
+sigma = 0.5
+n_EG = 50
+clusterExport(cl, c("sigma", "n_EG"))
+
+num_reps_grad_k_hat = 1000
+some_grad_k_hats = pbsapply(seq_len(num_reps_grad_k_hat), function(i){
+  Xs = sample_from_proposal(n_EG, sigma)
+  
+  k_hat_prime = d_k_hat_d_sigma(sigma, Xs)
+  k_hat = Xs_2_k_hat(sigma, Xs)
+  score = score_g_one_sample(sigma, Xs)
+
+  grad_k_hat = k_hat_prime + k_hat * score
+
+  output = c(k_hat_prime = k_hat_prime, k_hat = k_hat, score = score, grad_k_hat = grad_k_hat)
+  return(output)
+  # grad_k_hat(sigma, Xs)
+}, cl = cl) %>% t()
+
+(grad_k_hat_COVs = apply(some_grad_k_hats, 2, function(X) sd(X)/mean(X)))
+(grad_k_hat_means = apply(some_grad_k_hats, 2, mean))
+(grad_k_hat_SEs = apply(some_grad_k_hats, 2, sd) / sqrt(num_reps_grad_k_hat))
+
+some_grad_k_hats_old = some_grad_k_hats
+# some_grad_k_hats = c(some_grad_k_hats, some_grad_k_hats_old)
+
+stopCluster(cl)
+
+mean(some_grad_k_hats)
+sd(some_grad_k_hats) / sqrt(num_reps_grad_k_hat)
+
+Xs = sample_from_proposal(n_EG, sigma)
+this_grad_k_hat = grad_k_hat(sigma, Xs)
+
+
+
+
+# ------------------------ Variability of ESS vs k-hat ----------------------- #
+
+
+set.seed(1)
+
+sigma = 5e-1
+n_var_comp = 1000
+M_var_comp = 10000
+
+
+some_ESS_comp = numeric(M_var_comp)
+some_k_hats_comp = numeric(M_var_comp)
+
+data_comp_raw = pbsapply(seq_len(M_var_comp), function(i){
+  Xs = sample_from_proposal(n_var_comp, sigma)
+
+  #* ESS
+  wts = get_wts(Xs, sigma)
+  ESS = get_ESS(wts)
+  rho = mean(wts^2)
+
+  #* k-hat
+  k_hat = Xs_2_k_hat(sigma, Xs)
+  
+  c(ESS = ESS, rho = rho, k_hat = k_hat)
+}) %>% t()
+
+(info_comp = apply(data_comp_raw, 2, function(X) c(mean = mean(X), SE = sd(X)/sqrt(M_var_comp), CV = sd(X)/mean(X))))
+
+
+info_comp_0001 = info_comp
+
+
 
 # ---------------------------------------------------------------------------- #
 #                           Stochastic Approximation                           #

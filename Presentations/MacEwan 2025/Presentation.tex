@@ -22,9 +22,9 @@
 
 \newcommand{\GLMMs}{Mixed-Effects Models}
 
-\title[]{Adaptive Pareto Smoothed Importance Sampling}
+\title[]{Selected Topics}
 \author{William Ruth}
-\institute[]{Joint work with Payman Nickchi}
+\institute[]{Université de Montréal}
 \date{\vspace{-3cm}}
 % \titlegraphic{\includegraphics[width=2cm]{../Logos/CANSSI_Logo.png} \hspace{2cm} \includegraphics[width=4cm]{../Logos/Logo_UdeM-CMJN.jpg}}
 
@@ -35,7 +35,23 @@
     \titlepage
 \end{frame}
 
-\begin{frame}{Introduction}
+\begin{frame}{Topics}
+    \begin{outline}
+        \1 Adaptive Pareto Smoothed Importance Sampling \newline
+        \1 Multilevel Causal Mediation Analysis \newline
+        \1 Modelling Tuberculosis in Foreign-Born Canadians
+    \end{outline}
+\end{frame}
+
+\begin{frame}{Topics}
+    \begin{outline}
+        \1 \textbf{Adaptive Pareto Smoothed Importance Sampling} \newline
+        \1 Multilevel Causal Mediation Analysis \newline
+        \1 Modelling Tuberculosis in Foreign-Born Canadians
+    \end{outline}
+\end{frame}
+
+\begin{frame}{Outline}
     \begin{outline}
         \1 Importance sampling \newline
         \1 Measuring performance \newline
@@ -250,13 +266,13 @@
 
 \begin{frame}{Stochastic Approximation}
     \begin{outline}
-        \1 Actually, we want to maximize a population-level analog: $ESS^*$ \newline
+        \1 Actually, we want to maximize a population-level analog: $\rho \approx \frac{N}{ESS}$ \newline
 
-        \1 If we had $ESS^*$, we would do gradient ascent
-            \2 $\theta_{k+1} = \theta_k + \alpha \nabla ESS^*(\theta_k)$ \newline
+        \1 If we had $\rho$, we would do gradient descent
+            \2 $\theta_{k+1} = \theta_k - \alpha \nabla \rho(\theta_k)$ \newline
 
-        \1 Instead, do gradient ascent on $ESS$
-            \2 $\hat{\theta}_{k+1} = \hat{\theta}_k + \alpha_k \nabla ESS(\hat{\theta}_k)$
+        \1 Instead, do gradient descent on $\hat{\rho}$
+            \2 $\hat{\theta}_{k+1} = \hat{\theta}_k - \alpha_k \nabla \hat{\rho}(\hat{\theta}_k)$
     \end{outline}
 \end{frame}
 
@@ -268,20 +284,50 @@
 
         \1 Quickly adapted for optimization
             \2 Use noisy evaluations for finite difference
-            \2 \citep{Kie52} \newline
+            \2 \citep{Kie52} 
+    \end{outline}
+\end{frame}
 
+\begin{frame}{Stochastic Approximation}
+    \begin{outline}
         \1 Very well developed theory
+        \1 Step size $\rightarrow$ 0 \newline
+
         \1 Stochastic gradient descent
+            \2 Resample a (very) large dataset
+
     \end{outline}
 \end{frame}
 
 \begin{frame}{Example: Mystery Target}
     \centering
-    \includegraphics[height=0.7\textheight, width=0.9\textwidth, keepaspectratio]{Figures/ESS traj.pdf} \newline
-    \begin{outline}
-        $\hat{\theta}_\mathrm{end}^{(ESS)} \approx -8 \times 10^{-4}$ \hspace{1cm} $ESS_\mathrm{end} \approx 1000 - (7 \times 10^{-4})$
-    \end{outline}
+    \includegraphics[height=0.9\textheight, width=0.9\textwidth, keepaspectratio]{Figures/ESS Traj - 0,5.pdf}
 \end{frame}
+
+\begin{frame}{Example: Mystery Target}
+    \centering
+    \includegraphics[height=0.9\textheight, width=0.9\textwidth, keepaspectratio]{Figures/ESS Traj - 0,9.pdf}
+\end{frame}
+
+\begin{frame}{Example: Mystery Target}
+    \centering
+    \includegraphics[height=0.9\textheight, width=0.9\textwidth, keepaspectratio]{Figures/ESS Traj - 2.pdf}
+\end{frame}
+
+\begin{frame}{Example: Mystery Target}
+    \centering
+    \includegraphics[height=0.9\textheight, width=0.9\textwidth, keepaspectratio]{Figures/ESS Traj - 10.pdf}
+\end{frame}
+
+
+%! This resembles the previous slide
+% \begin{frame}{Example: Mystery Target}
+%     \centering
+%     \includegraphics[height=0.7\textheight, width=0.9\textwidth, keepaspectratio]{Figures/ESS traj.pdf} \newline
+%     \begin{outline}
+%         $\hat{\theta}_\mathrm{end}^{(ESS)} \approx -8 \times 10^{-4}$ \hspace{1cm} $ESS_\mathrm{end} \approx 1000 - (7 \times 10^{-4})$
+%     \end{outline}
+% \end{frame}
 
 
 \begin{frame}{Our Method}
@@ -293,46 +339,95 @@
     \end{outline}
 \end{frame}
 
+
+%! Consider adding this back in. I haven't yet found a way to present the numerics that I feel confident about
+% \begin{frame}{Our Method}
+%     \begin{outline}
+%         \1 Consider repeated sampling with $\sigma = 0.5$ (hard)
+%         \1 For each sample, estimate $\rho$ and $k$ \newline
+
+%         \1 Coefficient of Variation:
+%             \2 $\hat{\rho}$: $5.06$
+%             \2 $\hat{k}$: $0.22$
+%     \end{outline}
+    
+% %     \centering
+% %   \begin{tabular}{|c|c c|}
+% %     \hline
+% %     & $\hat{\rho}$ & $\hat{k}$ \\
+% %     \hline
+% %     Mean & 29.6 & 0.65 \\ 
+% %     Standard Error & 15.0 & 0.01 \\ 
+% %     Coefficient of Variation & {5.1} & {0.22}\\
+% %     \hline
+% %   \end{tabular}
+% \end{frame}
+
+% \begin{frame}{Our Method}
+%     \centering
+%   \begin{tabular}{|c|c c|}
+%     \hline
+%     & $\hat{\rho}$ & $\hat{k}$ \\
+%     \hline
+%     Mean & 29.6 & 0.65 \\ 
+%     Standard Error & 15.0 & 0.01 \\ 
+%     \textbf{Coefficient of Variation} & \textbf{5.1} & \textbf{0.22}\\
+%     \hline
+%   \end{tabular}
+% \end{frame}
+
 \begin{frame}{Our Method}
     \begin{outline}
         \1 Use diagnostic as objective function \newline
 
         \1 Apply stochastic approximation to minimize $\hat{k}$
-            \2 More precisely, $k(\theta)$
+            \2 More precisely, its population analog: $k(\theta)$
     \end{outline}
 \end{frame}
 
 
-\begin{frame}{Example: Mystery Target}
-    \centering
-    \includegraphics[height=0.7\textheight, width=0.9\textwidth, keepaspectratio]{Figures/PS traj.pdf} \newline
+\begin{frame}{Our Method}
     \begin{outline}
-        $\hat{\theta}_\mathrm{end}^{(PS)} \approx 4 \times 10^{-3}$ \hspace{5cm}
+        \1 Results: plot trajectories for the same values of sigma used above for ESS
+
+        % \1 Connect back to how much worse we expect things to be in high dimensions
+        %     \2 Can I do a high-dimensional version of the above problem?
+
+        % \1 Consider cumulative averaging to emphasize differences. Don't really need to include this.
     \end{outline}
 \end{frame}
 
-\begin{frame}{Example: Mystery Target}
-    \begin{outline}
-        \1 Performance tends to be better if we average all the estimates \newline
 
-        \1 Call this $\bar{\theta}$
-    \end{outline}
-\end{frame}
+% \begin{frame}{Example: Mystery Target}
+%     \centering
+%     \includegraphics[height=0.7\textheight, width=0.9\textwidth, keepaspectratio]{Figures/PS traj.pdf} \newline
+%     \begin{outline}
+%         $\hat{\theta}_\mathrm{end}^{(PS)} \approx 4 \times 10^{-3}$ \hspace{5cm}
+%     \end{outline}
+% \end{frame}
 
-\begin{frame}{Example: Mystery Target}
-    \centering
-    \includegraphics[height=0.7\textheight, width=0.45\textwidth]{Figures/ESS mean traj.pdf}%
-    \includegraphics[height=0.7\textheight, width=0.45\textwidth]{Figures/PS mean traj.pdf} \newline
-    \begin{outline}
-        $\bar{\theta}_\mathrm{end}^{(ESS)} \approx -1 \times 10^{-4}$ \hspace{1.5cm} $\bar{\theta}_\mathrm{end}^{(PS)} \approx 2 \times 10^{-5}$
-    \end{outline}
-\end{frame}
+% \begin{frame}{Example: Mystery Target}
+%     \begin{outline}
+%         \1 Performance tends to be better if we average all the estimates \newline
 
-\begin{frame}{Another Example}
-    \begin{outline}
-        \1 
-    \end{outline}
-\end{frame}
+%         \1 Call this $\bar{\theta}$
+%     \end{outline}
+% \end{frame}
+
+% \begin{frame}{Example: Mystery Target}
+%     \centering
+%     \includegraphics[height=0.7\textheight, width=0.45\textwidth]{Figures/ESS mean traj.pdf}%
+%     \includegraphics[height=0.7\textheight, width=0.45\textwidth]{Figures/PS mean traj.pdf} \newline
+%     \begin{outline}
+%         $\bar{\theta}_\mathrm{end}^{(ESS)} \approx -1 \times 10^{-4}$ \hspace{1.5cm} $\bar{\theta}_\mathrm{end}^{(PS)} \approx 2 \times 10^{-5}$
+%     \end{outline}
+% \end{frame}
+
+% \begin{frame}{Another Example}
+%     \begin{outline}
+%         \1 
+%     \end{outline}
+% \end{frame}
 
 
 \begin{frame}{Recap}
@@ -351,18 +446,50 @@
 \end{frame}
 
 
-% \begin{frame}{Acknowledgements}
-%     Collaborators:
-%     \begin{itemize}
-%         \item Payman Nickchi
-%         \item Richard Lockhart
-%     \end{itemize}
 
-%     Funding:
-%     \begin{itemize}
-%         \item Canadian Statistical Sciences Institute
-%     \end{itemize}
-% \end{frame}
+\begin{frame}{Topics}
+    \begin{outline}
+        \1 Adaptive Pareto Smoothed Importance Sampling \newline
+        \1 \textbf{Multilevel Causal Mediation Analysis} \newline
+        \1 Modelling Tuberculosis in Foreign-Born Canadians
+    \end{outline}
+\end{frame}
+
+\begin{frame}{Topics}
+    \begin{outline}
+        \1 Add slides from my SSC talk
+    \end{outline}
+\end{frame}
+
+\begin{frame}{Topics}
+    \begin{outline}
+        \1 Adaptive Pareto Smoothed Importance Sampling \newline
+        \1 Multilevel Causal Mediation Analysis \newline
+        \1 \textbf{Modelling Tuberculosis in Foreign-Born Canadians}
+    \end{outline}
+\end{frame}
+
+\begin{frame}{Topics}
+    \begin{outline}
+        \1 Give brief overview and mention directions for future research
+        \1 One of the profs in the department, Cristina Anton, does numerical SDEs. Mention potential collaboration
+    \end{outline}
+\end{frame}
+
+\begin{frame}{Acknowledgements}
+    Collaborators:
+    \begin{outline}
+        \1 Payman (UBC), Richard (SFU)
+        \1 Bouchra (UdeM), Bruno (HEC), Rado (UdeM), Rowin (UdeM)
+        \1 Jeremy (SFU), Albert (Langara) \newline
+    \end{outline}
+
+    Funding:
+    \begin{outline}
+        \1 CANSSI
+    \end{outline}
+\end{frame}
+
 
 
 \begin{frame}
