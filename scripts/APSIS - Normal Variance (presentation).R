@@ -399,7 +399,6 @@ print(both_diagnostics)
 
 # ---------------------- Stochastic Approximation - ESS ---------------------- #
 
-#! We optimize over zeta := log(sigma) so the support is unbounded
 
 d_wt_sq_d_sigma <- function(sigma, x){
   A = (sigma^2 - x^2)/(sigma^3)
@@ -527,56 +526,186 @@ grad_k_hat <- function(sigma, Xs){
 
 
 
+# Xs = sample_from_proposal(n_EG, sigma)
 
-#* Run one iteration of SA
+#* Finite difference approximation to grad of k_hat
+#* Respects dependence of X on sigma, but uses structure of normal distribution
+#? Xs must have been generated with SD = sigma
+FD_k_hat <- function(sigma, Xs, delta = ((.Machine$double.eps)^(1/3))){
 
 
-# Setup cluster
-# cl = makeCluster(detectCores() - 2)
-# cl = makeCluster(15)
-cl = makeCluster(10)
-# clusterExport(cl, c("N", "b_Y", "theta_Y", "b_M", "theta_M", "which_REs"))
-clusterExport(cl, c("sample_from_proposal", "grad_k_hat", "n_EG", "d_k_hat_d_sigma", "Xs_2_k_hat", "score_g_one_sample", "sigma", "get_wts", "f", "g"))
-clusterEvalQ(cl, {
-    source("src/Pareto_Smoothing.R")
-})
-clusterSetRNGStream(cl = cl, 11111111)
+  sigma_plus = sigma + delta
+  sigma_minus = sigma - delta
+
+  Xs_plus = Xs * sigma_plus / sigma
+  Xs_minus = Xs * sigma_minus / sigma
+
+  k_hat_plus = Xs_2_k_hat(sigma_plus, Xs_plus)
+  k_hat_minus = Xs_2_k_hat(sigma_minus, Xs_minus)
+
+  (output = (k_hat_plus - k_hat_minus) / (2*delta))
+  return(output)
+}
+
+# # Test finite difference vs analytical gradient
+# sigma = 0.5
+# B_grad_comparison = 100
+
+# grad_comparison = pbsapply(seq_len(B_grad_comparison), function(i){
+#   Xs = sample_from_proposal(n_EG, sigma)
+#   this_FD_k_hat = FD_k_hat(sigma, Xs)
+#   this_grad_k_hat = grad_k_hat(sigma, Xs)
+
+#   return(c(FD = this_FD_k_hat, grad = this_grad_k_hat))
+# }) %>% t
+
+# apply(grad_comparison, 2, function(x){
+#   x_bar = mean(x)
+#   SD = sd(x)
+
+#   output = c(mean = x_bar, SE = SD / sqrt(length(x)), CV = SD / abs(x_bar))
+#   return(output)
+
+# })
+
+
+#* Run SA to minimize k_hat
 
 set.seed(1)
 
-sigma = 0.5
-n_EG = 50
-clusterExport(cl, c("sigma", "n_EG"))
+n_EG = 1000
 
-num_reps_grad_k_hat = 1000
-some_grad_k_hats = pbsapply(seq_len(num_reps_grad_k_hat), function(i){
-  Xs = sample_from_proposal(n_EG, sigma)
+# Note: ESS is undefined for sigma < sqrt(0.5) \approx 0.71
+# Candidate values that seem to be working numerically: 0.5, 0.75, 0.9
+# sigma_old = 0.5
+sigma_old = 1e-2
+# sigma_old = 1.05
+
+
+
+step_size_power = 0.8   # Step size at iteration i is 1/i^step_size_power
+# Must be >= 0.75
+grad_step_size_power = 0.25   # Radius of interval whose endpoints are used for finite difference approximation
+# Alt: 0.25
+
+# Test that step size powers are valid
+if(step_size_power > 1) stop("Step sizes must have divergent sum (i.e. step size power must be at most 1)")
+if(step_size_power + grad_step_size_power <= 1) stop("Product of step sizes must have convergent sum (i.e. step size powers must satisfy step_size_power + grad_step_size_power > 1)")
+if(step_size_power - grad_step_size_power <= 0.5) stop("Ratio of squared step sizes must have convergent sum (i.e. step size powers must satisfy step_size_power - grad_step_size_power > 0.5)")
+
+
+B_EG_k_hat = 100
+
+all_sigmas = numeric(B_EG_k_hat + 1)
+all_sigmas[1] = sigma_old
+
+all_k_hats = numeric(B_EG_k_hat)
+
+for(i in 1:B_EG_k_hat){
+  if(i %% 10 == 0) print(paste0(i, " of ", B_EG_k_hat))
+
+  Xs = sample_from_proposal(n_EG, sigma_old)
+
+  step_size = 1/i^step_size_power
+
+  # this_grad = FD_k_hat(sigma_old, Xs, delta = ((.Machine$double.eps)^(1/3)))
+  this_grad = FD_k_hat(sigma_old, Xs, delta = (i^grad_step_size_power) * ((.Machine$double.eps)^(1/2)))
+
+  sigma_new = sigma_old - step_size * this_grad
+
+  all_sigmas[i+1] = sigma_new
+  sigma_old = sigma_new
+
+  this_k_hat = Xs_2_k_hat(sigma_old, Xs)
+  all_k_hats[i] = this_k_hat
+
+}
+
+all_sigmas
+
+
+sigma_trajectories_k_hat = list()
+sigma_trajectories_k_hat[["2"]] = all_sigmas
+
+
+
+#* Make plots
+pdf(paste0(plot_dir, "k_hat Traj - 0,5.pdf"), width=10, height=7)
+plot(sigma_trajectories_k_hat[["0.5"]], type = "l", ylab = TeX(r'($\hat{\sigma}$)'), xlab = "Iteration", main = TeX(r"($\hat{\sigma}_0 = 0.5$)"))
+abline(h = 1, col = "red", lwd = 2)
+dev.off()
+
+pdf(paste0(plot_dir, "k_hat Traj - 0,01.pdf"), width=10, height=7)
+plot(sigma_trajectories_k_hat[["0.01"]], type = "l", ylab = TeX(r'($\hat{\sigma}$)'), xlab = "Iteration", main = TeX(r"($\hat{\sigma}_0 = 0.01$)"))
+abline(h = 1, col = "red", lwd = 2)
+dev.off()
+
+pdf(paste0(plot_dir, "k_hat Traj - 2.pdf"), width=10, height=7)
+plot(sigma_trajectories_k_hat[["2"]], type = "l", ylab = TeX(r'($\hat{\sigma}$)'), xlab = "Iteration", main = TeX(r"($\hat{\sigma}_0 = 2$)"), ylim = c(1,2))
+abline(h = 1, col = "red", lwd = 2)
+dev.off()
+
+
+
+
+
+
+
+
+
+
+
+# #! Old
+
+# #* Run one iteration of SA
+
+
+# # Setup cluster
+# # cl = makeCluster(detectCores() - 2)
+# # cl = makeCluster(15)
+# cl = makeCluster(10)
+# # clusterExport(cl, c("N", "b_Y", "theta_Y", "b_M", "theta_M", "which_REs"))
+# clusterExport(cl, c("sample_from_proposal", "grad_k_hat", "n_EG", "d_k_hat_d_sigma", "Xs_2_k_hat", "score_g_one_sample", "sigma", "get_wts", "f", "g"))
+# clusterEvalQ(cl, {
+#     source("src/Pareto_Smoothing.R")
+# })
+# clusterSetRNGStream(cl = cl, 11111111)
+
+# set.seed(1)
+
+# sigma = 0.5
+# n_EG = 50
+# clusterExport(cl, c("sigma", "n_EG"))
+
+# num_reps_grad_k_hat = 1000
+# some_grad_k_hats = pbsapply(seq_len(num_reps_grad_k_hat), function(i){
+#   Xs = sample_from_proposal(n_EG, sigma)
   
-  k_hat_prime = d_k_hat_d_sigma(sigma, Xs)
-  k_hat = Xs_2_k_hat(sigma, Xs)
-  score = score_g_one_sample(sigma, Xs)
+#   k_hat_prime = d_k_hat_d_sigma(sigma, Xs)
+#   k_hat = Xs_2_k_hat(sigma, Xs)
+#   score = score_g_one_sample(sigma, Xs)
 
-  grad_k_hat = k_hat_prime + k_hat * score
+#   grad_k_hat = k_hat_prime + k_hat * score
 
-  output = c(k_hat_prime = k_hat_prime, k_hat = k_hat, score = score, grad_k_hat = grad_k_hat)
-  return(output)
-  # grad_k_hat(sigma, Xs)
-}, cl = cl) %>% t()
+#   output = c(k_hat_prime = k_hat_prime, k_hat = k_hat, score = score, grad_k_hat = grad_k_hat)
+#   return(output)
+#   # grad_k_hat(sigma, Xs)
+# }, cl = cl) %>% t()
 
-(grad_k_hat_COVs = apply(some_grad_k_hats, 2, function(X) sd(X)/mean(X)))
-(grad_k_hat_means = apply(some_grad_k_hats, 2, mean))
-(grad_k_hat_SEs = apply(some_grad_k_hats, 2, sd) / sqrt(num_reps_grad_k_hat))
+# (grad_k_hat_COVs = apply(some_grad_k_hats, 2, function(X) sd(X)/mean(X)))
+# (grad_k_hat_means = apply(some_grad_k_hats, 2, mean))
+# (grad_k_hat_SEs = apply(some_grad_k_hats, 2, sd) / sqrt(num_reps_grad_k_hat))
 
-some_grad_k_hats_old = some_grad_k_hats
-# some_grad_k_hats = c(some_grad_k_hats, some_grad_k_hats_old)
+# some_grad_k_hats_old = some_grad_k_hats
+# # some_grad_k_hats = c(some_grad_k_hats, some_grad_k_hats_old)
 
-stopCluster(cl)
+# stopCluster(cl)
 
-mean(some_grad_k_hats)
-sd(some_grad_k_hats) / sqrt(num_reps_grad_k_hat)
+# mean(some_grad_k_hats)
+# sd(some_grad_k_hats) / sqrt(num_reps_grad_k_hat)
 
-Xs = sample_from_proposal(n_EG, sigma)
-this_grad_k_hat = grad_k_hat(sigma, Xs)
+# Xs = sample_from_proposal(n_EG, sigma)
+# this_grad_k_hat = grad_k_hat(sigma, Xs)
 
 
 
