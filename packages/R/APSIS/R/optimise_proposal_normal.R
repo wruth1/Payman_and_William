@@ -60,9 +60,8 @@ optimise_proposal_normal = function(target, n, mu = c(-10,10), control = NULL){
 
   while( (current.iter < max.iter) | check.cond ){
 
-    ###########################################################################
+    #+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +#
     # Step1. Generate a random sample from Normal(mu,1) for a grid values of mu
-    ###########################################################################
 
     #### First create a gird of values for some values of mu. This has a length
     #### of 201
@@ -76,22 +75,20 @@ optimise_proposal_normal = function(target, n, mu = c(-10,10), control = NULL){
     #### Third take a sample of size n from proposal and make a matrix with n
     #### rows and 201 columns
     sample.from.proposal <- apply(X = mu.grid, MARGIN = 1, FUN = rnorm, n = n)
-    ###########################################################################
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
 
 
-    ###########################################################################
+    #+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +#
     #Step2. Compute weights. For each mu, we have one sample, and for each
     #sample we have a vector of weights
-    ###########################################################################
     weights <- matrix(NA, nrow = n, ncol = len)
     for(i in 1:len){
       eval_target   <- target(x = sample.from.proposal[,i], mu.grid[i])
       eval_proposal <- dnorm(x = sample.from.proposal[,i], mean = mu.grid[i], sd = 1)
       weights[,i]   <- eval_target / eval_proposal
     }
-    ###########################################################################
-
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
 
     # Step3. Implement Pareto Smoothing method to replace extreme weights
