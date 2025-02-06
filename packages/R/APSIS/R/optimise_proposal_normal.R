@@ -1,10 +1,15 @@
-#' Pareto Smoothed Importance Sampling with a Family of Normal Distribution For
-#' Proposal
+#' Optimised Adaptive Importance Sampler with a Family of Normal Distribution for
+#' Proposal Distribution
 #'
-#' @param target
-#' @param n
-#' @param control
-#' @param mu
+#' @param target A target distribution. This must be a function of the sample
+#'   (x) only. The `optimise_proposal_normal` function will evaluate this target
+#'   function at randomly generated values of x. The target must return a
+#'   numeric vector where each element is the evaluated value of x.
+#' @param n The desired sample size to generate at each iteration.
+#' @param mu0 The starting value for the mean parameter in the proposal normal
+#'   distribution.
+#' @param control A set of parameters to control algorithm convergence including
+#'   stopping criteria and number of iterations.
 #'
 #' @returns
 #' @export
@@ -12,7 +17,7 @@
 #' @description
 #'
 #' @examples
-optimise_proposal_normal = function(target, n, mu = c(-10,10), control = NULL){
+optimise_proposal_normal = function(target, n, mu0, control = NULL){
 
   #
   # Check if target is a numeric positive value
@@ -34,6 +39,7 @@ optimise_proposal_normal = function(target, n, mu = c(-10,10), control = NULL){
     control <- apsis_control()
   }
 
+
   #
   # Initialize a vector to record simulated parameters of target distribution
   #
@@ -52,51 +58,34 @@ optimise_proposal_normal = function(target, n, mu = c(-10,10), control = NULL){
 
 
   #
-  # Set the values for current.iter which is a counter in the while statement
-  # and check.cond to compare with epsilon
+  # Set the values before while loop:
+  # t: keep track of iteration number
+  # check: to evaluate convergence based on two consecutive mean values by
+  # comparing to epsilon
+  # Set the first element of param to initial value of mean set by user
   #
-  current.iter <- 0
-  check.cond   <- FALSE
-
-  while( (current.iter < max.iter) | check.cond ){
-
-    #+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +#
-    # Step1. Generate a random sample from Normal(mu,1) for a grid values of mu
-
-    #### First create a gird of values for some values of mu. This has a length
-    #### of 201
-    temp <- seq(from = mu[1], to = mu[2], by = 0.1)
-    len  <- length(temp)
-
-    #### Second make a matrix with one column and 201 rows where each row is one
-    #### value of mu
-    mu.grid <- matrix(data = temp, nrow = len, ncol = 1)
-
-    #### Third take a sample of size n from proposal and make a matrix with n
-    #### rows and 201 columns
-    sample.from.proposal <- apply(X = mu.grid, MARGIN = 1, FUN = rnorm, n = n)
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+  t  <- 1
+  check <- TRUE
+  param[t] <- mu0
 
 
+  while( (t < max.iter) | check ){
 
-    #+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +#
-    #Step2. Compute weights. For each mu, we have one sample, and for each
-    #sample we have a vector of weights
-    weights <- matrix(NA, nrow = n, ncol = len)
-    for(i in 1:len){
-      eval_target   <- target(x = sample.from.proposal[,i], mu.grid[i])
-      eval_proposal <- dnorm(x = sample.from.proposal[,i], mean = mu.grid[i], sd = 1)
-      weights[,i]   <- eval_target / eval_proposal
+    # Update the proposal by finding the new value for mu
+    param[t+1] <- update_proposal_normal(n = n, mu = param[t], f = target, step.size = 1/t)
+
+    # Check if the convergence reached
+    if( abs(param[t +1] - param[t]) < epsilon ){
+      check <- FALSE
     }
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
-
-    # Step3. Implement Pareto Smoothing method to replace extreme weights
-
-    ###########################################################################
+    # Increase iteration
+    t <- t + 1
 
   }
 
+  # Return generated mu
+  return(param)
 
 }
 

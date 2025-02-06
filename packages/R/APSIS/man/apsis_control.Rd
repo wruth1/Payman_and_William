@@ -4,12 +4,12 @@
 \alias{apsis_control}
 \title{Auxiliary Function for Controlling Parameters in APSIS Algorithm}
 \usage{
-apsis_control(epsilon = 1e-06, max.iter = 1000, step.size = NULL)
+apsis_control(epsilon = 1e-04, max.iter = 1000, step.size = NULL)
 }
 \arguments{
 \item{epsilon}{A numeric value. the tolerance being used to check the
 absolute differences between two generated parameters from target
-distribution and stop the simulation. The default value is 1e-6.}
+distribution and stop the simulation. The default value is 1e-3.}
 
 \item{max.iter}{A positive numeric value. The maximum number of Monte Carlo
 simulation that you want the algorithm to take. The default value is 1000.

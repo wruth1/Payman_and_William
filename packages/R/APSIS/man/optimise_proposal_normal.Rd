@@ -2,15 +2,26 @@
 % Please edit documentation in R/optimise_proposal_normal.R
 \name{optimise_proposal_normal}
 \alias{optimise_proposal_normal}
-\title{Pareto Smoothed Importance Sampling with a Family of Normal Distribution For
-Proposal}
+\title{Optimised Adaptive Importance Sampler with a Family of Normal Distribution for
+Proposal Distribution}
 \usage{
-optimise_proposal_normal(target, n, mu = c(-10, 10), control = NULL)
+optimise_proposal_normal(target, n, mu0, control = NULL)
 }
 \arguments{
-\item{mu}{}
+\item{target}{A target distribution. This must be a function of the sample
+(x) only. The `optimise_proposal_normal` function will evaluate this target
+function at randomly generated values of x. The target must return a
+numeric vector where each element is the evaluated value of x.}
+
+\item{n}{The desired sample size to generate at each iteration.}
+
+\item{mu0}{The starting value for the mean parameter in the proposal normal
+distribution.}
+
+\item{control}{A set of parameters to control algorithm convergence including
+stopping criteria and number of iterations.}
 }
 \description{
-Pareto Smoothed Importance Sampling with a Family of Normal Distribution For
-Proposal
+Optimised Adaptive Importance Sampler with a Family of Normal Distribution for
+Proposal Distribution
 }
