@@ -30,7 +30,7 @@ optimise_proposal_normal = function(target, n, mu0, control = NULL){
   # Check if n is a numeric positive value
   #
   if (!is.numeric(n) || n < 2)
-    stop('maximum number of iterations must be > 2')
+    stop('maximum number of iterations must be > 2')   #! Greater than 2, or geq 2?
 
   #
   # Set control parameters to default values
