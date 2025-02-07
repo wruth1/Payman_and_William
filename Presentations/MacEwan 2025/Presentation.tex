@@ -26,7 +26,7 @@
 \author{William Ruth}
 \institute[]{Université de Montréal}
 \date{\vspace{-3cm}}
-% \titlegraphic{\includegraphics[width=2cm]{../Logos/CANSSI_Logo.png} \hspace{2cm} \includegraphics[width=4cm]{../Logos/Logo_UdeM-CMJN.jpg}}
+\titlegraphic{\includegraphics[width=2cm]{Logos/CANSSI_Logo.png} \hspace{2cm} \includegraphics[width=4cm]{Logos/Logo_UdeM-CMJN.jpg}}
 
 
 \begin{document}
@@ -37,12 +37,12 @@
 
 \begin{frame}{Who am I?}
     \begin{outline}
-        \1 PhD SFU 2023
+        \1 PhD SFU (2023)
         \1 Postdoc UdeM (present) \newline
 
         \1 Computational Statistics
-            \2 Simulation
-            \2 Simulation-based inference
+            \2 Simulation and related methods
+            \2 Latent variable models
         \1 Infectious disease modelling
     \end{outline}
 \end{frame}
@@ -286,7 +286,7 @@
 
         \1 Instead, do gradient descent on $\hat{\rho}$
             \2 $\hat{\theta}_{k+1} = \hat{\theta}_k - \alpha_k \nabla \hat{\rho}(\hat{\theta}_k)$ 
-        \1 Stochastic approximation
+        \1 \textbf{Stochastic approximation}
     \end{outline}
 \end{frame}
 
@@ -459,31 +459,28 @@
     \end{outline}
 \end{frame}
 
-\begin{frame}{Outline}
-    \begin{itemize}
-        \setlength{\itemsep}{0.75em}
-        \item[1)] The Problem
-        \item[2)] Mediation Analysis
-        \item[3)] Causal Inference
-        \item[4)] Mixed-Effects Models
-        \item[5)] Mixed-Effects Models in Causal Mediation Analysis
-    \end{itemize}
-\end{frame}
+% \begin{frame}{Outline}
+%     \begin{itemize}
+%         \setlength{\itemsep}{0.75em}
+%         \item[1)] The Problem
+%         \item[2)] Mediation Analysis
+%         \item[3)] Causal Inference
+%         \item[4)] Mixed-Effects Models
+%         \item[5)] Mixed-Effects Models in Causal Mediation Analysis
+%     \end{itemize}
+% \end{frame}
 
 \begin{frame}{Example}
-    \begin{itemize}
-        \item Goal: Understand adherence to restrictive measures
-        \begin{itemize}
-            \item E.g. Lockdowns
-            \item Both past and future \newline
-        \end{itemize}
-        \item Influence of news source
-        \begin{itemize}
-            \item How trustworthy? \newline
-        \end{itemize}
-        \item Disentangle influence on future from influence on past
-    \end{itemize}
-    
+    \begin{outline}
+        \1 Goal: Understand adherence to restrictive measures
+            \2 E.g. Lockdowns
+            \2 Both past and future \newline
+
+        \1 Influence of news source
+            \2 How trustworthy? \newline
+
+        \1 Disentangle influence on future from influence on past  
+    \end{outline}  
 \end{frame}
 
 
@@ -544,335 +541,367 @@
 \end{frame}
 
 \begin{frame}{Mediation Analysis}
-    Separate \textbf{Total Effect} of $X$ on $Y$ into
-    \begin{itemize}
-        \item \textbf{Direct Effect}
-        \item \textbf{Indirect Effect}\newline
-    \end{itemize}
+    \begin{outline}
+        \1 Separate \textbf{Total Effect} of $X$ on $Y$ into
+            \2 \textbf{Direct Effect}
+            \2 \textbf{Indirect Effect}\newline
 
-    Traditionally, use regression
+        \1 Define effects formally using counterfactuals
+    \end{outline}
+    
 \end{frame}
 
 \begin{frame}{Mediation Analysis}
-    Continuous outcome and mediator:
-    \begin{itemize}
-        \item $Y = \alpha_0 + \alpha_1 M + \alpha_2 X + \varepsilon_Y$
-        \item $M = \beta_0 + \beta_1 X + \varepsilon_M$ \newline
-    \end{itemize}
-
-    
-    \textbf{Direct Effect}: $\alpha_2$
-    \begin{itemize}
-        \item ``$X$ in $Y$''
-    \end{itemize}
-    \textbf{Indirect Effect}: $\alpha_1 \cdot \beta_1$
-    \begin{itemize}
-        \item ``$M$ in $Y$'' $\cdot$ ``$X$ in $M$''
-    \end{itemize}
-    \textbf{Total Effect}: $\alpha_2 + \alpha_1 \cdot \beta_1$
-
-\end{frame}
-
-\begin{frame}{Mediation Analysis}
-    Popular approach
-    \begin{itemize}
-        \item A bit outdated\ldots \newline
-    \end{itemize}
-
-    More popular: Causal mediation analysis
-    
-\end{frame}
-
-\begin{frame}{Causal Inference}
-    Assume that $X$ \textit{causes} $Y$\newline
-
-    Counterfactuals:
-    \begin{itemize}
-        \item What value would $Y$ take if $X$ were set to a particular level?
-        \item Write $Y_x$ for the value of $Y$ when $X=x$
-        \item If $X\neq x$ then $Y_x$ is literally a ``counterfactual'' 
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{Causal Inference}
-    Example:
-    \begin{itemize}
-        \item Alice only reads scientific publications and will follow all lockdown mandates
-        \item What if she instead only read Facebook?\newline
-        \item $Y_{Science}(Alice) = \mathrm{follow}$
-        \item $Y_{Facebook}(Alice) = \mathrm{follow}$
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{Causal Inference}
-    Example:
-    \begin{itemize}
-        \item Bob also only reads scientific publications and will follow all lockdown mandates, but is more susceptible to being influenced \newline
-        \item $Y_{Science}(Bob) = \mathrm{follow}$
-        \item $Y_{Facebook}(Bob) = \mathrm{not\ follow}$
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{Causal Inference}
-    \begin{itemize}
-        \item We only observe one outcome per individual\newline
-
-        \item Explore population-level effects by averaging\newline
-
-        \item Define mediation effects in terms of expected counterfactuals
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{Causal Inference}
-    \textbf{Total Effect}: $\mathbb{E}(Y_{x'} - Y_{x})$
-    \begin{itemize}
-        \item Effect on outcome when we change exposure from $X=x$ to $X=x'$ \newline
-    \end{itemize}
-
-    Other effects involve dependence on a mediator:
-    \begin{itemize}
-        \item $Y_{xm}$: Value of outcome when
-        \begin{itemize}
-            \item Exposure ($X$) is set to $x$
-            \item Mediator ($M$) is set to $m$
-        \end{itemize}
-        \item $M_x$: Value of mediator when
-        \begin{itemize}
-            \item Exposure ($X$) is set to $x$
-        \end{itemize}
-        \item ``Nested Counterfactuals'': $Y_{x M_x}$ or $Y_{x M_{x'}}$
-    \end{itemize}
-
-\end{frame}
-
-\begin{frame}{Causal Mediation Analysis}
-    \textbf{Controlled Direct Effect}: $\mathbb{E}(Y_{x'm} - Y_{xm})$
-    \begin{itemize}
-        \item Effect of changing exposure with mediator held fixed \newline
-    \end{itemize}
-
-    \textbf{Natural Direct Effect}: $\mathbb{E}(Y_{x'M_{x}} - Y_{xM_{x}})$
-    \begin{itemize}
-        \item Effect of changing exposure when we don't interfere with the mediator  \newline
-    \end{itemize}
-
-    \textbf{Natural Indirect Effect}: $\mathbb{E}(Y_{xM_{x'}} - Y_{xM_{x}})$
-    \begin{itemize}
-        \item Effect of changing which exposure value is seen by the mediator while holding fixed which exposure value is seen by the outcome
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{\CMA}
-    In our example
-    \begin{itemize}
-        \item Controlled Direct Effect: Effect of increasing news trustworthiness if the whole population followed guidelines in the past
-        \item Natural Direct Effect: Effect of increasing news trustworthiness independent of any induced change in past compliance
-        \item Natural Indirect Effect: Effect of changing past compliance if everyone only got news from Facebook
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{\CMA}
-    We can't measure all required counterfactuals
-    \begin{itemize}
-        \item E.g., $Y_x$ or $Y_{x'}$, not both \newline
-    \end{itemize}
-
-    Expected counterfactuals related to conditional expectations
-
-    \begin{itemize}
-        \item     Under  ``identification'' assumptions, $\bE Y_x = \bE(Y | X=x)$ \newline
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{\CMA}
-    How does causality change our analysis? \newline
-
-    Still fit regression models, but include interaction terms between exposure and mediator
-    \begin{itemize}
-        \item $Y = \alpha_0 + \alpha_1 M + \alpha_2 X + \alpha_3 M \cdot X + \varepsilon_Y$
-        \item $M = \beta_0 + \beta_1 X + \varepsilon_M$ \newline
-    \end{itemize}
-
-    Direct and indirect effects now depend on the levels of the exposure
-
-\end{frame}
-
-
-\begin{frame}{\CMA\ -- Extensions}
-    Discussion so far has involved continuous mediator and outcome
-    \begin{itemize}
-        \item What about binary? \newline
-    \end{itemize}
-
-    Individuals might also be clustered
-    \begin{itemize}
-        \item E.g. Within countries
-    \end{itemize}
-
-\end{frame}
-
-\begin{frame}{\CMA\ -- Extensions}
     \begin{outline}
-        \1 Handling binary variables is pretty straightforward
-            \2 Instead of linear regression, use logistic regression
-        \1 Expected  counterfactuals are now probabilities \newline
+        \1 Under ``identification assumptions'', expected counterfactuals equal conditional expectations \newline
 
-        \1 Might use risk-ratios or odds-ratios \newline
-
-        \1 Dependence on regression coefficients becomes more non-linear
-
-
-        % \1 Extend to more than 2 categories using binary indicators
+        \1 Use regression
+            \2 Linear vs logistic
+            \2 Single-level vs multi-level
     \end{outline}
-
 \end{frame}
 
-\begin{frame}{\CMA\ -- Extensions}
+\begin{frame}{Multi-Level Models}
     \begin{outline}
-        \1 Clustered data more complicated \newline
+        \1 Grouped data
+            \2 E.g. By country \newline
 
-        \1 Standard approach is multi-level modelling
-            \2 I.e. Add random effects which vary across clusters \newline
-
-        \1 Combined with categorical variables: 
-            \2 Generalized linear mixed models (GLMMs)
+        \1 Mediation effects differ by group
+            \2 Mixed-effects regression
     \end{outline}
-    Clustered data more complicated \newline
-\end{frame}
-
-
-\begin{frame}{\GLMMs}
-    The core idea is to augment our set of covariates
-    \begin{itemize}
-        \item Coefficients of these new covariates are random variables that vary across groups/clusters \newline
-    \end{itemize}
-
-    In the linear setting:
-    \begin{itemize}
-        \item Old model: $Y = \alpha_0 + \alpha_1 X_1 + \ldots + \alpha_p X_p + \varepsilon$
-        \item New model: $Y = \alpha_0 + \alpha_1 X_1 + \ldots + \alpha_p X_p + \mathbf{u_1 Z_1 + \ldots + u_q Z_q} + \varepsilon$ \newline
-    \end{itemize}
-
-    
-
-
-\end{frame}
-
-\begin{frame}{\GLMMs}
-    The $Z$'s are fixed, known covariates
-    The $u$'s are random variables
-    \begin{itemize}
-        \item I.e. Random effects \newline
-    \end{itemize}
-
-    It's possible for the $X$'s and $Z$'s to overlap
-    \begin{itemize}
-        \item The coefficient on such a covariate has the form $\alpha_j + u_{k}$
-        \item I.e. Mixed effect
-    \end{itemize}
-
-\end{frame}
-
-
-\begin{frame}{\GLMMs}
-    Extend to generalized linear models in the usual way \newline
-
-    Linear predictor now has a random effects component \newline
-\end{frame}
-
-\begin{frame}{\GLMMs}
-    Why bother?
-    \begin{itemize}
-        \item E.g. Measured some but not all levels of a categorical variable
-        \item Estimate covariance matrix of random effects
-        \item Test for non-zero variance of each random effect \newline
-    \end{itemize}
-
-    ``Predict'' level of random effects for each group
-    \begin{itemize}
-        \item Conditional mean or conditional mode of random effects given response
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{\GLMMs}
-    In our example:
-    \begin{itemize}
-        \item Data collected from 11 different countries
-        \item Explicitly model inter-country variability
-        \item Predict country-specific random effects
-        \item Use country-specific coefficients in formulas for mediation effects
-        \item Test for significant mediation effects within each country \newline
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{Multilevel Mediation Analysis}
-    Uncertainty quantification for mixed-effects models can be challenging  \newline
-    
-    Strategies include:
-    \begin{itemize}
-        \item Bootstrap
-        \item Quasi-Bayesian Monte Carlo
-        \item $\delta$-method
-    \end{itemize}
-\end{frame}
-
-
-\begin{frame}{Multilevel Mediation Analysis}
-    Uncertainty quantification for mixed-effects models can be challenging  \newline
-    
-    Strategies include:
-    \begin{itemize}
-        \item Bootstrap
-        \item Quasi-Bayesian Monte Carlo
-        \item $\bm{\delta}$\textbf{-method}
-    \end{itemize}
 \end{frame}
 
 \begin{frame}{Multilevel Mediation Analysis}
     \begin{outline}
+        \1 Uncertainty quantification is messy
+            \2 Bootstrap
+            \2 Quasi-Bayesian Monte Carlo
+            \2 $\delta$-method \newline
+
+        \1 Monte Carlo studies look promising
+    \end{outline}
+\end{frame}
+
+% \begin{frame}{Mediation Analysis}
+%     Continuous outcome and mediator:
+%     \begin{itemize}
+%         \item $Y = \alpha_0 + \alpha_1 M + \alpha_2 X + \varepsilon_Y$
+%         \item $M = \beta_0 + \beta_1 X + \varepsilon_M$ \newline
+%     \end{itemize}
+
+    
+%     \textbf{Direct Effect}: $\alpha_2$
+%     \begin{itemize}
+%         \item ``$X$ in $Y$''
+%     \end{itemize}
+%     \textbf{Indirect Effect}: $\alpha_1 \cdot \beta_1$
+%     \begin{itemize}
+%         \item ``$M$ in $Y$'' $\cdot$ ``$X$ in $M$''
+%     \end{itemize}
+%     \textbf{Total Effect}: $\alpha_2 + \alpha_1 \cdot \beta_1$
+
+% \end{frame}
+
+% \begin{frame}{Mediation Analysis}
+%     Popular approach
+%     \begin{itemize}
+%         \item A bit outdated\ldots \newline
+%     \end{itemize}
+
+%     More popular: Causal mediation analysis
+    
+% \end{frame}
+
+% \begin{frame}{Causal Inference}
+%     Assume that $X$ \textit{causes} $Y$\newline
+
+%     Counterfactuals:
+%     \begin{itemize}
+%         \item What value would $Y$ take if $X$ were set to a particular level?
+%         \item Write $Y_x$ for the value of $Y$ when $X=x$
+%         \item If $X\neq x$ then $Y_x$ is literally a ``counterfactual'' 
+%     \end{itemize}
+% \end{frame}
+
+% \begin{frame}{Causal Inference}
+%     Example:
+%     \begin{itemize}
+%         \item Alice only reads scientific publications and will follow all lockdown mandates
+%         \item What if she instead only read Facebook?\newline
+%         \item $Y_{Science}(Alice) = \mathrm{follow}$
+%         \item $Y_{Facebook}(Alice) = \mathrm{follow}$
+%     \end{itemize}
+% \end{frame}
+
+% \begin{frame}{Causal Inference}
+%     Example:
+%     \begin{itemize}
+%         \item Bob also only reads scientific publications and will follow all lockdown mandates, but is more susceptible to being influenced \newline
+%         \item $Y_{Science}(Bob) = \mathrm{follow}$
+%         \item $Y_{Facebook}(Bob) = \mathrm{not\ follow}$
+%     \end{itemize}
+% \end{frame}
+
+% \begin{frame}{Causal Inference}
+%     \begin{itemize}
+%         \item We only observe one outcome per individual\newline
+
+%         \item Explore population-level effects by averaging\newline
+
+%         \item Define mediation effects in terms of expected counterfactuals
+%     \end{itemize}
+% \end{frame}
+
+% \begin{frame}{Causal Inference}
+%     \textbf{Total Effect}: $\mathbb{E}(Y_{x'} - Y_{x})$
+%     \begin{itemize}
+%         \item Effect on outcome when we change exposure from $X=x$ to $X=x'$ \newline
+%     \end{itemize}
+
+%     Other effects involve dependence on a mediator:
+%     \begin{itemize}
+%         \item $Y_{xm}$: Value of outcome when
+%         \begin{itemize}
+%             \item Exposure ($X$) is set to $x$
+%             \item Mediator ($M$) is set to $m$
+%         \end{itemize}
+%         \item $M_x$: Value of mediator when
+%         \begin{itemize}
+%             \item Exposure ($X$) is set to $x$
+%         \end{itemize}
+%         \item ``Nested Counterfactuals'': $Y_{x M_x}$ or $Y_{x M_{x'}}$
+%     \end{itemize}
+
+% \end{frame}
+
+% \begin{frame}{Causal Mediation Analysis}
+%     \textbf{Controlled Direct Effect}: $\mathbb{E}(Y_{x'm} - Y_{xm})$
+%     \begin{itemize}
+%         \item Effect of changing exposure with mediator held fixed \newline
+%     \end{itemize}
+
+%     \textbf{Natural Direct Effect}: $\mathbb{E}(Y_{x'M_{x}} - Y_{xM_{x}})$
+%     \begin{itemize}
+%         \item Effect of changing exposure when we don't interfere with the mediator  \newline
+%     \end{itemize}
+
+%     \textbf{Natural Indirect Effect}: $\mathbb{E}(Y_{xM_{x'}} - Y_{xM_{x}})$
+%     \begin{itemize}
+%         \item Effect of changing which exposure value is seen by the mediator while holding fixed which exposure value is seen by the outcome
+%     \end{itemize}
+% \end{frame}
+
+% \begin{frame}{\CMA}
+%     In our example
+%     \begin{itemize}
+%         \item Controlled Direct Effect: Effect of increasing news trustworthiness if the whole population followed guidelines in the past
+%         \item Natural Direct Effect: Effect of increasing news trustworthiness independent of any induced change in past compliance
+%         \item Natural Indirect Effect: Effect of changing past compliance if everyone only got news from Facebook
+%     \end{itemize}
+% \end{frame}
+
+% \begin{frame}{\CMA}
+%     We can't measure all required counterfactuals
+%     \begin{itemize}
+%         \item E.g., $Y_x$ or $Y_{x'}$, not both \newline
+%     \end{itemize}
+
+%     Expected counterfactuals related to conditional expectations
+
+%     \begin{itemize}
+%         \item     Under  ``identification'' assumptions, $\bE Y_x = \bE(Y | X=x)$ \newline
+%     \end{itemize}
+% \end{frame}
+
+% \begin{frame}{\CMA}
+%     How does causality change our analysis? \newline
+
+%     Still fit regression models, but include interaction terms between exposure and mediator
+%     \begin{itemize}
+%         \item $Y = \alpha_0 + \alpha_1 M + \alpha_2 X + \alpha_3 M \cdot X + \varepsilon_Y$
+%         \item $M = \beta_0 + \beta_1 X + \varepsilon_M$ \newline
+%     \end{itemize}
+
+%     Direct and indirect effects now depend on the levels of the exposure
+
+% \end{frame}
+
+
+% \begin{frame}{\CMA\ -- Extensions}
+%     Discussion so far has involved continuous mediator and outcome
+%     \begin{itemize}
+%         \item What about binary? \newline
+%     \end{itemize}
+
+%     Individuals might also be clustered
+%     \begin{itemize}
+%         \item E.g. Within countries
+%     \end{itemize}
+
+% \end{frame}
+
+% \begin{frame}{\CMA\ -- Extensions}
+%     \begin{outline}
+%         \1 Handling binary variables is pretty straightforward
+%             \2 Instead of linear regression, use logistic regression
+%         \1 Expected  counterfactuals are now probabilities \newline
+
+%         \1 Might use risk-ratios or odds-ratios \newline
+
+%         \1 Dependence on regression coefficients becomes more non-linear
+
+
+%         % \1 Extend to more than 2 categories using binary indicators
+%     \end{outline}
+
+% \end{frame}
+
+% \begin{frame}{\CMA\ -- Extensions}
+%     \begin{outline}
+%         \1 Clustered data more complicated \newline
+
+%         \1 Standard approach is multi-level modelling
+%             \2 I.e. Add random effects which vary across clusters \newline
+
+%         \1 Combined with categorical variables: 
+%             \2 Generalized linear mixed models (GLMMs)
+%     \end{outline}
+%     Clustered data more complicated \newline
+% \end{frame}
+
+
+% \begin{frame}{\GLMMs}
+%     The core idea is to augment our set of covariates
+%     \begin{itemize}
+%         \item Coefficients of these new covariates are random variables that vary across groups/clusters \newline
+%     \end{itemize}
+
+%     In the linear setting:
+%     \begin{itemize}
+%         \item Old model: $Y = \alpha_0 + \alpha_1 X_1 + \ldots + \alpha_p X_p + \varepsilon$
+%         \item New model: $Y = \alpha_0 + \alpha_1 X_1 + \ldots + \alpha_p X_p + \mathbf{u_1 Z_1 + \ldots + u_q Z_q} + \varepsilon$ \newline
+%     \end{itemize}
+
+    
+
+
+% \end{frame}
+
+% \begin{frame}{\GLMMs}
+%     The $Z$'s are fixed, known covariates
+%     The $u$'s are random variables
+%     \begin{itemize}
+%         \item I.e. Random effects \newline
+%     \end{itemize}
+
+%     It's possible for the $X$'s and $Z$'s to overlap
+%     \begin{itemize}
+%         \item The coefficient on such a covariate has the form $\alpha_j + u_{k}$
+%         \item I.e. Mixed effect
+%     \end{itemize}
+
+% \end{frame}
+
+
+% \begin{frame}{\GLMMs}
+%     Extend to generalized linear models in the usual way \newline
+
+%     Linear predictor now has a random effects component \newline
+% \end{frame}
+
+% \begin{frame}{\GLMMs}
+%     Why bother?
+%     \begin{itemize}
+%         \item E.g. Measured some but not all levels of a categorical variable
+%         \item Estimate covariance matrix of random effects
+%         \item Test for non-zero variance of each random effect \newline
+%     \end{itemize}
+
+%     ``Predict'' level of random effects for each group
+%     \begin{itemize}
+%         \item Conditional mean or conditional mode of random effects given response
+%     \end{itemize}
+% \end{frame}
+
+% \begin{frame}{\GLMMs}
+%     In our example:
+%     \begin{itemize}
+%         \item Data collected from 11 different countries
+%         \item Explicitly model inter-country variability
+%         \item Predict country-specific random effects
+%         \item Use country-specific coefficients in formulas for mediation effects
+%         \item Test for significant mediation effects within each country \newline
+%     \end{itemize}
+% \end{frame}
+
+% \begin{frame}{Multilevel Mediation Analysis}
+%     Uncertainty quantification for mixed-effects models can be challenging  \newline
+    
+%     Strategies include:
+%     \begin{itemize}
+%         \item Bootstrap
+%         \item Quasi-Bayesian Monte Carlo
+%         \item $\delta$-method
+%     \end{itemize}
+% \end{frame}
+
+
+% \begin{frame}{Multilevel Mediation Analysis}
+%     Uncertainty quantification for mixed-effects models can be challenging  \newline
+    
+%     Strategies include:
+%     \begin{itemize}
+%         \item Bootstrap
+%         \item Quasi-Bayesian Monte Carlo
+%         \item $\bm{\delta}$\textbf{-method}
+%     \end{itemize}
+% \end{frame}
+
+% \begin{frame}{Multilevel Mediation Analysis}
+%     \begin{outline}
         
-        \1 Mediation effects defined using nested counterfactuals -- $ Y_{xM_{x'}}$
+%         \1 Mediation effects defined using nested counterfactuals -- $ Y_{xM_{x'}}$
 
-        \1 Expected nested counterfactuals expressed in terms of regression parameters
-            \2 Coefficients and random effect covariances \newline
+%         \1 Expected nested counterfactuals expressed in terms of regression parameters
+%             \2 Coefficients and random effect covariances \newline
 
-        \1 $\delta$-method maps uncertainty in regression parameters to mediation effects
+%         \1 $\delta$-method maps uncertainty in regression parameters to mediation effects
 
-    \end{outline}
+%     \end{outline}
 
-\end{frame}
+% \end{frame}
 
-\begin{frame}{Multilevel Mediation Analysis}
-    \begin{outline}
-        \1 Start with asymptotic covariance of regression parameters
-            \2 Made possible by the \textit{glmmTMB} package in \texttt{R} \newline
+% \begin{frame}{Multilevel Mediation Analysis}
+%     \begin{outline}
+%         \1 Start with asymptotic covariance of regression parameters
+%             \2 Made possible by the \textit{glmmTMB} package in \texttt{R} \newline
 
-        \1 Pre- and post-multiply by Jacobian
-            \2 Regression parameters to expected counterfactuals
-            \2 Expected counterfactuals to mediation effects
+%         \1 Pre- and post-multiply by Jacobian
+%             \2 Regression parameters to expected counterfactuals
+%             \2 Expected counterfactuals to mediation effects
         
 
-    \end{outline}
+%     \end{outline}
     
 
 
-\end{frame}
+% \end{frame}
 
 
 
 
 
-\begin{frame}{Putting it All Together}
-    \begin{itemize}
-        \item Define direct, indirect and total effects using counterfactuals \newline
+% \begin{frame}{Putting it All Together}
+%     \begin{itemize}
+%         \item Define direct, indirect and total effects using counterfactuals \newline
 
-        \item Estimate these effects across groups using generalized linear mixed models \newline
+%         \item Estimate these effects across groups using generalized linear mixed models \newline
 
-        \item Compute standard errors for estimated effects using the $\delta$-method
+%         \item Compute standard errors for estimated effects using the $\delta$-method
 
-    \end{itemize}
+%     \end{itemize}
 
-\end{frame}
+% \end{frame}
 
 \begin{frame}{Topics}
     \begin{outline}
@@ -882,19 +911,51 @@
     \end{outline}
 \end{frame}
 
-\begin{frame}{Topics}
+
+
+\begin{frame}{Tuberculosis}
     \begin{outline}
-        \1 Give brief overview and mention directions for future research
-        \1 One of the profs in the department, Cristina Anton, does numerical SDEs. Mention potential collaboration
+        \1 Massive problem worldwide
+            \2 Prevalence of 20-25\%
+            \2 \citep{Coh19} \newline
+        
+        \1 Infection includes a latent period
+            \2 Can last months or entire lifetime
     \end{outline}
 \end{frame}
+
+\begin{frame}{Tuberculosis in Canada}
+    \begin{outline}
+        \1 Relatively rare in Canada \newline
+
+        \1 Mostly present in foreign-born and indigenous communities
+            \2 We focus on foreign-born
+        \1 Immigration screens for active TB but not latent
+    \end{outline}
+\end{frame}
+
+\begin{frame}{Tuberculosis in Canada}
+    \begin{outline}
+        \1 We model TB in foreign-born Canadians using a system of ODEs
+            \2 Includes immigration and domestic transmission \newline
+
+        \1 Some parameters from literature
+        \1 Others fit using data \newline
+
+        \1 Not on track to meet our goal of 90\% reduction by 2035
+
+    \end{outline}
+\end{frame}
+
+
+
 
 \begin{frame}{Acknowledgements}
     Collaborators:
     \begin{outline}
-        \1 Payman (UBC), Richard (SFU)
-        \1 Bouchra (UdeM), Bruno (HEC), Rado (UdeM), Rowin (UdeM)
-        \1 Jeremy (SFU), Albert (Langara) \newline
+        \1 Payman Nickcki (UBC), Richard Lockhart (SFU)
+        \1 Bouchra Nasri (UdeM), Bruno Remillard (HEC), Rado Ramasy (UdeM), Rowin Alfaro (UdeM)
+        \1 Jeremy Chiu (SFU), Albert Wong (Langara) \newline
     \end{outline}
 
     Funding:
