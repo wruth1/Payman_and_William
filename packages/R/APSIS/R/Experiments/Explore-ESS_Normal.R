@@ -7,12 +7,12 @@ devtools::load_all()
 
 target = function(x) dnorm(x)
 
-n = 1000
+n = 100
 
 mu0 = 1
 
 
-optimise_proposal_normal(target, n, mu0)
+optimise_proposal_normal(target, n, mu0, control = apsis_control(max.iter = 10000))
 
 
 
