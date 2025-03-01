@@ -1,5 +1,5 @@
-#' Optimised Adaptive Importance Sampler with a Family of Normal Distribution for
-#' Proposal Distribution
+#' Optimised Adaptive Importance Sampler with a Family of Normal Distribution
+#' for Proposal Distribution
 #'
 #' @param target A target distribution. This must be a function of the sample
 #'   (x) only. The `optimise_proposal_normal` function will evaluate this target
@@ -8,6 +8,8 @@
 #' @param n The desired sample size to generate at each iteration.
 #' @param mu0 The starting value for the mean parameter in the proposal normal
 #'   distribution.
+#' @param boundary A boundary of the permissible parameter space. An integer
+#'   number where defines the boundary of generated parameters.
 #' @param control A set of parameters to control algorithm convergence including
 #'   stopping criteria and number of iterations.
 #'
@@ -17,7 +19,11 @@
 #' @description
 #'
 #' @examples
-optimise_proposal_normal = function(target, n, mu0, control = NULL){
+#'
+#' f <- function(x){ return(dnorm(x=x,mean=0,sd=1)) }
+#' param <- optimise_proposal_normal(target = f, mu0 = 1)
+#'
+optimise_proposal_normal = function(target, mu0, n = 100, boundary = 2, control = NULL){
 
   #
   # Check if target is a numeric positive value
@@ -30,7 +36,7 @@ optimise_proposal_normal = function(target, n, mu0, control = NULL){
   # Check if n is a numeric positive value
   #
   if (!is.numeric(n) || n < 2)
-    stop('maximum number of iterations must be > 2')   #! Greater than 2, or geq 2?
+    stop('maximum number of iterations must be >= 2')   #! Greater than 2, or geq 2?
 
   #
   # Set control parameters to default values
@@ -39,13 +45,6 @@ optimise_proposal_normal = function(target, n, mu0, control = NULL){
     control <- apsis_control()
   }
 
-
-  #
-  # Initialize a vector to record simulated parameters of target distribution
-  #
-  param <- vector()
-
-
   #
   # Extract max.iter and epsilon from control list. 1) max.iter is the maximum
   # number of iteration that algorithm takes. In other words, the number of
@@ -53,9 +52,14 @@ optimise_proposal_normal = function(target, n, mu0, control = NULL){
   # we use to check if the difference between two consecutive generated
   # parameters is small enough
   #
-  max.iter <- control$max.iter
-  epsilon  <- control$epsilon
+  max.iter  <- control$max.iter
+  epsilon   <- control$epsilon
+  step.size <- control$step.size
 
+  #
+  # Initialize a vector to record simulated parameters of target distribution
+  #
+  param <- vector()
 
   #
   # Set the values before while loop:
@@ -68,11 +72,18 @@ optimise_proposal_normal = function(target, n, mu0, control = NULL){
   check <- TRUE
   param[t] <- mu0
 
-
   while( (t < max.iter) | check ){
 
     # Update the proposal by finding the new value for mu
     param[t+1] <- update_proposal_normal(n = n, mu = param[t], f = target, step.size = 1/t)
+
+    if(param[t+1] < -boundary){
+      param[t+1] <- -boundary
+    }
+
+    if(param[t+1] > boundary){
+      param[t+1] <- boundary
+    }
 
     # Check if the convergence reached
     if( abs(param[t +1] - param[t]) < epsilon ){
@@ -81,7 +92,6 @@ optimise_proposal_normal = function(target, n, mu0, control = NULL){
 
     # Increase iteration
     t <- t + 1
-
   }
 
   # Return generated mu

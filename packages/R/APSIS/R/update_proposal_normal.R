@@ -1,14 +1,18 @@
-#' Title
+#' Updating the Proposal, Generating New Values for Mean Parameter
 #'
-#' @param n
-#' @param mu
-#' @param f
-#' @param step.size
+#' @param n The desired sample size to generate at each iteration. This argument
+#'   is being passed from \code{\link{optimise_proposal_normal}} function.
+#' @param mu The current value of generated mu that will be updated. This
+#'   argument is being passed from \code{\link{optimise_proposal_normal}}
+#'   function.
+#' @param f The target function being passed from
+#'   \code{\link{optimise_proposal_normal}}.
+#' @param step.size The value of step size in optimization part when updating
+#'   generated mean.
 #'
 #' @returns
 #' @export
 #'
-#' @examples
 update_proposal_normal = function(n, mu, f, step.size){
 
   # Generate a random sample from Normal(mu,1) for the current value of mu
