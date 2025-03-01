@@ -2,7 +2,7 @@
 #'
 #' @param epsilon A numeric value. the tolerance being used to check the
 #'   absolute differences between two generated parameters from target
-#'   distribution and stop the simulation. The default value is 1e-4.
+#'   distribution and stop the simulation. The default value is 1e-5.
 #' @param max.iter A positive numeric value. The maximum number of Monte Carlo
 #'   simulation that you want the algorithm to take. The default value is 10000.
 #'   The algorithm stops when either desired tolerance achieved or max number of
@@ -15,7 +15,7 @@
 #' @return A list of three of input arguments.
 #' @export
 #'
-apsis_control = function(epsilon = 1e-4, max.iter = 10000, step.size = NULL){
+apsis_control = function(epsilon = 1e-5, max.iter = 10000, step.size = NULL){
 
   # Check if epsilon is a numeric positive value
   if (!is.numeric(epsilon) || epsilon <= 0)
