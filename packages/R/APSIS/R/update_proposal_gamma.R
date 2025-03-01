@@ -27,7 +27,6 @@ update_proposal_gamma = function(n, lambda, f, a, step.size){
 
   # Compute weights
   weight        <- eval_target / eval_proposal
-  weight        <- weight * eval_target
 
   # Calculate gradient value
   gt            <- estimate_gradient_gamma(x = xsample, l = lambda, w = weight)

@@ -14,7 +14,7 @@ estimate_gradient_gamma = function(x, l, w){
   # optimised adaptive importance samplers by Akyildiz and Miguez, 2022 We
   # estimate the gradient of "effective sample size" by an average of generated
   # sample and weights
-  temp <- ( x - (1/l) ) * w
+  temp <- ( x - (1/l) ) * w * w
 
   # Compute sample mean
   gt   <- mean(temp)
