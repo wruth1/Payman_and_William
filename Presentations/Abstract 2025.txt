@@ -1,0 +1,11 @@
+Adaptive Pareto Smoothed Importance Sampling
+
+Monte Carlo integration is a standard tool for approximating expected values that are analytically intractable. However, generating the required samples from complicated distributions is often challenging. Importance sampling allows us to substitute an i.i.d. sample from the target distribution with a weighted sample from a more tractable “proposal distribution” of our choice.
+
+The efficiency of importance sampling depends on our choice of proposal distribution, which is often selected heuristically. In fact, measuring the performance of a given proposal distribution is also non-trivial. One popular metric, the effective sample size, can be unreliable unless our proposal is reasonably close to the target. Recently, Vehtari et al. (2024) proposed a more robust measure of performance, called the Pareto tail index.
+
+We propose a more principled approach to selecting proposal distributions using stochastic optimization. Specifically, we use the stochastic approximation algorithm of Kiefer and Wolfowitz to optimize the Pareto tail index over some pre-specified family of proposal distributions. Our method builds on work by Akyildiz and Míguez (2021), who optimize the less reliable effective sample size.
+
+Our approach iteratively updates the proposal distribution to better align with the target. At each step, we estimate the Pareto tail index of the importance weights, and use a finite difference approximation to guide optimization. This algorithm generalizes stochastic gradient descent, and converges under mild conditions.
+
+In summary, we propose a systematic method for selecting proposal distributions, reducing reliance on heuristics. By optimizing a robust performance measure, our approach enhances existing importance sampling methodology. We expect our method to improve practice in a wide range of statistical computing applications, such as Bayesian inference and high-dimensional integration.
