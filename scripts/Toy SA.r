@@ -220,7 +220,7 @@ plot(f_traj_ana_log[-1], type = "l", main = "log(-f) (Rob-Mon)", ylim = c(y_min_
 
 par(mfrow = c(1,1))
 
-
+dev.off()
 
 
 # ---------------------------------------------------------------------------- #

@@ -1,94 +1,101 @@
 
-# ---------------------------------------------------------------------------- #
-#                         Easy - Normal Location Family                        #
-# ---------------------------------------------------------------------------- #
-
-set.seed(1)
-
-source("src/ESS Versions.r")
-
-N = 1000
-
-mu0 = 1
-
-X = rnorm(N, mu0, 1)
-
-
-mu = mu0
-
 
 # Kiefer-Wolfowitz
 get_a = function(k) return(k^(-1))
 get_c = function(k) return(k^(-1/3))
 
-# # Aggressive
-# get_a = function(k) return(k^(-0.8))
-# get_c = function(k) return(k^(-0.25))
 
-wt = function(theta, X, normalize = T){
-    W_raw = dnorm(X) / dnorm(X, theta, 1)
+phi = function(x) x
 
-    if(!normalize){
-        return(W_raw)
+f_dens = function(x) dnorm(x)
+g_dens = function(x, mu, sigma) dnorm(x, mu, sigma)
+
+get_W = function(x, mu, sigma) f_dens(x) / g_dens(x, mu, sigma)
+
+
+sim_G = function(n, mu, sigma) rnorm(n, mu, sigma)
+
+
+# Evaluate f with noise (i.e. f+E). E is either provided or, if NULL, generated on the spot.
+# Optionally, also return E (with f, as a list).
+f_ran = function(){
+    
+    if(is.null(E)){
+        E = make_E(sigma)
+    }
+
+    f_val = f_det(theta)
+
+    f_obs = f_val + E
+
+    if(!return_E){
+        return(f_obs)
     } else{
-        W = W_raw / sum(W_raw)
-        return(W)
-    }    
-} 
-
-ESS = function(theta, X){
-    W = wt(theta, X)
-
-    # L2
-    return(1 / sum(W^2))
-
-    # L Infinity
-    # return(1 / max(W))
+        return(list(f = f_obs, E = E))
+    }
     
 }
 
-rproposal = function(n, theta) rnorm(n, theta, 1)
 
+# Apply a finite difference approximation to the gradient of f (with noise)
+# Either supply noise terms or they are generated. In latter case, different errors are used for step up and step down evaluations.
+fin_diff_f = function(theta, c, E_up = NULL, E_down = NULL, sigma = 1, return_E = FALSE){
+    if(is.null(E_up)) E_up = make_E(sigma)
+    if(is.null(E_down)) E_down = make_E(sigma)
 
-fin_diff_ESS = function(theta, X, c){
-    A = ESS(theta + c, X)
-    B = ESS(theta - c, X)
+    A = f_ran(theta + c, E_up)
+    B = f_ran(theta - c, E_down)
 
-    return((A - B) / (2*c))
+    grad_hat = (A - B) / (2*c)
+
+    if(!return_E){
+        return(grad_hat)
+    } else{
+        return(list(grad_hat = grad_hat, E_up = E_up, E_down = E_down))
+    }
 }
 
 
 
 # k: iteration number
 # n: size of sample from proposal
-update_theta = function(theta_old, k, n=1000){
+update_theta = function(theta_old, k, sigma = 1){
     a_k = get_a(k)
     
-    X = rproposal(n, theta_old)
-
     c_k = get_c(k)
-    grad_hat = fin_diff_ESS(theta_old, X, c_k)
+    grad_hat = fin_diff_f(theta_old, c_k, sigma = sigma)
 
     theta_new = theta_old + a_k * grad_hat
     return(theta_new)
 }
 
 
+# set.seed(1)
 
-set.seed(1)
+K = 1000
 
-K = 10
-
-theta_old = 1
+theta_init = 1
+theta_old = theta_init
 
 theta_traj = rep(0, times = K)
 theta_traj[1] = theta_old
 
 for(k in 2:K){
-    theta_next = update_theta(theta_old, k, n)
+    theta_next = update_theta(theta_old, k, sigma = sigma)
 
     theta_traj[k] = theta_next
     theta_old = theta_next
 }
 
-theta_traj
+# theta_traj
+
+
+# par(mfrow = c(1,2))
+
+# plot(theta_traj[-1], type = "l")
+# abline(h = 0)
+
+# f_traj = f_det(theta_traj)
+# plot(f_traj[-1])
+
+# par(mfrow = c(1,1))
