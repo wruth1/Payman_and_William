@@ -28,11 +28,24 @@ sim_G = function(N, sigma){
     rnorm(N, 0, sigma)
 }
 
+sim_G_from_U = function(U, sigma){
+  qnorm(U, 0, sigma)
+}
+
+
+
 
 ESS_from_X = function(sigma, some_Xs){
     some_Ws = f(some_Xs) / g(some_Xs, sigma)
     return(1/sum(some_Ws^2))
 }
+
+
+ESS_from_U = function(sigma, some_Us){
+  some_Xs = sim_G_from_U(some_Us, sigma)
+  ESS_from_X(sigma, some_Xs)
+}
+
 
 ESS_from_N = function(sigma, N){
     some_Xs = sim_G(N, sigma)
@@ -40,18 +53,16 @@ ESS_from_N = function(sigma, N){
 }
 
 
-#
-# Analytical gradient of the effective sample size.
-#
-G = function(mu){
-  2*mu*exp(mu^2)
-}
 
 # ToDo: Implement "common random number" variance reduction technique for the step-up and step-down evaluations. Switch from N as input to a set of uniforms as input. Use, e.g., qnorm(U, 0, sigma +/- c) for common random numbers
+# ToDo: Analyze whether the common random numbers approach is appropriate for this calculation
 # c: step size for finite difference. Denominator is 2c
 fin_diff_grad = function(sigma, N, c){
-    A = ESS_from_N(sigma + c, N)
-    B = ESS_from_N(sigma - c, N)
+
+    some_Us = runif(N)
+
+    A = ESS_from_U(sigma + c, some_Us)
+    B = ESS_from_U(sigma - c, some_Us)
 
     return((A - B)/(2*c))
 }
@@ -91,12 +102,11 @@ update_proposal = function(sigma, N, a, c){
 # get_c = function(k) return(k^(-0.25))
 
 # Chen et al. (2024)
-get_a = function(k) return(k^(-0.501))
-get_c = function(k) return(0.001 * k^(-0.501))
+get_a = function(k, a0 = 1) return(a0* k^(-0.501))
+get_c = function(k, c0 = 0.001) return(c0 * k^(-0.501))
 
 
 
-set.seed(111)
 
 #
 # Initialize values
@@ -116,12 +126,15 @@ sigma[1] = 2
 # N = 100
 N = 1000
 
+set.seed(111)
+
+
 for(i in 2:MC){
   print(paste0(i, " out of ", MC))
-  # You can change stepsize if you run into problem
-  # but it should be ok with this one (William: I think so).
-  sigma[i]  = update_proposal(sigma[i-1], N, get_a(i), get_c(i) )
+  sigma[i]  = update_proposal(sigma[i-1], N, get_a(i, a0 = 1000), get_c(i) )
 }
+
+print(sigma)
 
 
 # ToDo: Make a plot of the true ESS as a function of sigma. Compute the true value by Monte Carlo with high precision
