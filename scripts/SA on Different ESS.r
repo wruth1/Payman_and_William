@@ -1,10 +1,5 @@
 
 
-# library(latex2exp)
-
-# plot_dir = "Presentations/RichCon 2024/Figures/"
-
-
 
 #
 # Define the target distribution, f(x) standard Normal distribution.
@@ -32,6 +27,16 @@ sim_G_from_U = function(U, sigma){
   qnorm(U, 0, sigma)
 }
 
+get_L1_ESS = function(W){
+    N = length(W)
+
+    W_p = subset(W, W>1/N)
+
+    S_p = sum(W_p)
+    N_p = length(W_p)
+
+    return(-N * S_p + N_p + N)
+}
 
 # ToDo: Implement remaining norms
 ESS_from_W = function(some_Ws, flavour = "L2"){
@@ -40,15 +45,17 @@ ESS_from_W = function(some_Ws, flavour = "L2"){
   } else if(flavour == "LInfty"){
     return(1 / max(some_Ws))
   } else if(flavour == "L1"){
-    stop("L1 norm-based ESS not yet implemented")
+    return(get_L1_ESS(some_Ws))
   } else if(flavour == "entropy"){
-    stop("Entropy-based ESS not yet implemented")
+    return(exp(-sum(some_Ws * log(some_Ws))))
   }
 }
 
 
 ESS_from_X = function(sigma, some_Xs, flavour = "L2"){
     some_Ws = f(some_Xs) / g(some_Xs, sigma)
+
+    some_Ws = some_Ws / sum(some_Ws)        #!!!!!!!!!!! Apply self-normalization
 
     return(ESS_from_W(some_Ws, flavour))
 }
@@ -121,16 +128,22 @@ get_c = function(k, alpha = -0.501, c0 = 0.001) return(c0 * k^(alpha))
 
 
 # Number of SA iterations
-MC = 100
+MC = 1000
 # MC = 1000
 
 # Number of random sample at each iteration
 # N = 100
 N = 1000
 
-# flavour = "L2"
-flavour = "LInfty"
+#? If sigma ever lands outside a cmpt interval, project to the endpoints
+sigma_min = 0.1
+sigma_max = 2.5
+
+
 # flavour = "L1"
+# flavour = "L2"
+# flavour = "LInfty"
+flavour = "entropy"
 
 
 set.seed(111)
@@ -142,83 +155,33 @@ sigma[1] = 2
 for(i in 2:MC){
   print(paste0(i, " out of ", MC))
   # sigma[i]  = update_proposal(sigma[i-1], N, get_a(i, alpha = -1, a0 = 10), get_c(i), flavour = flavour)
-  sigma[i]  = update_proposal(sigma[i-1], N, get_a(i, a0 = 1), get_c(i), flavour = flavour)
+    sigma_new = update_proposal(sigma[i-1], N, get_a(i, a0 = 0.01), get_c(i), flavour = flavour)
+    if(sigma_new < sigma_min){
+        sigma[i] = sigma_min
+    } else if(sigma_new > sigma_max){
+        sigma[i] = sigma_max
+    } else{
+        sigma[i] = sigma_new
+    }
 }
 
 print(sigma)
 
-# sigma_LInfty = sigma
-# sigma_L2 = sigma
 
-sigma - sigma_L2
-sigma - sigma_LInfty
+# sigma_L1 = sigma
+# sigma_L2 = sigma
+# sigma_LInfty = sigma
+# sigma_entropy = sigma
+
+
+pacman::p_load(tidyr)
+
+data_sigma = tibble(i = 1:MC, L1 = sigma_L1, L2 = sigma_L2, Infty = sigma_LInfty, entropy = sigma_entropy) %>%
+    pivot_longer(2:5, names_to = "flavour", values_to = "sigma")
+
+
+ggplot(data_sigma, aes(x = i, y = sigma)) + geom_line() + facet_wrap(~flavour)
+
 
 # ToDo: Make a plot of the true ESS as a function of sigma. Compute the true value by Monte Carlo with high precision
 
-
-
-# # 
-# # 
-# # pdf(paste0(plot_dir, "PS traj.pdf"), width=10, height=7)
-# # 
-# # par(mfrow=c(1,2))
-# # # par(mfrow=c(1,3))
-# # 
-# # plot(1:MC, mu, xlab = 'Iteration', ylab = TeX(r'($\hat{\theta}$)'), main = 'Parameter Estimate')
-# # # abline(h = 0)
-# # plot(1:MC, all_k_hats, xlab = 'Iteration', ylab = TeX(r'($\hat{k}$)'), main = 'Tail Index')
-# # 
-# # dev.off()
-
-# # plot(20:MC, cumsum(mu[20:MC]) / 20:MC)#, ylim = c(0, 1.5))
-# # 
-# # 
-# # mean(mu[20:MC])
-
-# mu[MC]
-# mean(mu[start:MC])
-
-
-
-# MC_small = 100
-
-
-# pdf(paste0(plot_dir, "PS traj.pdf"), width=10, height=7)
-# par(mfrow=c(1,2))
-
-# plot(1:MC_small, mu[1:MC_small], xlab = 'Iteration', ylab = TeX(r'($\hat{\theta}$)'), main = 'Parameter Estimate')
-# # abline(h = 0)
-# plot(1:MC_small, all_k_hats[1:MC_small], xlab = 'Iteration', ylab = TeX(r'($\hat{k}$)'), main = 'Tail Index', ylim = c(-0.5, 0.5))
-
-# dev.off()
-
-
-# pdf(paste0(plot_dir, "PS mean traj.pdf"), width=5, height=7)
-
-# # par(mfrow=c(1,2))
-
-# start = MC/2
-
-# par(mfrow = c(1,1))
-# # plot(start:MC, mu[start:MC], xlab = 'Iteration', ylab = TeX(r'($\hat{\theta}$)'), main = 'Parameter Estimate')
-# plot(start:MC, cumsum(mu[start:MC])/1:(MC - start + 1), xlab = 'Iteration', ylab = "Cumulative Average", main = 'PS - Based', ylim = c(-6e-4, 6e-4))
-# # abline(h = 0)
-
-# dev.off()
-
-
-# mu[MC_small]
-# mu[MC]
-# mean(mu[start:MC])
-
-
-
-# par(mfrow = c(1,2))
-
-# plot(theta_traj[-1], type = "l")
-# abline(h = 0)
-
-# f_traj = f_det(theta_traj)
-# plot(f_traj[-1])
-
-# par(mfrow = c(1,1))
