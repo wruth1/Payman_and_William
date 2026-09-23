@@ -33,36 +33,48 @@ sim_G_from_U = function(U, sigma){
 }
 
 
-
-
-ESS_from_X = function(sigma, some_Xs){
-    some_Ws = f(some_Xs) / g(some_Xs, sigma)
+# ToDo: Implement remaining norms
+ESS_from_W = function(some_Ws, flavour = "L2"){
+  if(flavour == "L2"){
     return(1/sum(some_Ws^2))
+  } else if(flavour == "LInfty"){
+    return(1 / max(some_Ws))
+  } else if(flavour == "L1"){
+    stop("L1 norm-based ESS not yet implemented")
+  } else if(flavour == "entropy"){
+    stop("Entropy-based ESS not yet implemented")
+  }
 }
 
 
-ESS_from_U = function(sigma, some_Us){
+ESS_from_X = function(sigma, some_Xs, flavour = "L2"){
+    some_Ws = f(some_Xs) / g(some_Xs, sigma)
+
+    return(ESS_from_W(some_Ws, flavour))
+}
+
+
+ESS_from_U = function(sigma, some_Us, flavour = "L2"){
   some_Xs = sim_G_from_U(some_Us, sigma)
-  ESS_from_X(sigma, some_Xs)
+  ESS_from_X(sigma, some_Xs, flavour)
 }
 
 
-ESS_from_N = function(sigma, N){
+ESS_from_N = function(sigma, N, flavour = "L2"){
     some_Xs = sim_G(N, sigma)
-    ESS_from_X(sigma, some_Xs)
+    ESS_from_X(sigma, some_Xs, flavour)
 }
 
 
 
-# ToDo: Implement "common random number" variance reduction technique for the step-up and step-down evaluations. Switch from N as input to a set of uniforms as input. Use, e.g., qnorm(U, 0, sigma +/- c) for common random numbers
 # ToDo: Analyze whether the common random numbers approach is appropriate for this calculation
 # c: step size for finite difference. Denominator is 2c
-fin_diff_grad = function(sigma, N, c){
+fin_diff_grad = function(sigma, N, c, flavour = "L2"){
 
     some_Us = runif(N)
 
-    A = ESS_from_U(sigma + c, some_Us)
-    B = ESS_from_U(sigma - c, some_Us)
+    A = ESS_from_U(sigma + c, some_Us, flavour = flavour)
+    B = ESS_from_U(sigma - c, some_Us, flavour = flavour)
 
     return((A - B)/(2*c))
 }
@@ -82,8 +94,8 @@ fin_diff_grad = function(sigma, N, c){
 #
 # a: step size multiplier on gradient
 # c: step size for finite difference. Denominator is 2c
-update_proposal = function(sigma, N, a, c){
-  grad_hat = fin_diff_grad(sigma, N, c)
+update_proposal = function(sigma, N, a, c, flavour = "L2"){
+  grad_hat = fin_diff_grad(sigma, N, c, flavour = flavour)
   
   sigma_new = sigma + a * grad_hat
   return(sigma_new)
@@ -102,96 +114,100 @@ update_proposal = function(sigma, N, a, c){
 # get_c = function(k) return(k^(-0.25))
 
 # Chen et al. (2024)
-get_a = function(k, a0 = 1) return(a0* k^(-0.501))
-get_c = function(k, c0 = 0.001) return(c0 * k^(-0.501))
+get_a = function(k, alpha = -0.501, a0 = 1) return(a0* k^(alpha))
+get_c = function(k, alpha = -0.501, c0 = 0.001) return(c0 * k^(alpha))
 
 
 
-
-#
-# Initialize values
-#
 
 # Number of SA iterations
-# MC = 100
-MC = 1000
-
-# Initial value for sigma in proposal
-sigma = numeric(MC)
-
-sigma[1] = 2
-
+MC = 100
+# MC = 1000
 
 # Number of random sample at each iteration
 # N = 100
 N = 1000
 
+# flavour = "L2"
+flavour = "LInfty"
+# flavour = "L1"
+
+
 set.seed(111)
 
+# Initial value for sigma in proposal
+sigma = numeric(MC)
+sigma[1] = 2
 
 for(i in 2:MC){
   print(paste0(i, " out of ", MC))
-  sigma[i]  = update_proposal(sigma[i-1], N, get_a(i, a0 = 1000), get_c(i) )
+  # sigma[i]  = update_proposal(sigma[i-1], N, get_a(i, alpha = -1, a0 = 10), get_c(i), flavour = flavour)
+  sigma[i]  = update_proposal(sigma[i-1], N, get_a(i, a0 = 1), get_c(i), flavour = flavour)
 }
 
 print(sigma)
 
+# sigma_LInfty = sigma
+# sigma_L2 = sigma
+
+sigma - sigma_L2
+sigma - sigma_LInfty
 
 # ToDo: Make a plot of the true ESS as a function of sigma. Compute the true value by Monte Carlo with high precision
 
 
 
-# 
-# 
+# # 
+# # 
+# # pdf(paste0(plot_dir, "PS traj.pdf"), width=10, height=7)
+# # 
+# # par(mfrow=c(1,2))
+# # # par(mfrow=c(1,3))
+# # 
+# # plot(1:MC, mu, xlab = 'Iteration', ylab = TeX(r'($\hat{\theta}$)'), main = 'Parameter Estimate')
+# # # abline(h = 0)
+# # plot(1:MC, all_k_hats, xlab = 'Iteration', ylab = TeX(r'($\hat{k}$)'), main = 'Tail Index')
+# # 
+# # dev.off()
+
+# # plot(20:MC, cumsum(mu[20:MC]) / 20:MC)#, ylim = c(0, 1.5))
+# # 
+# # 
+# # mean(mu[20:MC])
+
+# mu[MC]
+# mean(mu[start:MC])
+
+
+
+# MC_small = 100
+
+
 # pdf(paste0(plot_dir, "PS traj.pdf"), width=10, height=7)
-# 
 # par(mfrow=c(1,2))
-# # par(mfrow=c(1,3))
-# 
-# plot(1:MC, mu, xlab = 'Iteration', ylab = TeX(r'($\hat{\theta}$)'), main = 'Parameter Estimate')
+
+# plot(1:MC_small, mu[1:MC_small], xlab = 'Iteration', ylab = TeX(r'($\hat{\theta}$)'), main = 'Parameter Estimate')
 # # abline(h = 0)
-# plot(1:MC, all_k_hats, xlab = 'Iteration', ylab = TeX(r'($\hat{k}$)'), main = 'Tail Index')
-# 
+# plot(1:MC_small, all_k_hats[1:MC_small], xlab = 'Iteration', ylab = TeX(r'($\hat{k}$)'), main = 'Tail Index', ylim = c(-0.5, 0.5))
+
 # dev.off()
 
-# plot(20:MC, cumsum(mu[20:MC]) / 20:MC)#, ylim = c(0, 1.5))
-# 
-# 
-# mean(mu[20:MC])
 
-mu[MC]
-mean(mu[start:MC])
+# pdf(paste0(plot_dir, "PS mean traj.pdf"), width=5, height=7)
 
+# # par(mfrow=c(1,2))
 
+# start = MC/2
 
-MC_small = 100
+# par(mfrow = c(1,1))
+# # plot(start:MC, mu[start:MC], xlab = 'Iteration', ylab = TeX(r'($\hat{\theta}$)'), main = 'Parameter Estimate')
+# plot(start:MC, cumsum(mu[start:MC])/1:(MC - start + 1), xlab = 'Iteration', ylab = "Cumulative Average", main = 'PS - Based', ylim = c(-6e-4, 6e-4))
+# # abline(h = 0)
 
-
-pdf(paste0(plot_dir, "PS traj.pdf"), width=10, height=7)
-par(mfrow=c(1,2))
-
-plot(1:MC_small, mu[1:MC_small], xlab = 'Iteration', ylab = TeX(r'($\hat{\theta}$)'), main = 'Parameter Estimate')
-# abline(h = 0)
-plot(1:MC_small, all_k_hats[1:MC_small], xlab = 'Iteration', ylab = TeX(r'($\hat{k}$)'), main = 'Tail Index', ylim = c(-0.5, 0.5))
-
-dev.off()
+# dev.off()
 
 
-pdf(paste0(plot_dir, "PS mean traj.pdf"), width=5, height=7)
-
-# par(mfrow=c(1,2))
-
-start = MC/2
-
-par(mfrow = c(1,1))
-# plot(start:MC, mu[start:MC], xlab = 'Iteration', ylab = TeX(r'($\hat{\theta}$)'), main = 'Parameter Estimate')
-plot(start:MC, cumsum(mu[start:MC])/1:(MC - start + 1), xlab = 'Iteration', ylab = "Cumulative Average", main = 'PS - Based', ylim = c(-6e-4, 6e-4))
-# abline(h = 0)
-
-dev.off()
-
-
-mu[MC_small]
-mu[MC]
-mean(mu[start:MC])
+# mu[MC_small]
+# mu[MC]
+# mean(mu[start:MC])
 
