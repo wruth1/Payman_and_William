@@ -185,3 +185,15 @@ ggplot(data_sigma, aes(x = i, y = sigma)) + geom_line() + facet_wrap(~flavour)
 
 # ToDo: Make a plot of the true ESS as a function of sigma. Compute the true value by Monte Carlo with high precision
 
+
+
+
+sigma_ave_L1 = cumsum(sigma_L1) / seq_along(sigma_L1)
+sigma_ave_L2 = cumsum(sigma_L2) / seq_along(sigma_L2)
+sigma_ave_LInfty = cumsum(sigma_LInfty) / seq_along(sigma_LInfty)
+sigma_ave_entropy = cumsum(sigma_entropy) / seq_along(sigma_entropy)
+
+data_sigma_ave = tibble(i = 1:MC, L1 = sigma_ave_L1, L2 = sigma_ave_L2, Infty = sigma_ave_LInfty, entropy = sigma_ave_entropy) %>%
+    pivot_longer(2:5, names_to = "flavour", values_to = "sigma_ave")
+
+ggplot(data_sigma_ave, aes(x = i, y = sigma_ave)) + geom_line() + facet_wrap(~flavour) + geom_hline(yintercept = 1)
