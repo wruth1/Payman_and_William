@@ -342,7 +342,7 @@
 
 
 \begin{frame}
-    \frametitle{Aside: Stochastic Approximation}
+    \frametitle{Stochastic Approximation}
 
     \begin{outline}
         \1 Stochastic approximation was proposed by \citeauthor{Rob51} in 1951 for finding roots of functions with noise \newline
@@ -354,7 +354,7 @@
 
 
 \begin{frame}
-    \frametitle{Aside: Stochastic Approximation}
+    \frametitle{Stochastic Approximation}
 
     \begin{outline}
         \1 A root of $f(x)$ is a fixed point of $x + f(x)$
@@ -373,7 +373,7 @@
 
 
 \begin{frame}
-    \frametitle{Aside: Stochastic Approximation}
+    \frametitle{Stochastic Approximation}
     \begin{outline}
         \1 The main reason we're interested in this method is to take $f$ as a gradient
             \2 Now, we're doing optimization \newline
@@ -385,7 +385,7 @@
 
 
 \begin{frame}
-    \frametitle{Aside: Stochastic Approximation}
+    \frametitle{Stochastic Approximation}
     \begin{outline}
         \1 Fixed-point iteration for root finding
     \end{outline}
@@ -397,7 +397,7 @@
 
 
 \begin{frame}
-    \frametitle{Aside: Stochastic Approximation}
+    \frametitle{Stochastic Approximation}
     \begin{outline}
         \1 \citet{Rob51}
     \end{outline}
@@ -408,7 +408,7 @@
 
 
 \begin{frame}
-    \frametitle{Aside: Stochastic Approximation}
+    \frametitle{Stochastic Approximation}
     \begin{outline}
         \1 \citet{Rob51} for optimization
     \end{outline}
@@ -418,7 +418,7 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Aside: Stochastic Approximation}
+    \frametitle{Stochastic Approximation}
 \begin{outline}
         \1 \citet{Kie52}
     \end{outline}
@@ -429,11 +429,11 @@
 
 
 \begin{frame}
-    \frametitle{Aside: Stochastic Approximation}
+    \frametitle{Stochastic Approximation}
     \begin{outline}
         \1 Disclaimer: The theory and practice of stochastic approximation has developed since the 50s \newline
 
-        \1 E.g. Stochastic gradient descent, Polyak-Ruppert averaging, projection
+        \1 E.g. Stochastic gradient descent, Polyak-Ruppert averaging, projection, \ldots
     \end{outline}
 \end{frame}
 
@@ -456,8 +456,8 @@
 
 \begin{frame}{Example: Normal Scale Family}
     \begin{outline}
-        \1 Let's revisit the simple example from earlier
-        \1 $f$ standard normal \newline
+        \1 Let's revisit the simple example from earlier \newline
+        \1 $f$ standard normal
 
         \1 Proposal family: $\{ N(0, \sigma^2) \}$
     \end{outline}    
@@ -472,13 +472,6 @@
 \end{frame}
 
 
-\begin{frame}{Example: Normal Scale Family}
-    \begin{outline}
-        \1 Rather than choosing one ESS, I want to compare them \newline
-
-        \1 Use stochastic approximation to optimize over $\sigma > 0$.
-    \end{outline}    
-\end{frame}
 
 \begin{frame}{Example: Normal Scale Family}
     \centering
@@ -487,8 +480,8 @@
 
 \begin{frame}{Example: T Degrees of Freedom}
     \begin{outline}
-        \1 Next, let's do something a little more interesting
-        \1 $f$ standard normal \newline
+        \1 Next, let's do something a little more interesting \newline
+        \1 $f$ standard normal
 
         \1 Proposal family: $\{ T_n: n>0 \}$
     \end{outline}  
@@ -498,6 +491,54 @@
     \centering
     \includegraphics[height=0.8\textheight, width=0.9\textwidth, keepaspectratio]{Figures/New/T SA.png}
 \end{frame}
+
+
+\begin{frame}{Example: T from Normal}
+    \begin{outline}
+        \1 Finally, let's end on a weird example \newline
+        \1 $f \sim $ Cauchy 
+
+        \1 Proposal family: $\{ N(0, \sigma^2) \}$
+    \end{outline}  
+\end{frame}
+
+\begin{frame}{Example: T from Normal}
+    \centering
+    \includegraphics[height=0.8\textheight, width=0.9\textwidth, keepaspectratio]{Figures/New/T from Normal SA.png}
+\end{frame}
+
+\begin{frame}{Example: T from Normal}
+    \begin{outline}
+        \1 We might be able to reduce this variability by carefully tuning SA \newline
+
+        \1 Easier to use Polyak-Ruppert Averaging
+            \2 Replace process with cumulative average
+    \end{outline}  
+\end{frame}
+
+
+\begin{frame}{Example: T from Normal}
+    \centering
+    \includegraphics[height=0.8\textheight, width=0.9\textwidth, keepaspectratio]{Figures/New/T from Normal SA (averaged).png}
+\end{frame}
+
+
+
+\begin{frame}
+    \frametitle{Discussion}
+    \begin{outline}
+        \1 Key takeaways:
+            \2 You don't have to guess a great proposal distribution
+            \2 There are different ways to measure effective sample size \newline
+        
+        \1 Ongoing work:
+            \2 Guidance on which ESS to use when
+            \2 Applications to latent variable problems
+    \end{outline}
+    
+
+\end{frame}
+
 
 
 \begin{comment}
@@ -825,7 +866,7 @@
 
 
 %! Add Pictures?
-\begin{frame}{Acknowledgements}
+\begin{frame}{Collaborators}
     \begin{outline}
         \1 Payman Nickchi (UBC)
         \1 Richard Lockhart (SFU)

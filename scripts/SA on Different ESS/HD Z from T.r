@@ -1,30 +1,39 @@
 
 
 pacman::p_load(tidyr)
+pacman::p_load(mvtnorm)
+
+
+d = 20
+
 
 #
 # Define the target distribution, f(x) standard Normal distribution.
 # The function Takes x and returns p.d.f of N(0,1)
 #
 f = function(x){
-  dunif(x)
+  dmvnorm(x, sigma = diag(d))
 }
 
-curve(g(x, 0), from = 0, to = 1)
 
 #
 # Density of the proposal distribution.
 # T with df degrees of freedom.
-g = function(x, theta){
-    dbeta(x, theta + 1, 1)
+g = function(x, df){
+  prod(dt(x, df = df))
+    # dmvt(x, sigma = diag(d), df = df, log = F)
 }
 
-sim_G = function(N, theta){
-    rbeta(N, theta+1, 1)
+sim_G = function(N, df){
+    rt(N, df)
 }
 
-sim_G_from_U = function(U, theta){
-  qbeta(U, theta + 1, 1)
+sim_G_from_U = function(U, df){
+  qt(U, df)
+}
+
+sim_G_from_many_Us = function(some_Us, df){
+  lapply(some_Us, sim_G_from_U, df = df)
 }
 
 get_L1_ESS = function(W){
@@ -51,37 +60,42 @@ ESS_from_W = function(some_Ws, flavour = "L2"){
   }
 }
 
+# some_Xs = replicate(10, rnorm(d), simplify = F)
 
-ESS_from_X = function(theta, some_Xs, flavour = "L2"){
-    some_Ws = f(some_Xs) / g(some_Xs, theta)
+ESS_from_X = function(df, some_Xs, flavour = "L2"){
+  some_fs = sapply(some_Xs, f)
+  some_gs = sapply(some_Xs, g, df = df)
+
+    some_Ws = some_fs / some_gs
 
     some_Ws = some_Ws / sum(some_Ws)        #!!!!!!!!!!! Apply self-normalization
 
     return(ESS_from_W(some_Ws, flavour))
 }
 
+# some_Us = replicate(10, runif(d), simplify = F)
 
-ESS_from_U = function(theta, some_Us, flavour = "L2"){
-  some_Xs = sim_G_from_U(some_Us, theta)
-  ESS_from_X(theta, some_Xs, flavour)
+ESS_from_U = function(df, some_Us, flavour = "L2"){
+  some_Xs = lapply(some_Us, sim_G_from_U, df = df)
+  ESS_from_X(df, some_Xs, flavour)
 }
 
 
-ESS_from_N = function(theta, N, flavour = "L2"){
-    some_Xs = sim_G(N, theta)
-    ESS_from_X(theta, some_Xs, flavour)
-}
+# ESS_from_N = function(df, N, flavour = "L2"){
+#     some_Xs = sim_G(N, df)
+#     ESS_from_X(df, some_Xs, flavour)
+# }
 
 
 
 # ToDo: Analyze whether the common random numbers approach is appropriate for this calculation
 # c: step size for finite difference. Denominator is 2c
-fin_diff_grad = function(theta, N, c, flavour = "L2"){
+fin_diff_grad = function(df, N, c, flavour = "L2"){
 
-    some_Us = runif(N)
+    some_Us = replicate(N, runif(d), simplify = F)
 
-    A = ESS_from_U(theta + c, some_Us, flavour = flavour)
-    B = ESS_from_U(theta - c, some_Us, flavour = flavour)
+    A = ESS_from_U(df + c, some_Us, flavour = flavour)
+    B = ESS_from_U(df - c, some_Us, flavour = flavour)
 
     return((A - B)/(2*c))
 }
@@ -91,8 +105,8 @@ fin_diff_grad = function(theta, N, c, flavour = "L2"){
 
 #
 # Define a function to update the proposal at each iteration, let's call this function update_proposal.
-# This function takes the sample (x) and parameter (theta) at each iteration and returns
-# a new value for the parameter (theta).
+# This function takes the sample (x) and parameter (df) at each iteration and returns
+# a new value for the parameter (df).
 #
 # (Some notes on stepsize:
 # the best practical suggestion is to set stepsize as \frac{1}{t} where t is the iteration number.
@@ -101,11 +115,11 @@ fin_diff_grad = function(theta, N, c, flavour = "L2"){
 #
 # a: step size multiplier on gradient
 # c: step size for finite difference. Denominator is 2c
-update_proposal = function(theta, N, a, c, flavour = "L2"){
-  grad_hat = fin_diff_grad(theta, N, c, flavour = flavour)
+update_proposal = function(df, N, a, c, flavour = "L2"){
+  grad_hat = fin_diff_grad(df, N, c, flavour = flavour)
   
-  theta_new = theta + a * grad_hat
-  return(theta_new)
+  df_new = df + a * grad_hat
+  return(df_new)
 }
 
 
@@ -128,20 +142,20 @@ get_c = function(k, alpha = -0.501, c0 = 0.001) return(c0 * k^(alpha))
 
 
 # Number of SA iterations
-MC = 1000
+MC = 200
 # MC = 1000
 
 # Number of random sample at each iteration
 # N = 100
 N = 1000
 
-#? If theta ever lands outside a cmpt interval, project to the endpoints
-theta_min = 0.1
-theta_max = 2.5
+#? If df ever lands outside a cmpt interval, project to the endpoints
+theta_min = 1   #! Might be better to use 1.5 to avoid Cauchy degeneracies
+theta_max = 200 #! Might need a larger value, as df -> infinity gives a normal
 
 
 # flavour = "L1"
-# flavour = "L2"
+flavour = "L2"
 # flavour = "LInfty"
 # flavour = "entropy"
 
@@ -149,8 +163,7 @@ theta_max = 2.5
 set.seed(111)
 
 # Initial value for theta in proposal
-theta = numeric(MC)
-theta[1] = 20
+theta_0 = 20
 
 
 
@@ -171,8 +184,8 @@ run_SA = function(theta_0, flavour,
 
   for(i in 2:MC){
     if(verbose){
-      if((i %% 50) == 0)  print(paste0(i, " out of ", MC))
-      # print(paste0(i, " out of ", MC))
+      # if((i %% 50) == 0)  print(paste0(i, " out of ", MC))
+      print(paste0(i, " out of ", MC))
     }
       
       # Run update
@@ -195,13 +208,14 @@ run_SA = function(theta_0, flavour,
 }
 
 
-# theta_L1 = theta
-# theta_L2 = theta
-# theta_LInfty = theta
-# theta_entropy = theta
+
+# df_L1 = df
+# df_L2 = df
+# df_LInfty = df
+# df_entropy = df
 
 
-make_trajectories = function(theta_0 = 0.5, theta_min = 0.1, theta_max = 2.5, N=1000, MC = 1000, a0 = 1, c0 = 0.001, alpha_a = -0.501, alpha_c = -0.501){
+make_trajectories = function(theta_0 = 20, theta_min = 1, theta_max = 200, N=1000, MC = 1000, a0 = 1, c0 = 0.001, alpha_a = -0.501, alpha_c = -0.501){
 
 
   print("L1")
@@ -209,7 +223,8 @@ make_trajectories = function(theta_0 = 0.5, theta_min = 0.1, theta_max = 2.5, N=
                       theta_min = theta_min, theta_max = theta_max,
                       N = N, MC = MC, 
                       a0 = a0, c0 = c0, 
-                      alpha_a = alpha_a, alpha_c = alpha_c)
+                      alpha_a = alpha_a, alpha_c = alpha_c,
+                      verbose = TRUE)
 
 
   print("L2")
@@ -217,7 +232,8 @@ make_trajectories = function(theta_0 = 0.5, theta_min = 0.1, theta_max = 2.5, N=
                       theta_min = theta_min, theta_max = theta_max,
                       N = N, MC = MC, 
                       a0 = a0, c0 = c0, 
-                      alpha_a = alpha_a, alpha_c = alpha_c)
+                      alpha_a = alpha_a, alpha_c = alpha_c,
+                      verbose = TRUE)
 
 
 
@@ -226,7 +242,8 @@ make_trajectories = function(theta_0 = 0.5, theta_min = 0.1, theta_max = 2.5, N=
                       theta_min = theta_min, theta_max = theta_max,
                       N = N, MC = MC, 
                       a0 = a0, c0 = c0, 
-                      alpha_a = alpha_a, alpha_c = alpha_c)
+                      alpha_a = alpha_a, alpha_c = alpha_c,
+                      verbose = TRUE)
 
 
 
@@ -235,7 +252,8 @@ make_trajectories = function(theta_0 = 0.5, theta_min = 0.1, theta_max = 2.5, N=
                       theta_min = theta_min, theta_max = theta_max,
                       N = N, MC = MC, 
                       a0 = a0, c0 = c0, 
-                      alpha_a = alpha_a, alpha_c = alpha_c)
+                      alpha_a = alpha_a, alpha_c = alpha_c,
+                      verbose = TRUE)
 
 
 
@@ -245,14 +263,14 @@ make_trajectories = function(theta_0 = 0.5, theta_min = 0.1, theta_max = 2.5, N=
     return(data_theta)
 }
 
-data_theta = make_trajectories(MC = 200, a0 = 0.00005)
+data_theta = make_trajectories(MC = 200, theta_max = Inf)
 
 ggplot(data_theta, aes(x = i, y = theta)) + geom_line() + facet_wrap(~flavour)
 # ggplot(data_theta, aes(x = i, y = log(theta))) + geom_line() + facet_wrap(~flavour)
 
 
 
-png("C:\\Users\\wruth\\My Drive (wruth@mtroyal.ca)\\Research\\Payman_and_William\\Presentations\\2026 - Meeting of Alberta Statisticians\\Figures\\New\\T SA.png")
+png("C:\\Users\\wruth\\My Drive (wruth@mtroyal.ca)\\Research\\Payman_and_William\\Presentations\\2026 - Meeting of Alberta Statisticians\\Figures\\New\\High-D T SA.png")
 ggplot(data_theta, aes(x = i, y = theta)) + geom_line(linewidth = 1) + facet_wrap(~flavour) + xlab("Iteration") + ylab("DF") + theme(text = element_text(size = 25))
 dev.off()
 

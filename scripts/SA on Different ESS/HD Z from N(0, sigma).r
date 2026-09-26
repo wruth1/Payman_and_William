@@ -1,30 +1,34 @@
 
 
 pacman::p_load(tidyr)
+pacman::p_load(mvtnorm)
+
+
+d = 20
+
 
 #
 # Define the target distribution, f(x) standard Normal distribution.
 # The function Takes x and returns p.d.f of N(0,1)
 #
 f = function(x){
-  dunif(x)
+  dmvnorm(x, sigma = diag(d))
 }
 
-curve(g(x, 0), from = 0, to = 1)
 
 #
 # Density of the proposal distribution.
-# T with df degrees of freedom.
+# T with theta degrees of freedom.
 g = function(x, theta){
-    dbeta(x, theta + 1, 1)
+  prod(dnorm(x, sd = theta))
 }
 
 sim_G = function(N, theta){
-    rbeta(N, theta+1, 1)
+    rnorm(N, 0, sigma = theta)
 }
 
 sim_G_from_U = function(U, theta){
-  qbeta(U, theta + 1, 1)
+  qnorm(U, 0, theta)
 }
 
 get_L1_ESS = function(W){
@@ -51,26 +55,26 @@ ESS_from_W = function(some_Ws, flavour = "L2"){
   }
 }
 
+# some_Xs = replicate(10, rnorm(d), simplify = F)
 
 ESS_from_X = function(theta, some_Xs, flavour = "L2"){
-    some_Ws = f(some_Xs) / g(some_Xs, theta)
+  some_fs = sapply(some_Xs, f)
+  some_gs = sapply(some_Xs, g, theta = theta)
+
+    some_Ws = some_fs / some_gs
 
     some_Ws = some_Ws / sum(some_Ws)        #!!!!!!!!!!! Apply self-normalization
 
     return(ESS_from_W(some_Ws, flavour))
 }
 
+# some_Us = replicate(10, runif(d), simplify = F)
 
 ESS_from_U = function(theta, some_Us, flavour = "L2"){
-  some_Xs = sim_G_from_U(some_Us, theta)
+  some_Xs = lapply(some_Us, sim_G_from_U, theta = theta)
   ESS_from_X(theta, some_Xs, flavour)
 }
 
-
-ESS_from_N = function(theta, N, flavour = "L2"){
-    some_Xs = sim_G(N, theta)
-    ESS_from_X(theta, some_Xs, flavour)
-}
 
 
 
@@ -78,8 +82,9 @@ ESS_from_N = function(theta, N, flavour = "L2"){
 # c: step size for finite difference. Denominator is 2c
 fin_diff_grad = function(theta, N, c, flavour = "L2"){
 
-    some_Us = runif(N)
+    some_Us = replicate(N, runif(d), simplify = F)
 
+    A = sapply(theta + c, ESS_from_U, some_Us = some_Us)
     A = ESS_from_U(theta + c, some_Us, flavour = flavour)
     B = ESS_from_U(theta - c, some_Us, flavour = flavour)
 
@@ -91,8 +96,8 @@ fin_diff_grad = function(theta, N, c, flavour = "L2"){
 
 #
 # Define a function to update the proposal at each iteration, let's call this function update_proposal.
-# This function takes the sample (x) and parameter (theta) at each iteration and returns
-# a new value for the parameter (theta).
+# This function takes the sample (x) and parameter (df) at each iteration and returns
+# a new value for the parameter (df).
 #
 # (Some notes on stepsize:
 # the best practical suggestion is to set stepsize as \frac{1}{t} where t is the iteration number.
@@ -128,7 +133,7 @@ get_c = function(k, alpha = -0.501, c0 = 0.001) return(c0 * k^(alpha))
 
 
 # Number of SA iterations
-MC = 1000
+MC = 200
 # MC = 1000
 
 # Number of random sample at each iteration
@@ -136,12 +141,12 @@ MC = 1000
 N = 1000
 
 #? If theta ever lands outside a cmpt interval, project to the endpoints
-theta_min = 0.1
-theta_max = 2.5
+theta_min = 1   
+theta_max = 200 
 
 
 # flavour = "L1"
-# flavour = "L2"
+flavour = "L2"
 # flavour = "LInfty"
 # flavour = "entropy"
 
@@ -149,8 +154,7 @@ theta_max = 2.5
 set.seed(111)
 
 # Initial value for theta in proposal
-theta = numeric(MC)
-theta[1] = 20
+theta_0 = rep(2, d)
 
 
 
@@ -165,19 +169,19 @@ run_SA = function(theta_0, flavour,
                     verbose = FALSE){
 
   # Initial value for theta in proposal
-  theta = numeric(MC)
-  theta[1] = theta_0
+  theta = list()
+  theta[[1]] = theta_0
 
 
   for(i in 2:MC){
     if(verbose){
-      if((i %% 50) == 0)  print(paste0(i, " out of ", MC))
-      # print(paste0(i, " out of ", MC))
+      # if((i %% 50) == 0)  print(paste0(i, " out of ", MC))
+      print(paste0(i, " out of ", MC))
     }
       
       # Run update
       # theta[i]  = update_proposal(theta[i-1], N, get_a(i, alpha = -1, a0 = 10), get_c(i), flavour = flavour)
-      theta_new = update_proposal(theta[i-1], N, get_a(i, alpha = alpha_a, a0 = a0), get_c(i, alpha = alpha_c, c0 = c0), flavour = flavour)
+      theta_new = update_proposal(theta[[i-1]], N, get_a(i, alpha = alpha_a, a0 = a0), get_c(i, alpha = alpha_c, c0 = c0), flavour = flavour)
 
         if(theta_new < theta_min){
           theta[i] = theta_min
@@ -195,13 +199,14 @@ run_SA = function(theta_0, flavour,
 }
 
 
-# theta_L1 = theta
-# theta_L2 = theta
-# theta_LInfty = theta
-# theta_entropy = theta
+
+# df_L1 = df
+# df_L2 = df
+# df_LInfty = df
+# df_entropy = df
 
 
-make_trajectories = function(theta_0 = 0.5, theta_min = 0.1, theta_max = 2.5, N=1000, MC = 1000, a0 = 1, c0 = 0.001, alpha_a = -0.501, alpha_c = -0.501){
+make_trajectories = function(theta_0 = 20, theta_min = 1, theta_max = 200, N=1000, MC = 1000, a0 = 1, c0 = 0.001, alpha_a = -0.501, alpha_c = -0.501){
 
 
   print("L1")
@@ -209,7 +214,8 @@ make_trajectories = function(theta_0 = 0.5, theta_min = 0.1, theta_max = 2.5, N=
                       theta_min = theta_min, theta_max = theta_max,
                       N = N, MC = MC, 
                       a0 = a0, c0 = c0, 
-                      alpha_a = alpha_a, alpha_c = alpha_c)
+                      alpha_a = alpha_a, alpha_c = alpha_c,
+                      verbose = TRUE)
 
 
   print("L2")
@@ -217,7 +223,8 @@ make_trajectories = function(theta_0 = 0.5, theta_min = 0.1, theta_max = 2.5, N=
                       theta_min = theta_min, theta_max = theta_max,
                       N = N, MC = MC, 
                       a0 = a0, c0 = c0, 
-                      alpha_a = alpha_a, alpha_c = alpha_c)
+                      alpha_a = alpha_a, alpha_c = alpha_c,
+                      verbose = TRUE)
 
 
 
@@ -226,7 +233,8 @@ make_trajectories = function(theta_0 = 0.5, theta_min = 0.1, theta_max = 2.5, N=
                       theta_min = theta_min, theta_max = theta_max,
                       N = N, MC = MC, 
                       a0 = a0, c0 = c0, 
-                      alpha_a = alpha_a, alpha_c = alpha_c)
+                      alpha_a = alpha_a, alpha_c = alpha_c,
+                      verbose = TRUE)
 
 
 
@@ -235,7 +243,8 @@ make_trajectories = function(theta_0 = 0.5, theta_min = 0.1, theta_max = 2.5, N=
                       theta_min = theta_min, theta_max = theta_max,
                       N = N, MC = MC, 
                       a0 = a0, c0 = c0, 
-                      alpha_a = alpha_a, alpha_c = alpha_c)
+                      alpha_a = alpha_a, alpha_c = alpha_c,
+                      verbose = TRUE)
 
 
 
@@ -245,14 +254,14 @@ make_trajectories = function(theta_0 = 0.5, theta_min = 0.1, theta_max = 2.5, N=
     return(data_theta)
 }
 
-data_theta = make_trajectories(MC = 200, a0 = 0.00005)
+data_theta = make_trajectories(MC = 20, a0 = 0.005, theta_0 = 2, theta_min = 0.1, theta_max = 2.5)
 
 ggplot(data_theta, aes(x = i, y = theta)) + geom_line() + facet_wrap(~flavour)
 # ggplot(data_theta, aes(x = i, y = log(theta))) + geom_line() + facet_wrap(~flavour)
 
 
 
-png("C:\\Users\\wruth\\My Drive (wruth@mtroyal.ca)\\Research\\Payman_and_William\\Presentations\\2026 - Meeting of Alberta Statisticians\\Figures\\New\\T SA.png")
+png("C:\\Users\\wruth\\My Drive (wruth@mtroyal.ca)\\Research\\Payman_and_William\\Presentations\\2026 - Meeting of Alberta Statisticians\\Figures\\New\\High-D Normal SA.png")
 ggplot(data_theta, aes(x = i, y = theta)) + geom_line(linewidth = 1) + facet_wrap(~flavour) + xlab("Iteration") + ylab("DF") + theme(text = element_text(size = 25))
 dev.off()
 
