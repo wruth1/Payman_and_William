@@ -55,6 +55,7 @@
             \2 Effective sample size \newline
         \1 Improving performance
             \2 Stochastic approximation
+
     \end{outline}
 \end{frame}
 
@@ -103,9 +104,9 @@
 
 
 
-\begin{frame}{Example: Mystery Target}
+\begin{frame}{Example: Standard Normal}
     \begin{outline}
-        \1 $f$ unknown, but can be evaluated 
+        \1 $f$ standard normal 
         \1 $\varphi(X) = X^2$ \newline
 
         \1 Try some proposals:
@@ -117,7 +118,7 @@
     \end{outline}    
 \end{frame}
 
-\begin{frame}{Example: Mystery Target}
+\begin{frame}{Example: Standard Normal}
     \centering
     \includegraphics[height=0.9\textheight, width=0.9\textwidth, keepaspectratio]{Figures/Wt Hist.pdf}
 \end{frame}
@@ -358,13 +359,11 @@
     \begin{outline}
         \1 A root of $f(x)$ is a fixed point of $x + f(x)$
             \2 Use fixed point iteration for root finding
-        
         \begin{gather*}
             x_{n+1} = x_n + f(x_n)
         \end{gather*}
-
-        \1 \citeauthor{Rob51} showed that this recursion works even when you replace $f(x_n)$ with $f(x_n) + \varepsilon_n$
-
+        \1 \citeauthor{Rob51} showed that this recursion still works when you replace $f(x_n)$ with $\hat{f} (x_n) = f(x_n) + \varepsilon$
+        \1 Also need a dynamic step size
     \end{outline}
  
 \end{frame}
@@ -375,9 +374,129 @@
 
 \begin{frame}
     \frametitle{Aside: Stochastic Approximation}
+    \begin{outline}
+        \1 The main reason we're interested in this method is to take $f$ as a gradient
+            \2 Now, we're doing optimization \newline
+        
+        \1 Many functions of interest don't have analytical gradients
+        \1 \citet{Kie52} suggested using a finite difference approximation
+    \end{outline}
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Aside: Stochastic Approximation}
+    \begin{outline}
+        \1 Fixed-point iteration for root finding
+    \end{outline}
+    \begin{gather*}
+            x_{n+1} = x_n + f(x_n)
+    \end{gather*}
+\end{frame}
+
+
+
+\begin{frame}
+    \frametitle{Aside: Stochastic Approximation}
+    \begin{outline}
+        \1 \citet{Rob51}
+    \end{outline}
+    \begin{gather*}
+            x_{n+1} = x_n + a_n \hat{f}(x_n)
+    \end{gather*}
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Aside: Stochastic Approximation}
+    \begin{outline}
+        \1 \citet{Rob51} for optimization
+    \end{outline}
+    \begin{gather*}
+            x_{n+1} = x_n + a_n \widehat{\nabla f}(x_n)
+    \end{gather*}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Aside: Stochastic Approximation}
+\begin{outline}
+        \1 \citet{Kie52}
+    \end{outline}
+    \begin{gather*}
+            x_{n+1} = x_n + a_n \left[ \frac{\hat{f}(x_n + c_n) - \hat{f}(x_n - c_n)}{2c_n} \right]
+    \end{gather*}
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Aside: Stochastic Approximation}
+    \begin{outline}
+        \1 Disclaimer: The theory and practice of stochastic approximation has developed since the 50s \newline
+
+        \1 E.g. Stochastic gradient descent, Polyak-Ruppert averaging, projection
+    \end{outline}
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Adaptive Importance Sampling}
 
     \begin{outline}
+        \1 Let's combine the idea of effective sample size with stochastic approximation \newline
     \end{outline}
+      \setbeamertemplate{enumerate items}[default]
+
+    \begin{enumerate}
+        \item Choose an ESS measure and a parametric family of proposals
+        \item Use stochastic approximation to maximize the chosen ESS
+        \item Profit
+    \end{enumerate}
+\end{frame}
+
+
+\begin{frame}{Example: Normal Scale Family}
+    \begin{outline}
+        \1 Let's revisit the simple example from earlier
+        \1 $f$ standard normal \newline
+
+        \1 Proposal family: $\{ N(0, \sigma^2) \}$
+    \end{outline}    
+\end{frame}
+
+\begin{frame}{Example: Normal Scale Family}
+    \begin{outline}
+        \1 Rather than choosing one ESS, I want to compare them \newline
+
+        \1 Use stochastic approximation to optimize over $\sigma > 0$.
+    \end{outline}    
+\end{frame}
+
+
+\begin{frame}{Example: Normal Scale Family}
+    \begin{outline}
+        \1 Rather than choosing one ESS, I want to compare them \newline
+
+        \1 Use stochastic approximation to optimize over $\sigma > 0$.
+    \end{outline}    
+\end{frame}
+
+\begin{frame}{Example: Normal Scale Family}
+    \centering
+    \includegraphics[height=0.8\textheight, width=0.9\textwidth, keepaspectratio]{Figures/New/Normal SA.png}
+\end{frame}
+
+\begin{frame}{Example: T Degrees of Freedom}
+    \begin{outline}
+        \1 Next, let's do something a little more interesting
+        \1 $f$ standard normal \newline
+
+        \1 Proposal family: $\{ T_n: n>0 \}$
+    \end{outline}  
+\end{frame}
+
+\begin{frame}{Example: T Degrees of Freedom}
+    \centering
+    \includegraphics[height=0.8\textheight, width=0.9\textwidth, keepaspectratio]{Figures/New/T SA.png}
 \end{frame}
 
 

@@ -245,9 +245,18 @@ make_trajectories = function(theta_0 = 20, theta_min = 1, theta_max = 200, N=100
     return(data_theta)
 }
 
-data_theta = make_trajectories(MC = 200, a0 = 100)
+data_theta = make_trajectories(MC = 200, a0 = 100, theta_max = Inf)
 
 ggplot(data_theta, aes(x = i, y = theta)) + geom_line() + facet_wrap(~flavour)
+# ggplot(data_theta, aes(x = i, y = log(theta))) + geom_line() + facet_wrap(~flavour)
+
+
+
+png("C:\\Users\\wruth\\My Drive (wruth@mtroyal.ca)\\Research\\Payman_and_William\\Presentations\\2026 - Meeting of Alberta Statisticians\\Figures\\New\\T SA.png")
+ggplot(data_theta, aes(x = i, y = theta)) + geom_line(linewidth = 1) + facet_wrap(~flavour) + xlab("Iteration") + ylab("DF") + theme(text = element_text(size = 25))
+dev.off()
+
+
 
 
 
